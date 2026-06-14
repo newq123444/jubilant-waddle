@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../../store/auth.store';
 import { useDashboard } from '../../hooks';
+import FacilityMap from '../../components/FacilityMap';
 
 export default function MaintenanceDashboard() {
   const { user } = useAuthStore();
@@ -140,6 +141,11 @@ export default function MaintenanceDashboard() {
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{k.sub}</div>
           </div>
         ))}
+      </div>
+
+      {/* Facility Map */}
+      <div style={{ marginBottom: 16 }}>
+        <FacilityMap context="maintenance" />
       </div>
 
       {/* Main Content */}

@@ -5,6 +5,8 @@ import { useAuthStore } from '../../store/auth.store';
 import { useDashboard, useIncidents, useComplianceActions, useInvoices, useResidents, useStaff, useTraining } from '../../hooks';
 import { formatDate, formatPence } from '../../utils/formatters';
 import type { Incident, ComplianceAction, Invoice, Resident } from '../../types';
+import WeatherWidget from '../../components/WeatherWidget';
+import LiveActivityFeed from '../../components/LiveActivityFeed';
 
 // Animated counter hook
 function useCountUp(target: number, duration = 900) {
@@ -101,6 +103,11 @@ export default function ManagerDashboard() {
           <Link to="/care-notes" className="btn btn-secondary btn-sm">📝 Care Notes</Link>
           <Link to="/incidents?action=new" className="btn btn-danger btn-sm">🚨 Report Incident</Link>
         </div>
+      </div>
+
+      {/* ── Weather Widget (prominent position) ─────────────── */}
+      <div style={{ marginBottom: 24 }}>
+        <WeatherWidget />
       </div>
 
       {/* ── KPI Grid (animated) ────────────────────────────────── */}
@@ -224,6 +231,11 @@ export default function ManagerDashboard() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ── Live Activity Feed ─────────────────────────────────── */}
+      <div style={{ marginTop: 24 }}>
+        <LiveActivityFeed />
       </div>
     </div>
   );

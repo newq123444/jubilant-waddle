@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "feat",
   "description": "Add world-class unique features throughout the app: Enhanced real-time weather widget on all dashboards, a smart notifications/alerts panel for new roles, an interactive facility map component, and a staff wellness tracker. These features make the app stand out as truly world-class.",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "1. Create frontend/src/components/WeatherWidget.tsx: A beautiful weather widget showing current conditions and 3-day forecast for the care home location (use simulated data for Salford, UK). Include temperature, humidity, wind, and care-relevant alerts (e.g., 'Cold weather protocol may be needed', 'High UV - residents should wear hats outdoors'). Style with a gradient background matching current conditions.",
     "2. Create frontend/src/components/FacilityMap.tsx: An interactive SVG-based floor plan component showing room statuses (occupied/vacant/needs-cleaning/maintenance-required). Rooms should be clickable and show tooltips with resident name and last-check time. Include a legend. This gives cleaning and maintenance staff a visual overview.",

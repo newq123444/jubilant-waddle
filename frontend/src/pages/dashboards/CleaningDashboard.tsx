@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../../store/auth.store';
 import { useDashboard } from '../../hooks';
+import FacilityMap from '../../components/FacilityMap';
 
 export default function CleaningDashboard() {
   const { user } = useAuthStore();
@@ -148,6 +149,11 @@ export default function CleaningDashboard() {
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{k.sub}</div>
           </div>
         ))}
+      </div>
+
+      {/* Facility Map */}
+      <div style={{ marginBottom: 16 }}>
+        <FacilityMap context="cleaning" />
       </div>
 
       {/* Main Grid */}
