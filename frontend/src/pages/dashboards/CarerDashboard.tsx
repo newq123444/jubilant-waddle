@@ -1016,12 +1016,12 @@ export default function CarerDashboard() {
                         {/* Resident photo or initials */}
                       {(() => {
                         const res = residents.find(r => r.id === rid);
-                        const photoUrl = residentPhoto((res as any)?.photo_url);
+                        const photoUrl = residentPhoto(res?.photo_url);
                         const initials = first.resident_name.split(' ').map((n:string)=>n[0]).join('').slice(0,2);
                         return photoUrl ? (
-                          <img src={photoUrl} alt={first.resident_name} style={{ width:28, height:28, borderRadius:'50%', objectFit:'cover', border:'1.5px solid var(--border)', flexShrink:0 }} />
+                          <img src={photoUrl} alt={first.resident_name} style={{ width:36, height:36, borderRadius:'50%', objectFit:'cover', border:'2px solid var(--border)', flexShrink:0, boxShadow:'0 1px 3px rgba(0,0,0,.1)' }} />
                         ) : (
-                          <div style={{ width:28, height:28, borderRadius:'50%', background:'#e0e7ff', border:'1.5px solid #c7d2fe', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, color:'#4338ca', flexShrink:0 }}>{initials}</div>
+                          <div style={{ width:36, height:36, borderRadius:'50%', background:'#e0e7ff', border:'2px solid #c7d2fe', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:700, color:'#4338ca', flexShrink:0 }}>{initials}</div>
                         );
                       })()}
                       <div style={{ fontWeight:600, fontSize:13 }}>{first.resident_name}</div>

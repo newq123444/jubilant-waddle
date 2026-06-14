@@ -2,10 +2,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth.store';
-import { useTasks, useCompleteTask, useDeferTask, useStartTask, useReleaseTask, useGenerateTasks } from '../hooks';
+import { useTasks, useCompleteTask, useDeferTask, useStartTask, useReleaseTask, useGenerateTasks, useResidents } from '../hooks';
 import { useTaskSSE } from '../hooks/useSSE';
 import { todayISO } from '../utils/formatters';
 import type { Resident } from '../types';
+
+// ── Photo helper ──────────────────────────────────────────────────────────
+const BACKEND = (import.meta as any).env?.VITE_API_URL?.replace('/api','') || 'http://localhost:3001';
+function residentPhoto(url?: string | null): string | null {
+  if (!url) return null;
+  return url.startsWith('http') ? url : BACKEND + url;
+}
 
 // ── Status config ─────────────────────────────────────────────────────────
 const STATUS = {
@@ -252,6 +259,8 @@ export default function TaskBoard() {
 
   const startTask   = useStartTask();
   const genTasks    = useGenerateTasks();
+  const { data: rawResidents = [] } = useResidents({ active: true });
+  const residents: any[] = Array.isArray(rawResidents) ? rawResidents : [];
 
   // Live clock — updates task status colours every 30s
   useEffect(() => {
@@ -457,22 +466,34 @@ export default function TaskBoard() {
                 borderRadius: 10, alignItems: 'center',
               }}>
                 {/* Resident info */}
-                <div>
-                  <Link to={`/residents/${rid}`} style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)', textDecoration: 'none' }}>
-                    {first.resident_name}
-                  </Link>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2, display: 'flex', gap: 6, alignItems: 'center' }}>
-                    <span>Rm {first.room_number}</span>
-                    {first.risk_level === 'high' && <span style={{ color: '#dc2626', fontWeight: 700 }}>🔴</span>}
-                    <span style={{ color: doneCount === filtered.length ? '#16a34a' : 'var(--text-muted)', fontWeight: 600 }}>
-                      {doneCount}/{filtered.length}
-                    </span>
-                  </div>
-                  {hasInProg && (
-                    <div style={{ fontSize: 10, color: '#7c3aed', fontWeight: 600, marginTop: 2 }}>
-                      🟣 {resTasks.find(t => t.in_progress_by && t.in_progress_by !== userId)?.in_progress_name} filling…
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  {(() => {
+                    const res = residents.find((r: any) => r.id === rid);
+                    const photoUrl = residentPhoto(res?.photo_url);
+                    const initials = first.resident_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2);
+                    return photoUrl ? (
+                      <img src={photoUrl} alt={first.resident_name} style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--border)', flexShrink: 0, boxShadow: '0 1px 3px rgba(0,0,0,.1)' }} />
+                    ) : (
+                      <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#e0e7ff', border: '2px solid #c7d2fe', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: '#4338ca', flexShrink: 0 }}>{initials}</div>
+                    );
+                  })()}
+                  <div>
+                    <Link to={`/residents/${rid}`} style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)', textDecoration: 'none' }}>
+                      {first.resident_name}
+                    </Link>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2, display: 'flex', gap: 6, alignItems: 'center' }}>
+                      <span>Rm {first.room_number}</span>
+                      {first.risk_level === 'high' && <span style={{ color: '#dc2626', fontWeight: 700 }}>🔴</span>}
+                      <span style={{ color: doneCount === filtered.length ? '#16a34a' : 'var(--text-muted)', fontWeight: 600 }}>
+                        {doneCount}/{filtered.length}
+                      </span>
                     </div>
-                  )}
+                    {hasInProg && (
+                      <div style={{ fontSize: 10, color: '#7c3aed', fontWeight: 600, marginTop: 2 }}>
+                        🟣 {resTasks.find(t => t.in_progress_by && t.in_progress_by !== userId)?.in_progress_name} filling…
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Task chips */}
