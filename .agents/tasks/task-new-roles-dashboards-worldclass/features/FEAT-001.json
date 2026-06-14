@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "feat",
   "description": "Add three new roles (cleaning, kitchen, maintenance) across the entire stack: types, formatters, login page demo accounts, App.tsx navigation/colors, Dashboard.tsx router, and three dedicated dashboard pages with unique world-class features for each role.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "1. Update frontend/src/types/index.ts: Add 'cleaning' | 'kitchen' | 'maintenance' to the UserRole union type.",
     "2. Update frontend/src/utils/formatters.ts: Add entries to ROLE_LABELS for cleaning ('Cleaning Staff'), kitchen ('Kitchen Staff'), maintenance ('Maintenance Staff').",
@@ -34,5 +34,5 @@
     "cd /projects/sandbox/jubilant-waddle/backend && npm run build"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Pre-existing TypeScript build errors exist in both frontend (CareNotes.tsx, Emar.tsx, Incidents.tsx, Training.tsx) and backend (auth.controller.ts, photos.controller.ts, compression/multer type issues). These errors are NOT caused by this feature - verified by stashing changes and confirming same errors on base state. The new dashboard files and all modified files compile cleanly. The acceptance criteria 'Running cd frontend && npm run build succeeds' was already failing before this change due to pre-existing issues in unrelated files."
 }
