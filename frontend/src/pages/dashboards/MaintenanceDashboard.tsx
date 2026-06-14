@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useAuthStore } from '../../store/auth.store';
 import { useDashboard } from '../../hooks';
 import FacilityMap from '../../components/FacilityMap';
+import StaffWellnessWidget from '../../components/StaffWellnessWidget';
 
 export default function MaintenanceDashboard() {
   const { user } = useAuthStore();
@@ -132,7 +133,7 @@ export default function MaintenanceDashboard() {
           { label: 'In Progress', value: workOrderStats.inProgress.toString(), icon: '🔨', color: '#d97706', sub: 'Being worked on' },
           { label: 'Done This Week', value: workOrderStats.completedThisWeek.toString(), icon: '✅', color: '#16a34a', sub: `${workOrderStats.completedThisMonth} this month` },
           { label: 'Avg Response', value: workOrderStats.avgResponseTime, icon: '⏱️', color: '#2563eb', sub: 'First response time' },
-          { label: 'Systems Status', value: `${buildingSystems.filter(s => s.status === 'operational').length}/${buildingSystems.length}`, icon: '🏢', color: '#7c3aed', sub: 'All operational' },
+          { label: 'Systems Status', value: `${buildingSystems.filter(s => s.status === 'operational').length}/${buildingSystems.length}`, icon: '🏢', color: '#7c3aed', sub: dash ? `${dash.residents?.active ?? '...'} residents housed` : 'All operational' },
         ].map(k => (
           <div key={k.label} style={{ padding: '18px 16px', borderRadius: 12, background: 'white', border: '1px solid var(--border)', borderLeft: `4px solid ${k.color}`, boxShadow: '0 2px 8px rgba(0,0,0,.05)' }}>
             <div style={{ fontSize: 22, marginBottom: 8 }}>{k.icon}</div>
@@ -303,6 +304,11 @@ export default function MaintenanceDashboard() {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Staff Wellbeing */}
+      <div style={{ marginTop: 16 }}>
+        <StaffWellnessWidget />
       </div>
     </div>
   );

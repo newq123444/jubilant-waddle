@@ -16,6 +16,8 @@ interface TeamMoodEntry {
 
 export default function StaffWellnessWidget() {
   const [showConcernForm, setShowConcernForm] = useState(false);
+  const [concernText, setConcernText] = useState('');
+  const [submitted, setSubmitted] = useState(false);
 
   // Simulated shift data for current week
   const weeklyShifts: ShiftData[] = useMemo(() => [
@@ -164,7 +166,21 @@ export default function StaffWellnessWidget() {
         </div>
 
         {/* Report Concern Button */}
-        {!showConcernForm ? (
+        {submitted ? (
+          <div style={{ padding: 14, borderRadius: 10, background: '#f0fdf4', border: '1px solid #bbf7d0', textAlign: 'center' }}>
+            <div style={{ fontSize: 20, marginBottom: 8 }}>✅</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#16a34a', marginBottom: 4 }}>Thank you</div>
+            <div style={{ fontSize: 12, color: '#166534', lineHeight: 1.4 }}>
+              Your concern has been submitted confidentially. A member of management will review it within 24 hours.
+            </div>
+            <button
+              onClick={() => { setSubmitted(false); setConcernText(''); }}
+              style={{ marginTop: 10, padding: '6px 14px', borderRadius: 6, background: '#16a34a15', color: '#16a34a', border: '1px solid #16a34a30', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}
+            >
+              Done
+            </button>
+          </div>
+        ) : !showConcernForm ? (
           <button
             onClick={() => setShowConcernForm(true)}
             style={{
@@ -184,6 +200,8 @@ export default function StaffWellnessWidget() {
               Your concern will be handled confidentially by management. You can also contact the EAP helpline directly.
             </div>
             <textarea
+              value={concernText}
+              onChange={(e) => setConcernText(e.target.value)}
               placeholder="Describe your concern here..."
               style={{
                 width: '100%', minHeight: 60, padding: 10, borderRadius: 8, border: '1px solid #fde68a',
@@ -191,10 +209,18 @@ export default function StaffWellnessWidget() {
               }}
             />
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              <button style={{ flex: 1, padding: '8px 12px', borderRadius: 6, background: '#d97706', color: '#fff', border: 'none', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+              <button
+                onClick={() => { setShowConcernForm(false); setSubmitted(true); }}
+                disabled={!concernText.trim()}
+                style={{
+                  flex: 1, padding: '8px 12px', borderRadius: 6, background: concernText.trim() ? '#d97706' : '#e5e7eb',
+                  color: concernText.trim() ? '#fff' : '#9ca3af', border: 'none', fontSize: 12, fontWeight: 600,
+                  cursor: concernText.trim() ? 'pointer' : 'not-allowed',
+                }}
+              >
                 Submit
               </button>
-              <button onClick={() => setShowConcernForm(false)} style={{ padding: '8px 12px', borderRadius: 6, background: '#f3f4f6', color: '#6b7280', border: 'none', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+              <button onClick={() => { setShowConcernForm(false); setConcernText(''); }} style={{ padding: '8px 12px', borderRadius: 6, background: '#f3f4f6', color: '#6b7280', border: 'none', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
                 Cancel
               </button>
             </div>

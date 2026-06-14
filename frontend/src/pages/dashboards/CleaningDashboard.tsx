@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useAuthStore } from '../../store/auth.store';
 import { useDashboard } from '../../hooks';
 import FacilityMap from '../../components/FacilityMap';
+import StaffWellnessWidget from '../../components/StaffWellnessWidget';
 
 export default function CleaningDashboard() {
   const { user } = useAuthStore();
@@ -13,7 +14,7 @@ export default function CleaningDashboard() {
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   const today = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-  // Simulated cleaning data
+  // Room data aligned with FacilityMap - single source of truth
   const rooms = [
     { room: '1', resident: 'Margaret Hollis', status: 'clean', lastCleaned: '07:45', floor: 'ground' },
     { room: '2', resident: 'Arthur Pemberton', status: 'needs-attention', lastCleaned: '06:30', floor: 'ground' },
@@ -21,18 +22,24 @@ export default function CleaningDashboard() {
     { room: '4', resident: 'Harold Fletcher', status: 'overdue', lastCleaned: 'Yesterday 14:00', floor: 'ground' },
     { room: '5', resident: 'Edith Turner', status: 'clean', lastCleaned: '07:20', floor: 'ground' },
     { room: '6', resident: 'Reginald Barnes', status: 'clean', lastCleaned: '08:00', floor: 'ground' },
-    { room: '7', resident: 'Vera Chapman', status: 'needs-attention', lastCleaned: '06:45', floor: 'first' },
-    { room: '8', resident: 'Cyril Newton', status: 'overdue', lastCleaned: 'Yesterday 16:00', floor: 'first' },
+    { room: '7', resident: 'Vera Chapman', status: 'needs-attention', lastCleaned: '06:45', floor: 'ground' },
+    { room: '8', resident: null, status: 'clean', lastCleaned: '08:00', floor: 'ground' },
     { room: '9', resident: 'Elsie Hartley', status: 'clean', lastCleaned: '07:55', floor: 'first' },
     { room: '10', resident: 'Frederick Osborne', status: 'clean', lastCleaned: '08:15', floor: 'first' },
-    { room: '11', resident: 'Agnes Whitfield', status: 'clean', lastCleaned: '07:30', floor: 'first' },
-    { room: '12', resident: 'George Bradshaw', status: 'needs-attention', lastCleaned: '06:00', floor: 'first' },
-    { room: '13', resident: 'Winifred Stanton', status: 'clean', lastCleaned: '08:05', floor: 'second' },
-    { room: '14', resident: 'Ernest Higgins', status: 'overdue', lastCleaned: 'Yesterday 11:00', floor: 'second' },
-    { room: '15', resident: 'Phyllis Goodman', status: 'clean', lastCleaned: '07:40', floor: 'second' },
-    { room: '16', resident: 'Bertram Cross', status: 'clean', lastCleaned: '08:20', floor: 'second' },
+    { room: '11', resident: 'Agnes Whitfield', status: 'needs-attention', lastCleaned: '06:00', floor: 'first' },
+    { room: '12', resident: 'George Bradshaw', status: 'overdue', lastCleaned: 'Yesterday 16:00', floor: 'first' },
+    { room: '13', resident: 'Winifred Stanton', status: 'clean', lastCleaned: '08:05', floor: 'first' },
+    { room: '14', resident: 'Ernest Higgins', status: 'clean', lastCleaned: '07:50', floor: 'first' },
+    { room: '15', resident: null, status: 'clean', lastCleaned: '08:00', floor: 'first' },
+    { room: '16', resident: 'Bertram Cross', status: 'clean', lastCleaned: '08:20', floor: 'first' },
     { room: '17', resident: 'Gladys Perkins', status: 'clean', lastCleaned: '07:50', floor: 'second' },
     { room: '18', resident: 'Norman Yates', status: 'needs-attention', lastCleaned: '06:15', floor: 'second' },
+    { room: '19', resident: 'Florence Webb', status: 'clean', lastCleaned: '08:00', floor: 'second' },
+    { room: '20', resident: 'Albert Moss', status: 'needs-attention', lastCleaned: '06:45', floor: 'second' },
+    { room: '21', resident: 'Mabel Kirby', status: 'clean', lastCleaned: '07:55', floor: 'second' },
+    { room: '22', resident: null, status: 'clean', lastCleaned: '08:00', floor: 'second' },
+    { room: '23', resident: 'Cecil Rowlands', status: 'clean', lastCleaned: '08:10', floor: 'second' },
+    { room: '24', resident: 'Iris Loveday', status: 'clean', lastCleaned: '07:30', floor: 'second' },
   ];
 
   const filteredRooms = selectedFloor === 'all' ? rooms : rooms.filter(r => r.floor === selectedFloor);
@@ -64,7 +71,7 @@ export default function CleaningDashboard() {
 
   const deepCleanSchedule = [
     { area: 'Room 4 (Harold Fletcher)', date: 'Today', priority: 'urgent', reason: 'Infection control' },
-    { area: 'Room 8 (Cyril Newton)', date: 'Today', priority: 'high', reason: 'Weekly deep clean' },
+    { area: 'Room 12 (George Bradshaw)', date: 'Today', priority: 'high', reason: 'Weekly deep clean' },
     { area: 'Dining Room', date: 'Tomorrow', priority: 'medium', reason: 'Scheduled monthly' },
     { area: 'Main Lounge', date: 'Wed 15 Jan', priority: 'medium', reason: 'Scheduled monthly' },
     { area: 'Laundry Room', date: 'Thu 16 Jan', priority: 'low', reason: 'Quarterly deep clean' },
@@ -139,7 +146,7 @@ export default function CleaningDashboard() {
           { label: 'Rooms Clean', value: `${cleanCount}/${rooms.length}`, icon: '✅', color: '#16a34a', sub: 'Today' },
           { label: 'Needs Attention', value: attentionCount.toString(), icon: '⚠️', color: '#d97706', sub: 'Requires action' },
           { label: 'Overdue', value: overdueCount.toString(), icon: '🚨', color: '#dc2626', sub: 'Immediate priority' },
-          { label: 'IPAC Score', value: '91%', icon: '🛡️', color: '#2563eb', sub: 'Avg compliance' },
+          { label: 'Total Residents', value: dash?.residents?.active ?? '...', icon: '👥', color: '#2563eb', sub: `${rooms.length} rooms total` },
           { label: 'Tasks Done', value: `${todayTasks.filter(t => t.done).length}/${todayTasks.length}`, icon: '📋', color: '#7c3aed', sub: 'Today\'s progress' },
         ].map(k => (
           <div key={k.label} style={{ padding: '18px 16px', borderRadius: 12, background: 'white', border: '1px solid var(--border)', borderLeft: `4px solid ${k.color}`, boxShadow: '0 2px 8px rgba(0,0,0,.05)' }}>
@@ -180,7 +187,7 @@ export default function CleaningDashboard() {
                   {room.room}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600 }}>{room.resident}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600 }}>{room.resident || 'Vacant'}</div>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Last cleaned: {room.lastCleaned}</div>
                 </div>
                 <span style={{ padding: '3px 8px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: getStatusColor(room.status) + '15', color: getStatusColor(room.status) }}>
@@ -319,6 +326,11 @@ export default function CleaningDashboard() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Staff Wellbeing */}
+      <div style={{ marginTop: 16 }}>
+        <StaffWellnessWidget />
       </div>
     </div>
   );

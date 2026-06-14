@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../../store/auth.store';
 import { useDashboard, useResidents } from '../../hooks';
+import StaffWellnessWidget from '../../components/StaffWellnessWidget';
 import type { Resident } from '../../types';
 
 export default function KitchenDashboard() {
@@ -115,6 +116,11 @@ export default function KitchenDashboard() {
           <span style={{ padding: '6px 12px', borderRadius: 20, background: '#f9731620', border: '1px solid #f9731640', fontSize: 12, fontWeight: 600, color: '#f97316' }}>
             EHO Rating: 5/5 ★
           </span>
+          {dash && (
+            <span style={{ padding: '6px 12px', borderRadius: 20, background: '#16a34a20', border: '1px solid #16a34a40', fontSize: 12, fontWeight: 600, color: '#16a34a' }}>
+              {dash.residents?.active ?? '...'} Residents
+            </span>
+          )}
         </div>
       </div>
 
@@ -288,6 +294,11 @@ export default function KitchenDashboard() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Staff Wellbeing */}
+      <div style={{ marginTop: 16 }}>
+        <StaffWellnessWidget />
       </div>
     </div>
   );
