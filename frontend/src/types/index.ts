@@ -39,6 +39,7 @@ export interface Resident {
   weekly_fee_pence?: number;
   created_at: string;
   updated_at: string;
+  photo_url?: string;
 }
 
 export interface CareNote {

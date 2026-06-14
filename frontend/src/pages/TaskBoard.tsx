@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth.store';
 import { useTasks, useCompleteTask, useDeferTask, useStartTask, useReleaseTask, useGenerateTasks } from '../hooks';
 import { useTaskSSE } from '../hooks/useSSE';
-import { todayISO, formatTime } from '../utils/formatters';
+import { todayISO } from '../utils/formatters';
 import type { Resident } from '../types';
 
 // ── Status config ─────────────────────────────────────────────────────────

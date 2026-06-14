@@ -769,7 +769,7 @@ function ClinicalForm({ resident, noteType, task, onClose, onSaved, isAdHoc=fals
             <div style={{ marginBottom: 14 }}>
               <label style={{ fontSize:11,fontWeight:700,color:'var(--text-secondary)',display:'block',marginBottom:6,textTransform:'uppercase',letterSpacing:'.05em' }}>Additional Notes</label>
               <textarea rows={3} value={note.body||''} onChange={e=>set('body',e.target.value)}
-                placeholder={`Any additional observations for ${activeResident.first_name}…`}
+                placeholder={`Any additional observations for ${resident.first_name}…`}
                 style={{ width:'100%',padding:'12px 14px',borderRadius:10,border:'1px solid var(--border)',fontSize:14,resize:'vertical',fontFamily:'inherit',background:'var(--surface-2)',boxSizing:'border-box',outline:'none' }} />
             </div>
 
