@@ -88,6 +88,9 @@ async function seed() {
       { email: 'carer2@demo.carevista.co.uk',    role: 'carer',            first: 'Tom',     last: 'Walsh',    phone: '07700 900006' },
       { email: 'activities@demo.carevista.co.uk',role: 'activities',       first: 'Lisa',    last: 'Brown',    phone: '07700 900007' },
       { email: 'finance@demo.carevista.co.uk',   role: 'finance',          first: 'Karen',   last: 'Lloyd',    phone: '07700 900008' },
+      { email: 'cleaning@demo.carevista.co.uk',  role: 'cleaning',         first: 'Grace',   last: 'Williams', phone: '07700 900009' },
+      { email: 'kitchen@demo.carevista.co.uk',   role: 'kitchen',          first: 'Marcus',  last: 'Johnson',  phone: '07700 900010' },
+      { email: 'maintenance@demo.carevista.co.uk', role: 'maintenance',    first: 'Robert',  last: 'Taylor',   phone: '07700 900011' },
     ];
     const userIds: Record<string, string> = {};
     for (const u of usersData) {
@@ -117,6 +120,9 @@ async function seed() {
       { email: 'carer2@demo.carevista.co.uk',    emp: 'EMP006', title: 'Care Assistant',         hours: 24.0, rate: 12.00, dbsDaysLeft: 500 },
       { email: 'activities@demo.carevista.co.uk',emp: 'EMP007', title: 'Activities Coordinator', hours: 30.0, rate: 12.50, dbsDaysLeft: 350 },
       { email: 'finance@demo.carevista.co.uk',   emp: 'EMP008', title: 'Finance Officer',        hours: 37.5, rate: 16.00, dbsDaysLeft: 450 },
+      { email: 'cleaning@demo.carevista.co.uk',  emp: 'EMP009', title: 'Cleaning Supervisor',     hours: 35.0, rate: 12.50, dbsDaysLeft: 380 },
+      { email: 'kitchen@demo.carevista.co.uk',   emp: 'EMP010', title: 'Head Cook',               hours: 37.5, rate: 14.00, dbsDaysLeft: 420 },
+      { email: 'maintenance@demo.carevista.co.uk', emp: 'EMP011', title: 'Maintenance Officer',   hours: 37.5, rate: 15.50, dbsDaysLeft: 500 },
     ];
     const staffIds: Record<string, string> = {};
     for (const s of staffData) {

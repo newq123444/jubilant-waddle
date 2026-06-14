@@ -11,6 +11,9 @@ export const ROLE_LABELS: Record<string, string> = {
   admin:            'Administrator',
   super_admin:      'Super Admin',
   group_admin:      'Group Admin',
+  cleaning:         'Cleaning Staff',
+  kitchen:          'Kitchen Staff',
+  maintenance:      'Maintenance Staff',
 };
 
 export const NOTE_TYPE_LABELS: Record<string, string> = {

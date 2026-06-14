@@ -11,6 +11,9 @@ const DEMO_ACCOUNTS = [
   { email: 'carer1@demo.carevista.co.uk',    label: 'Care Assistant',   icon: '❤️', color: '#d97706', role: 'carer',             name: 'Amara Osei' },
   { email: 'activities@demo.carevista.co.uk',label: 'Activities',       icon: '🎨', color: '#ec4899', role: 'activities',        name: 'Lisa Brown' },
   { email: 'finance@demo.carevista.co.uk',   label: 'Finance',          icon: '💷', color: '#dc2626', role: 'finance',           name: 'Karen Lloyd' },
+  { email: 'cleaning@demo.carevista.co.uk', label: 'Cleaning Staff',   icon: '🧹', color: '#14b8a6', role: 'cleaning',          name: 'Grace Williams' },
+  { email: 'kitchen@demo.carevista.co.uk',  label: 'Kitchen Staff',    icon: '👨‍🍳', color: '#f97316', role: 'kitchen',           name: 'Marcus Johnson' },
+  { email: 'maintenance@demo.carevista.co.uk', label: 'Maintenance Staff', icon: '🔧', color: '#64748b', role: 'maintenance',    name: 'Robert Taylor' },
 ];
 const DEMO_PASSWORD = 'Demo1234!';
 

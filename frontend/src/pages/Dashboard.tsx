@@ -5,6 +5,9 @@ import ManagerDashboard  from './dashboards/ManagerDashboard';
 import NurseDashboard    from './dashboards/NurseDashboard';
 import CarerDashboard    from './dashboards/CarerDashboard';
 import FinanceDashboard  from './dashboards/FinanceDashboard';
+import CleaningDashboard from './dashboards/CleaningDashboard';
+import KitchenDashboard  from './dashboards/KitchenDashboard';
+import MaintenanceDashboard from './dashboards/MaintenanceDashboard';
 
 export default function Dashboard() {
   const { user } = useAuthStore();
@@ -22,6 +25,15 @@ export default function Dashboard() {
   }
   if (role === 'finance' || role === 'admin') {
     return <FinanceDashboard />;
+  }
+  if (role === 'cleaning') {
+    return <CleaningDashboard />;
+  }
+  if (role === 'kitchen') {
+    return <KitchenDashboard />;
+  }
+  if (role === 'maintenance') {
+    return <MaintenanceDashboard />;
   }
   // fallback — show manager dashboard
   return <ManagerDashboard />;

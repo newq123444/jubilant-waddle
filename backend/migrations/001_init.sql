@@ -13,7 +13,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE TYPE user_role AS ENUM (
   'super_admin', 'group_admin', 'home_manager', 'deputy_manager',
   'registered_nurse', 'senior_carer', 'carer', 'activities',
-  'admin', 'finance', 'family'
+  'admin', 'finance', 'family', 'cleaning', 'kitchen', 'maintenance'
 );
 
 CREATE TYPE risk_level AS ENUM ('low', 'medium', 'high');

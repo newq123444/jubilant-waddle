@@ -1,0 +1,7 @@
+{
+  "task_id": "task-new-roles-dashboards-worldclass",
+  "task_description": "Add cleaning, kitchen, and maintenance staff roles with login options, dedicated world-class dashboards, and unique features throughout the app that make it truly stand out.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002"],
+  "blocked_reason": null
+}

@@ -69,6 +69,8 @@ const ROLE_COLORS: Record<string, string> = {
   carer: '#d97706',          activities: '#ec4899',
   finance: '#dc2626',        admin: '#6366f1',
   super_admin: '#1e40af',    group_admin: '#1e40af',
+  cleaning: '#14b8a6',       kitchen: '#f97316',
+  maintenance: '#64748b',
 };
 
 // ── Hook: detect screen size ──────────────────────────────────────────────

@@ -3,7 +3,8 @@
 export type UserRole =
   | 'home_manager' | 'deputy_manager' | 'registered_nurse'
   | 'senior_carer' | 'carer' | 'activities'
-  | 'finance' | 'admin' | 'super_admin' | 'group_admin';
+  | 'finance' | 'admin' | 'super_admin' | 'group_admin'
+  | 'cleaning' | 'kitchen' | 'maintenance';
 
 export interface User {
   id: string;
