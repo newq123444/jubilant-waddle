@@ -46,6 +46,16 @@ import FireLogBook from './pages/FireLogBook';
 import VisitorSignIn from './pages/VisitorSignIn';
 import RoomTurnoverManager from './pages/RoomTurnoverManager';
 import ReportBuilder from './pages/ReportBuilder';
+import OfflineMode from './pages/OfflineMode';
+import ResidentTablet from './pages/ResidentTablet';
+import QrRoomScanning from './pages/QrRoomScanning';
+import BenchmarkingDashboard from './pages/BenchmarkingDashboard';
+import BoardPackGenerator from './pages/BoardPackGenerator';
+import StaffPerformanceInsights from './pages/StaffPerformanceInsights';
+import ElearningModule from './pages/ElearningModule';
+import CompetencySignoff from './pages/CompetencySignoff';
+import DiabetesManagement from './pages/DiabetesManagement';
+import PalliativeCarePathway from './pages/PalliativeCarePathway';
 import { ROLE_LABELS } from './utils/formatters';
 
 // ── Nav config ────────────────────────────────────────────────────────────
@@ -64,6 +74,10 @@ const NAV_ALL = [
   { path: '/wounds',    label: 'Wound Tracker', icon: '🩹', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','admin','super_admin','group_admin'] },
   { path: '/continence', label: 'Continence Care', icon: '📋', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'] },
   { path: '/room-turnover', label: 'Room Turnover', icon: '🛏️', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin','maintenance'] },
+  { path: '/qr-scanning', label: 'QR Scanning', icon: '📱', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'] },
+  { path: '/diabetes', label: 'Diabetes', icon: '🩸', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'] },
+  { path: '/palliative-care', label: 'Palliative Care', icon: '🕊️', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','admin','super_admin','group_admin'] },
+  { path: '/resident-tablet', label: 'Resident Tablet', icon: '📲', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'] },
   { path: '/risk-assessments', label: 'Risk Assessments', icon: '⚡', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','admin','super_admin','group_admin'] },
   { path: '/med-interactions', label: 'Med Interactions', icon: '💊', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','admin','super_admin','group_admin'] },
   { section: 'Team', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin','registered_nurse','senior_carer'] },
@@ -73,6 +87,9 @@ const NAV_ALL = [
   { path: '/smart-rota', label: 'AI Smart Rota', icon: '🤖', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin'] },
   { path: '/recruitment', label: 'Recruitment', icon: '📢', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin'] },
   { path: '/competency-matrix', label: 'Competencies', icon: '🎯', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin'] },
+  { path: '/competency-signoff', label: 'Sign-Offs', icon: '✍️', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin','registered_nurse'] },
+  { path: '/elearning', label: 'E-Learning', icon: '📚', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin','registered_nurse','senior_carer','carer'] },
+  { path: '/staff-performance', label: 'Performance', icon: '📈', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin'] },
   { path: '/sickness-absence', label: 'Absence', icon: '📊', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin'] },
   { section: 'Governance', roles: ['home_manager','deputy_manager','super_admin','group_admin','registered_nurse'] },
   { path: '/compliance', label: 'CQC Compliance', icon: '✅', roles: ['home_manager','deputy_manager','super_admin','group_admin'] },
@@ -80,6 +97,8 @@ const NAV_ALL = [
   { path: '/infections', label: 'Infection Control', icon: '🦠', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','admin','super_admin','group_admin'] },
   { path: '/fire-log', label: 'Fire Log', icon: '🔥', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin'] },
   { path: '/visitor-sign-in', label: 'Visitors', icon: '🚪', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin','senior_carer','carer','registered_nurse'] },
+  { path: '/benchmarking', label: 'Benchmarking', icon: '📊', roles: ['home_manager','deputy_manager','super_admin','group_admin'] },
+  { path: '/board-packs', label: 'Board Packs', icon: '📑', roles: ['home_manager','deputy_manager','super_admin','group_admin'] },
   { section: 'Communications' },
   { path: '/family',     label: 'Family Portal', icon: '💬', roles: null, badge: 'messages' },
   { section: 'Finance', roles: ['home_manager','deputy_manager','admin','finance','super_admin','group_admin'] },
@@ -96,6 +115,7 @@ const NAV_ALL = [
   { path: '/sbar-handover', label: 'SBAR Handover', icon: '📋', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','super_admin','group_admin'] },
   { path: '/audit-log',  label: 'Audit Log',    icon: '🔍', roles: ['home_manager','super_admin','group_admin'] },
   { path: '/report-builder', label: 'Report Builder', icon: '📑', roles: ['home_manager','deputy_manager','super_admin','group_admin'] },
+  { path: '/offline-mode', label: 'Offline Mode', icon: '📴', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'] },
 ];
 
 // Bottom nav — most important 5 items for phone
@@ -379,6 +399,16 @@ export default function App() {
           <Route path="/visitor-sign-in" element={<VisitorSignIn />} />
           <Route path="/room-turnover"   element={<RoomTurnoverManager />} />
           <Route path="/report-builder"  element={<ReportBuilder />} />
+          <Route path="/offline-mode"    element={<OfflineMode />} />
+          <Route path="/resident-tablet" element={<ResidentTablet />} />
+          <Route path="/qr-scanning"     element={<QrRoomScanning />} />
+          <Route path="/benchmarking"    element={<BenchmarkingDashboard />} />
+          <Route path="/board-packs"     element={<BoardPackGenerator />} />
+          <Route path="/staff-performance" element={<StaffPerformanceInsights />} />
+          <Route path="/elearning"       element={<ElearningModule />} />
+          <Route path="/competency-signoff" element={<CompetencySignoff />} />
+          <Route path="/diabetes"        element={<DiabetesManagement />} />
+          <Route path="/palliative-care" element={<PalliativeCarePathway />} />
           <Route path="/audit-log"      element={<AuditLog />} />
           <Route path="/profile"        element={<Profile />} />
           <Route path="*"               element={<Navigate to="/" replace />} />

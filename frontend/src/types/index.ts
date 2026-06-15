@@ -1223,3 +1223,292 @@ export interface MedicationInteraction {
   status: 'active' | 'acknowledged' | 'resolved' | 'overridden';
   created_at: string;
 }
+
+// ── Batch 3: Offline Sync ─────────────────────────────────────────────────
+export interface OfflineSyncItem {
+  id: string;
+  care_home_id: string;
+  user_id: string;
+  action_type: 'create' | 'update' | 'delete';
+  entity_type: string;
+  entity_id?: string;
+  payload: Record<string, any>;
+  status: 'pending' | 'synced' | 'conflict' | 'failed';
+  conflict_data?: Record<string, any>;
+  resolved_at?: string;
+  created_at: string;
+  synced_at?: string;
+}
+
+// ── Batch 3: Resident Tablet ──────────────────────────────────────────────
+export interface ResidentTabletRequest {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  request_type: 'help' | 'meal_rating' | 'activity_choice' | 'video_call' | 'entertainment';
+  details?: Record<string, any>;
+  status: 'pending' | 'acknowledged' | 'completed';
+  acknowledged_by?: string;
+  acknowledged_by_name?: string;
+  acknowledged_at?: string;
+  created_at: string;
+}
+
+// ── Batch 3: QR Room Scanning ─────────────────────────────────────────────
+export interface QrRoomCode {
+  id: string;
+  care_home_id: string;
+  room_number: string;
+  qr_code: string;
+  resident_id?: string;
+  resident_name?: string;
+  status: 'active' | 'inactive';
+  created_by?: string;
+  created_by_name?: string;
+  created_at: string;
+  deactivated_at?: string;
+}
+
+// ── Batch 3: Benchmarking ─────────────────────────────────────────────────
+export interface BenchmarkingKpi {
+  id: string;
+  care_home_id: string;
+  metric_name: string;
+  metric_value: number;
+  national_average: number;
+  percentile_rank?: number;
+  period_start: string;
+  period_end: string;
+  performance_level: 'above' | 'average' | 'below';
+  calculated_at: string;
+}
+
+// ── Batch 3: Board Pack ───────────────────────────────────────────────────
+export interface BoardPackReport {
+  id: string;
+  care_home_id: string;
+  title: string;
+  period_start: string;
+  period_end: string;
+  sections: Record<string, any>;
+  status: 'draft' | 'pending_approval' | 'approved' | 'rejected';
+  generated_by?: string;
+  generated_by_name?: string;
+  approved_by?: string;
+  approved_by_name?: string;
+  approved_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Batch 3: Staff Performance ────────────────────────────────────────────
+export interface StaffPerformanceMetric {
+  id: string;
+  care_home_id: string;
+  staff_id: string;
+  staff_name?: string;
+  metric_type: string;
+  metric_value: number;
+  period_start: string;
+  period_end: string;
+  tasks_completed?: number;
+  avg_response_time_minutes?: number;
+  notes_logged?: number;
+  calculated_at: string;
+}
+
+// ── Batch 3: E-Learning ──────────────────────────────────────────────────
+export interface ElearningModule {
+  id: string;
+  care_home_id: string;
+  title: string;
+  description?: string;
+  category: string;
+  duration_minutes?: number;
+  mandatory: boolean;
+  content_url?: string;
+  thumbnail_url?: string;
+  pass_mark?: number;
+  status: 'draft' | 'published' | 'archived';
+  created_by?: string;
+  created_by_name?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ElearningQuiz {
+  id: string;
+  module_id: string;
+  questions: Array<{
+    id: string;
+    question: string;
+    options: string[];
+    correct_answer: number;
+  }>;
+  created_at: string;
+}
+
+export interface ElearningCompletion {
+  id: string;
+  care_home_id: string;
+  staff_id: string;
+  staff_name?: string;
+  module_id: string;
+  module_title?: string;
+  quiz_score?: number;
+  pass_mark?: number;
+  passed: boolean;
+  completed_at: string;
+  certificate_url?: string;
+}
+
+// ── Batch 3: Competency Sign-Off ─────────────────────────────────────────
+export interface CompetencySignoff {
+  id: string;
+  care_home_id: string;
+  staff_id: string;
+  staff_name?: string;
+  competency_name: string;
+  assessor_id: string;
+  assessor_name?: string;
+  outcome: 'competent' | 'not_yet_competent' | 'requires_training';
+  evidence_notes?: string;
+  observation_date: string;
+  status: 'pending' | 'signed_off' | 'expired';
+  signed_off_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Batch 3: Diabetes Management ─────────────────────────────────────────
+export interface GlucoseReading {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  reading_mmol: number;
+  meal_timing: 'fasting' | 'pre_meal' | 'post_meal' | 'bedtime' | 'random';
+  logged_by: string;
+  logged_by_name?: string;
+  notes?: string;
+  created_at: string;
+}
+
+export interface InsulinDose {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  insulin_type: string;
+  dose_units: number;
+  injection_site?: string;
+  administered_by: string;
+  administered_by_name?: string;
+  scheduled_time?: string;
+  notes?: string;
+  created_at: string;
+}
+
+export interface DiabetesAlert {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  alert_type: 'hypo' | 'hyper' | 'missed_insulin' | 'pattern_concern';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  message: string;
+  glucose_reading_id?: string;
+  status: 'active' | 'acknowledged' | 'resolved';
+  acknowledged_by?: string;
+  acknowledged_by_name?: string;
+  created_at: string;
+}
+
+export interface Hba1cRecord {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  value_mmol_mol: number;
+  value_percent: number;
+  test_date: string;
+  ordered_by?: string;
+  notes?: string;
+  created_at: string;
+}
+
+// ── Batch 3: Palliative Care ─────────────────────────────────────────────
+export interface PalliativeCarePlan {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  preferred_place_of_death?: string;
+  resuscitation_status: 'for_resuscitation' | 'dnacpr';
+  spiritual_needs?: string;
+  preferred_priorities?: Record<string, any>;
+  advance_decisions?: string;
+  key_contacts?: Array<{ name: string; relationship: string; phone: string }>;
+  status: 'active' | 'review_due' | 'archived';
+  created_by?: string;
+  created_by_name?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ComfortRound {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  scheduled_time: string;
+  completed_time?: string;
+  completed_by?: string;
+  completed_by_name?: string;
+  pain_score?: number;
+  comfort_measures?: string[];
+  position_change?: boolean;
+  fluid_offered?: boolean;
+  mouth_care?: boolean;
+  notes?: string;
+  status: 'scheduled' | 'completed' | 'missed';
+  created_at: string;
+}
+
+export interface AnticipatoryMedication {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  medication_name: string;
+  indication: string;
+  dose: string;
+  route: string;
+  max_frequency?: string;
+  prescribed_by?: string;
+  last_administered_at?: string;
+  last_administered_by?: string;
+  last_administered_by_name?: string;
+  stock_remaining?: number;
+  status: 'active' | 'discontinued';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FamilyCommunicationLog {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  family_member_name: string;
+  communication_type: 'phone' | 'in_person' | 'video' | 'email' | 'letter';
+  summary: string;
+  discussed_topics?: string[];
+  follow_up_required?: boolean;
+  follow_up_notes?: string;
+  logged_by: string;
+  logged_by_name?: string;
+  communication_date: string;
+  created_at: string;
+}

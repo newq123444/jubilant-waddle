@@ -10,6 +10,9 @@ import {
   invoicingApi, occupancyApi, staffCostsApi, recruitmentApi,
   competencyApi, absenceApi, fireLogApi, visitorsApi,
   roomTurnoverApi, reportBuilderApi,
+  offlineSyncApi, residentTabletApi, qrRoomApi, benchmarkingApi,
+  boardPackApi, staffPerformanceApi, elearningApi, competencySignoffApi,
+  diabetesApi, palliativeCareApi,
 } from '../services/api';
 import { toast } from '../utils/toast';
 
@@ -818,4 +821,222 @@ export function useReportRun(id: string) {
 }
 export function useReportDataSources() {
   return useQuery({ queryKey: ['reports', 'data-sources'], queryFn: () => reportBuilderApi.getDataSources().then(r => r.data) });
+}
+
+// ── Offline Sync (Batch 3) ────────────────────────────────────────────────
+export function useOfflineSyncQueue() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => offlineSyncApi.queue(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['offline-sync'] }); toast.success('Action queued for sync'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to queue action') });
+}
+export function useOfflineSync() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => offlineSyncApi.sync(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['offline-sync'] }); toast.success('Sync completed'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Sync failed') });
+}
+export function useOfflineSyncConflicts() {
+  return useQuery({ queryKey: ['offline-sync', 'conflicts'], queryFn: () => offlineSyncApi.getConflicts().then(r => r.data) });
+}
+export function useResolveOfflineConflict() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => offlineSyncApi.resolveConflict(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['offline-sync'] }); toast.success('Conflict resolved'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to resolve conflict') });
+}
+
+// ── Resident Tablet (Batch 3) ─────────────────────────────────────────────
+export function useCreateTabletRequest() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => residentTabletApi.createRequest(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['tablet-requests'] }); toast.success('Request sent'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to send request') });
+}
+export function useTabletRequests(params?: object) {
+  return useQuery({ queryKey: ['tablet-requests', params], queryFn: () => residentTabletApi.listRequests(params).then(r => r.data) });
+}
+export function useAcknowledgeTabletRequest() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (id: string) => residentTabletApi.acknowledgeRequest(id).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['tablet-requests'] }); toast.success('Request acknowledged'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to acknowledge request') });
+}
+export function useResidentTabletView(residentId: string) {
+  return useQuery({ queryKey: ['tablet-view', residentId], queryFn: () => residentTabletApi.getResidentView(residentId).then(r => r.data), enabled: !!residentId });
+}
+
+// ── QR Room Scanning (Batch 3) ────────────────────────────────────────────
+export function useGenerateQrCode() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => qrRoomApi.generate(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['qr-rooms'] }); toast.success('QR code generated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to generate QR code') });
+}
+export function useQrRoomCodes(params?: object) {
+  return useQuery({ queryKey: ['qr-rooms', params], queryFn: () => qrRoomApi.list(params).then(r => r.data) });
+}
+export function useScanQrCode() {
+  return useMutation({ mutationFn: (code: string) => qrRoomApi.scan(code).then(r => r.data), onError: (err: any) => toast.error(err.response?.data?.error || 'Invalid QR code') });
+}
+export function useDeactivateQrCode() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (id: string) => qrRoomApi.deactivate(id).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['qr-rooms'] }); toast.success('QR code deactivated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to deactivate QR code') });
+}
+
+// ── Benchmarking Dashboard (Batch 3) ─────────────────────────────────────
+export function useBenchmarkingDashboard() {
+  return useQuery({ queryKey: ['benchmarking'], queryFn: () => benchmarkingApi.getDashboard().then(r => r.data) });
+}
+export function useCalculateBenchmarks() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => benchmarkingApi.calculate(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['benchmarking'] }); toast.success('Benchmarks calculated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to calculate benchmarks') });
+}
+export function useBenchmarkMetricHistory(metricName: string) {
+  return useQuery({ queryKey: ['benchmarking', 'metric', metricName], queryFn: () => benchmarkingApi.getMetricHistory(metricName).then(r => r.data), enabled: !!metricName });
+}
+export function useNationalAverages() {
+  return useQuery({ queryKey: ['benchmarking', 'national-averages'], queryFn: () => benchmarkingApi.getNationalAverages().then(r => r.data) });
+}
+
+// ── Board Pack Generator (Batch 3) ───────────────────────────────────────
+export function useGenerateBoardPack() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => boardPackApi.generate(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['board-packs'] }); toast.success('Board pack generated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to generate board pack') });
+}
+export function useBoardPacks(params?: object) {
+  return useQuery({ queryKey: ['board-packs', params], queryFn: () => boardPackApi.list(params).then(r => r.data) });
+}
+export function useBoardPack(id: string) {
+  return useQuery({ queryKey: ['board-packs', id], queryFn: () => boardPackApi.get(id).then(r => r.data), enabled: !!id });
+}
+export function useApproveBoardPack() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => boardPackApi.approve(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['board-packs'] }); toast.success('Board pack approved'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to approve board pack') });
+}
+
+// ── Staff Performance Insights (Batch 3) ─────────────────────────────────
+export function useStaffPerformanceTeam() {
+  return useQuery({ queryKey: ['staff-performance', 'team'], queryFn: () => staffPerformanceApi.getTeamMetrics().then(r => r.data) });
+}
+export function useStaffPerformanceIndividual(staffId: string) {
+  return useQuery({ queryKey: ['staff-performance', staffId], queryFn: () => staffPerformanceApi.getIndividualMetrics(staffId).then(r => r.data), enabled: !!staffId });
+}
+export function useCalculateStaffPerformance() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => staffPerformanceApi.calculateMetrics(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['staff-performance'] }); toast.success('Performance metrics calculated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to calculate metrics') });
+}
+export function useStaffResponseTimes() {
+  return useQuery({ queryKey: ['staff-performance', 'response-times'], queryFn: () => staffPerformanceApi.getResponseTimes().then(r => r.data) });
+}
+
+// ── E-Learning Module (Batch 3) ──────────────────────────────────────────
+export function useElearningModules(params?: object) {
+  return useQuery({ queryKey: ['elearning', 'modules', params], queryFn: () => elearningApi.listModules(params).then(r => r.data) });
+}
+export function useElearningModule(id: string) {
+  return useQuery({ queryKey: ['elearning', 'module', id], queryFn: () => elearningApi.getModule(id).then(r => r.data), enabled: !!id });
+}
+export function useCreateElearningModule() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => elearningApi.createModule(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['elearning'] }); toast.success('Module created'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to create module') });
+}
+export function useCreateElearningQuiz() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ moduleId, data }: { moduleId: string; data: object }) => elearningApi.createQuiz(moduleId, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['elearning'] }); toast.success('Quiz created'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to create quiz') });
+}
+export function useSubmitElearningQuiz() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ moduleId, data }: { moduleId: string; data: object }) => elearningApi.submitQuiz(moduleId, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['elearning'] }); toast.success('Quiz submitted'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to submit quiz') });
+}
+export function useElearningCompletions(params?: object) {
+  return useQuery({ queryKey: ['elearning', 'completions', params], queryFn: () => elearningApi.getCompletions(params).then(r => r.data) });
+}
+export function useElearningStaffProgress(staffId: string) {
+  return useQuery({ queryKey: ['elearning', 'staff', staffId], queryFn: () => elearningApi.getStaffProgress(staffId).then(r => r.data), enabled: !!staffId });
+}
+export function useElearningMandatoryStatus() {
+  return useQuery({ queryKey: ['elearning', 'mandatory'], queryFn: () => elearningApi.getMandatoryStatus().then(r => r.data) });
+}
+
+// ── Competency Sign-Off (Batch 3) ────────────────────────────────────────
+export function useCreateCompetencySignoff() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => competencySignoffApi.create(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['competency-signoffs'] }); toast.success('Competency sign-off recorded'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to record sign-off') });
+}
+export function useCompetencySignoffs(params?: object) {
+  return useQuery({ queryKey: ['competency-signoffs', params], queryFn: () => competencySignoffApi.list(params).then(r => r.data) });
+}
+export function useCompetencySignoff(id: string) {
+  return useQuery({ queryKey: ['competency-signoffs', id], queryFn: () => competencySignoffApi.get(id).then(r => r.data), enabled: !!id });
+}
+export function useUpdateCompetencySignoff() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => competencySignoffApi.update(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['competency-signoffs'] }); toast.success('Sign-off updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update sign-off') });
+}
+export function useStaffCompetencySignoffs(staffId: string) {
+  return useQuery({ queryKey: ['competency-signoffs', 'staff', staffId], queryFn: () => competencySignoffApi.getStaffSignoffs(staffId).then(r => r.data), enabled: !!staffId });
+}
+
+// ── Diabetes Management (Batch 3) ────────────────────────────────────────
+export function useLogGlucose() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => diabetesApi.logGlucose(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['diabetes'] }); toast.success('Glucose reading logged'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to log glucose') });
+}
+export function useGlucoseReadings(residentId: string) {
+  return useQuery({ queryKey: ['diabetes', 'glucose', residentId], queryFn: () => diabetesApi.getGlucoseReadings(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useLogInsulinDose() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => diabetesApi.logInsulinDose(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['diabetes'] }); toast.success('Insulin dose logged'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to log insulin dose') });
+}
+export function useInsulinDoses(residentId: string) {
+  return useQuery({ queryKey: ['diabetes', 'insulin', residentId], queryFn: () => diabetesApi.getInsulinDoses(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useRecordHba1c() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => diabetesApi.recordHba1c(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['diabetes'] }); toast.success('HbA1c recorded'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to record HbA1c') });
+}
+export function useHba1cHistory(residentId: string) {
+  return useQuery({ queryKey: ['diabetes', 'hba1c', residentId], queryFn: () => diabetesApi.getHba1cHistory(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useDiabetesAlerts() {
+  return useQuery({ queryKey: ['diabetes', 'alerts'], queryFn: () => diabetesApi.getAlerts().then(r => r.data) });
+}
+export function useAcknowledgeDiabetesAlert() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => diabetesApi.acknowledgeAlert(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['diabetes'] }); toast.success('Alert acknowledged'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to acknowledge alert') });
+}
+export function useGlucosePatterns(residentId: string) {
+  return useQuery({ queryKey: ['diabetes', 'patterns', residentId], queryFn: () => diabetesApi.getGlucosePatterns(residentId).then(r => r.data), enabled: !!residentId });
+}
+
+// ── Palliative Care Pathway (Batch 3) ────────────────────────────────────
+export function useCreatePalliativeCarePlan() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => palliativeCareApi.createCarePlan(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['palliative'] }); toast.success('Care plan created'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to create care plan') });
+}
+export function usePalliativeCarePlan(residentId: string) {
+  return useQuery({ queryKey: ['palliative', 'care-plan', residentId], queryFn: () => palliativeCareApi.getCarePlan(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useUpdatePalliativeCarePlan() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => palliativeCareApi.updateCarePlan(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['palliative'] }); toast.success('Care plan updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update care plan') });
+}
+export function useScheduleComfortRound() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => palliativeCareApi.scheduleComfortRound(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['palliative'] }); toast.success('Comfort round scheduled'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to schedule comfort round') });
+}
+export function useCompleteComfortRound() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => palliativeCareApi.completeComfortRound(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['palliative'] }); toast.success('Comfort round completed'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to complete comfort round') });
+}
+export function useComfortRounds(residentId: string) {
+  return useQuery({ queryKey: ['palliative', 'comfort-rounds', residentId], queryFn: () => palliativeCareApi.getComfortRounds(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useAddAnticipatoryMed() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => palliativeCareApi.addAnticipatoryMed(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['palliative'] }); toast.success('Anticipatory medication added'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to add medication') });
+}
+export function useAnticipatoryMeds(residentId: string) {
+  return useQuery({ queryKey: ['palliative', 'anticipatory-meds', residentId], queryFn: () => palliativeCareApi.getAnticipatoryMeds(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useAdministerAnticipatoryMed() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => palliativeCareApi.administerAnticipatoryMed(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['palliative'] }); toast.success('Medication administered'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to administer medication') });
+}
+export function useLogFamilyCommunication() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => palliativeCareApi.logFamilyCommunication(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['palliative'] }); toast.success('Communication logged'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to log communication') });
+}
+export function useFamilyCommunications(residentId: string) {
+  return useQuery({ queryKey: ['palliative', 'family-comms', residentId], queryFn: () => palliativeCareApi.getFamilyCommunications(residentId).then(r => r.data), enabled: !!residentId });
 }

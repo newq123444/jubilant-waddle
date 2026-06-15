@@ -2,7 +2,7 @@
   "id": "FEAT-003",
   "type": "feat",
   "description": "Frontend pages, API services, hooks, types, and App.tsx integration for all 10 Batch 3 features. Each feature gets a full React page with inline styles matching existing UI patterns.",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Add new API service objects to frontend/src/services/api.ts: offlineSyncApi, residentTabletApi, qrRoomApi, benchmarkingApi, boardPackApi, staffPerformanceApi, elearningApi, competencySignoffApi, diabetesApi, palliativeCareApi - each with methods matching their controller endpoints",
     "Add new types to frontend/src/types/index.ts: OfflineSyncItem, ResidentTabletRequest, QrRoomCode, BenchmarkingKpi, BoardPackReport, StaffPerformanceMetric, ElearningModule, ElearningQuiz, ElearningCompletion, CompetencySignoff, GlucoseReading, InsulinDose, DiabetesAlert, Hba1cRecord, PalliativeCarePlan, ComfortRound, AnticipatoryMedication, FamilyCommunicationLog",

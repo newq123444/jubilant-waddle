@@ -382,3 +382,100 @@ export const reportBuilderApi = {
   getRun:             (id: string) => api.get(`/reports/runs/${id}`),
   getDataSources:     () => api.get('/reports/data-sources'),
 };
+
+// ── Offline Sync (Batch 3) ────────────────────────────────────────────────
+export const offlineSyncApi = {
+  queue:           (data: object) => api.post('/offline-sync/queue', data),
+  sync:            (data: object) => api.post('/offline-sync/sync', data),
+  getConflicts:    () => api.get('/offline-sync/conflicts'),
+  resolveConflict: (id: string, data: object) => api.patch(`/offline-sync/conflicts/${id}`, data),
+};
+
+// ── Resident Tablet Interface (Batch 3) ───────────────────────────────────
+export const residentTabletApi = {
+  createRequest:      (data: object) => api.post('/resident-tablet/requests', data),
+  listRequests:       (params?: object) => api.get('/resident-tablet/requests', { params }),
+  acknowledgeRequest: (id: string) => api.patch(`/resident-tablet/requests/${id}/acknowledge`),
+  getResidentView:    (residentId: string) => api.get(`/resident-tablet/${residentId}/view`),
+};
+
+// ── QR Room Scanning (Batch 3) ────────────────────────────────────────────
+export const qrRoomApi = {
+  generate:   (data: object) => api.post('/qr-rooms', data),
+  list:       (params?: object) => api.get('/qr-rooms', { params }),
+  scan:       (code: string) => api.get(`/qr-rooms/scan/${code}`),
+  deactivate: (id: string) => api.patch(`/qr-rooms/${id}/deactivate`),
+};
+
+// ── Benchmarking Dashboard (Batch 3) ─────────────────────────────────────
+export const benchmarkingApi = {
+  getDashboard:       () => api.get('/benchmarking'),
+  calculate:          (data: object) => api.post('/benchmarking/calculate', data),
+  getMetricHistory:   (metricName: string) => api.get(`/benchmarking/metric/${metricName}`),
+  getNationalAverages:() => api.get('/benchmarking/national-averages'),
+};
+
+// ── Board Pack Generator (Batch 3) ───────────────────────────────────────
+export const boardPackApi = {
+  generate: (data: object) => api.post('/board-packs/generate', data),
+  list:     (params?: object) => api.get('/board-packs', { params }),
+  get:      (id: string) => api.get(`/board-packs/${id}`),
+  approve:  (id: string, data: object) => api.patch(`/board-packs/${id}/approve`, data),
+};
+
+// ── Staff Performance Insights (Batch 3) ─────────────────────────────────
+export const staffPerformanceApi = {
+  getTeamMetrics:       () => api.get('/staff-performance/team'),
+  getIndividualMetrics: (staffId: string) => api.get(`/staff-performance/${staffId}`),
+  calculateMetrics:     (data: object) => api.post('/staff-performance/calculate', data),
+  getResponseTimes:     () => api.get('/staff-performance/response-times'),
+};
+
+// ── E-Learning Module (Batch 3) ──────────────────────────────────────────
+export const elearningApi = {
+  listModules:       (params?: object) => api.get('/elearning/modules', { params }),
+  createModule:      (data: object) => api.post('/elearning/modules', data),
+  getModule:         (id: string) => api.get(`/elearning/modules/${id}`),
+  createQuiz:        (moduleId: string, data: object) => api.post(`/elearning/modules/${moduleId}/quiz`, data),
+  submitQuiz:        (moduleId: string, data: object) => api.post(`/elearning/modules/${moduleId}/quiz/submit`, data),
+  getCompletions:    (params?: object) => api.get('/elearning/completions', { params }),
+  getStaffProgress:  (staffId: string) => api.get(`/elearning/staff/${staffId}`),
+  getMandatoryStatus:() => api.get('/elearning/mandatory-status'),
+};
+
+// ── Competency Sign-Off (Batch 3) ────────────────────────────────────────
+export const competencySignoffApi = {
+  create:          (data: object) => api.post('/competency-signoffs', data),
+  list:            (params?: object) => api.get('/competency-signoffs', { params }),
+  get:             (id: string) => api.get(`/competency-signoffs/${id}`),
+  update:          (id: string, data: object) => api.patch(`/competency-signoffs/${id}`, data),
+  getStaffSignoffs:(staffId: string) => api.get(`/competency-signoffs/staff/${staffId}`),
+};
+
+// ── Diabetes Management (Batch 3) ────────────────────────────────────────
+export const diabetesApi = {
+  logGlucose:         (data: object) => api.post('/diabetes/glucose', data),
+  getGlucoseReadings: (residentId: string) => api.get(`/diabetes/glucose/${residentId}`),
+  logInsulinDose:     (data: object) => api.post('/diabetes/insulin', data),
+  getInsulinDoses:    (residentId: string) => api.get(`/diabetes/insulin/${residentId}`),
+  recordHba1c:        (data: object) => api.post('/diabetes/hba1c', data),
+  getHba1cHistory:    (residentId: string) => api.get(`/diabetes/hba1c/${residentId}`),
+  getAlerts:          () => api.get('/diabetes/alerts'),
+  acknowledgeAlert:   (id: string, data: object) => api.patch(`/diabetes/alerts/${id}`, data),
+  getGlucosePatterns: (residentId: string) => api.get(`/diabetes/glucose/${residentId}/patterns`),
+};
+
+// ── Palliative Care Pathway (Batch 3) ────────────────────────────────────
+export const palliativeCareApi = {
+  createCarePlan:            (data: object) => api.post('/palliative/care-plans', data),
+  getCarePlan:               (residentId: string) => api.get(`/palliative/care-plans/${residentId}`),
+  updateCarePlan:            (id: string, data: object) => api.patch(`/palliative/care-plans/${id}`, data),
+  scheduleComfortRound:      (data: object) => api.post('/palliative/comfort-rounds', data),
+  completeComfortRound:      (id: string, data: object) => api.patch(`/palliative/comfort-rounds/${id}`, data),
+  getComfortRounds:          (residentId: string) => api.get(`/palliative/comfort-rounds/${residentId}`),
+  addAnticipatoryMed:        (data: object) => api.post('/palliative/anticipatory-meds', data),
+  getAnticipatoryMeds:       (residentId: string) => api.get(`/palliative/anticipatory-meds/${residentId}`),
+  administerAnticipatoryMed: (id: string, data: object) => api.patch(`/palliative/anticipatory-meds/${id}/administer`, data),
+  logFamilyCommunication:    (data: object) => api.post('/palliative/family-communications', data),
+  getFamilyCommunications:   (residentId: string) => api.get(`/palliative/family-communications/${residentId}`),
+};
