@@ -2,7 +2,7 @@
   "id": "FEAT-009",
   "type": "feat",
   "description": "Priority 4 continued: Voice-to-text care notes and SBAR handover - Frontend pages for voice input on care notes and SBAR handover generation/viewing. Uses Web Speech API (browser native) for voice-to-text on the frontend.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Add TypeScript types to frontend/src/types/index.ts: VoiceTranscription (id, user_id, resident_id, audio_duration_seconds, transcription_text, confidence_score, care_note_id, status, created_at), SbarHandover (id, generated_by_name, shift_date, shift_type, situation, background, assessment, recommendation, residents_covered, key_concerns, status, approved_by_name, approved_at, created_at).",
     "Add API client methods to frontend/src/services/api.ts: voiceApi object with transcribe, createNoteFromVoice, getHistory; sbarApi object with generate, list, get, approve.",
@@ -23,5 +23,5 @@
     "cd /projects/sandbox/jubilant-waddle/frontend && npm run build"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Build verification: vite build succeeds. tsc reports 19 pre-existing type errors (Emar.tsx, Incidents.tsx, Training.tsx, CareNotes.tsx care_needs_summary) - none from new code. All new files (VoiceNoteInput.tsx, SbarHandover.tsx, types, hooks, api) compile cleanly."
 }
