@@ -459,3 +459,54 @@ export interface PredictiveRiskDashboardItem {
   deterioration_score: number | null;
   deterioration_generated_at: string | null;
 }
+
+// ── Family Portal ─────────────────────────────────────────────────────────
+export interface FamilyDailySummary {
+  id: string;
+  resident_id: string;
+  summary_date: string;
+  meals_summary: string | null;
+  activities_summary: string | null;
+  mood_summary: string | null;
+  care_notes_summary: string | null;
+  photo_urls: string[];
+  generated_at: string;
+  generated_by: string;
+}
+
+export interface FamilyWeeklyReport {
+  id: string;
+  resident_id: string;
+  week_start: string;
+  week_end: string;
+  report_content: string;
+  wellbeing_score_avg: number | null;
+  highlights: string[];
+  concerns: string[];
+  generated_at: string;
+  sent_at: string | null;
+}
+
+export interface FamilyPhoto {
+  id: string;
+  resident_id: string;
+  photo_url: string;
+  caption: string | null;
+  activity_session_id: string | null;
+  uploaded_by_name?: string;
+  created_at: string;
+}
+
+export interface FamilyDashboardData {
+  resident: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    room_number: string;
+    photo_url: string | null;
+  };
+  today_summary: FamilyDailySummary | null;
+  recent_photos: FamilyPhoto[];
+  unread_messages: number;
+  latest_wellbeing: any;
+}

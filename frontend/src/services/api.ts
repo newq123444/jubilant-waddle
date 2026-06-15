@@ -84,6 +84,13 @@ export const familyApi = {
   sendMessage:  (data: object) => api.post('/family/messages', data),
   markRead:     (id: string) => api.patch(`/family/messages/${id}/read`),
   listContacts: (residentId: string) => api.get(`/family/contacts/${residentId}`),
+  getDashboard: (residentId: string) => api.get(`/family/dashboard/${residentId}`),
+  getDailySummary: (residentId: string, date?: string) => api.get(`/family/daily-summary/${residentId}`, { params: { date } }),
+  generateDailySummary: (residentId: string, date?: string) => api.post(`/family/daily-summary/${residentId}/generate`, { date }),
+  getWeeklyReport: (residentId: string, weekStart?: string) => api.get(`/family/weekly-report/${residentId}`, { params: { weekStart } }),
+  generateWeeklyReports: () => api.post('/family/weekly-reports/generate'),
+  listPhotos: (residentId: string, params?: object) => api.get(`/family/photos/${residentId}`, { params }),
+  uploadPhoto: (residentId: string, formData: FormData) => api.post(`/family/photos/${residentId}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
 };
 
 // ── Billing ────────────────────────────────────────────────────────────────

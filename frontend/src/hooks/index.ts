@@ -296,3 +296,29 @@ export function useAcknowledgePredictiveAlert() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: (id: string) => predictiveApi.acknowledgeAlert(id).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['predictive-alerts'] }); toast.success('Alert acknowledged'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to acknowledge alert') });
 }
+
+// ── Family Portal (Enhanced) ──────────────────────────────────────────────
+export function useFamilyDashboard(residentId: string) {
+  return useQuery({ queryKey: ['family-dashboard', residentId], queryFn: () => familyApi.getDashboard(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useFamilyDailySummary(residentId: string, date?: string) {
+  return useQuery({ queryKey: ['family-daily-summary', residentId, date], queryFn: () => familyApi.getDailySummary(residentId, date).then(r => r.data), enabled: !!residentId });
+}
+export function useGenerateDailySummary() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ residentId, date }: { residentId: string; date?: string }) => familyApi.generateDailySummary(residentId, date).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['family-daily-summary'] }); qc.invalidateQueries({ queryKey: ['family-dashboard'] }); toast.success('Daily summary generated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to generate summary') });
+}
+export function useFamilyWeeklyReport(residentId: string, weekStart?: string) {
+  return useQuery({ queryKey: ['family-weekly-report', residentId, weekStart], queryFn: () => familyApi.getWeeklyReport(residentId, weekStart).then(r => r.data), enabled: !!residentId });
+}
+export function useGenerateWeeklyReports() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: () => familyApi.generateWeeklyReports().then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['family-weekly-report'] }); toast.success('Weekly reports generated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to generate reports') });
+}
+export function useFamilyPhotos(residentId: string) {
+  return useQuery({ queryKey: ['family-photos', residentId], queryFn: () => familyApi.listPhotos(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useUploadFamilyPhoto() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ residentId, formData }: { residentId: string; formData: FormData }) => familyApi.uploadPhoto(residentId, formData).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['family-photos'] }); qc.invalidateQueries({ queryKey: ['family-dashboard'] }); toast.success('Photo uploaded'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to upload photo') });
+}
