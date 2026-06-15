@@ -30,6 +30,16 @@ import * as smartRotaCtrl from '../controllers/smartRota.controller';
 import * as nlSearchCtrl from '../controllers/nlSearch.controller';
 import * as riskAssessmentsCtrl from '../controllers/riskAssessments.controller';
 import * as medInteractionsCtrl from '../controllers/medInteractions.controller';
+import * as invoicingCtrl from '../controllers/invoicing.controller';
+import * as occupancyCtrl from '../controllers/occupancy.controller';
+import * as staffCostsCtrl from '../controllers/staffCosts.controller';
+import * as recruitmentCtrl from '../controllers/recruitment.controller';
+import * as competencyMatrixCtrl from '../controllers/competencyMatrix.controller';
+import * as absenceCtrl from '../controllers/absence.controller';
+import * as fireLogCtrl from '../controllers/fireLog.controller';
+import * as visitorsCtrl from '../controllers/visitors.controller';
+import * as roomTurnoverCtrl from '../controllers/roomTurnover.controller';
+import * as reportBuilderCtrl from '../controllers/reportBuilder.controller';
 import { upload } from '../middleware/upload'; // getBillingSummary added
 import * as aiService from '../services/ai.service';
 import { query } from '../models/db';
@@ -520,6 +530,103 @@ router.get('/invoices/summary',     isFinance, billingCtrl.getBillingSummary);
 router.get('/invoices',             isFinance, billingCtrl.listInvoices);
 router.post('/invoices',            isFinance, billingCtrl.createInvoice);
 router.patch('/invoices/:id/status', isFinance, billingCtrl.updateInvoiceStatus);
+
+// ── Enhanced Invoicing (Finance) ──────────────────────────────────────────
+router.get('/invoicing/rate-uplifts',           isFinance, invoicingCtrl.listRateUplifts);
+router.post('/invoicing/rate-uplifts',          isFinance, invoicingCtrl.createRateUplift);
+router.patch('/invoicing/rate-uplifts/:id',     isFinance, invoicingCtrl.approveRateUplift);
+router.post('/invoicing/payment-reminders',     isFinance, invoicingCtrl.sendPaymentReminder);
+router.get('/invoicing/payment-reminders',      isFinance, invoicingCtrl.listPaymentReminders);
+router.get('/invoicing/revenue-dashboard',      isFinance, invoicingCtrl.getRevenueDashboard);
+
+// ── Occupancy Forecasting (Finance) ──────────────────────────────────────
+router.post('/occupancy',                       isFinance, occupancyCtrl.recordOccupancy);
+router.get('/occupancy/history',                isFinance, occupancyCtrl.getOccupancyHistory);
+router.post('/occupancy/forecasts',             isFinance, occupancyCtrl.generateForecast);
+router.get('/occupancy/forecasts',              isFinance, occupancyCtrl.getForecasts);
+router.get('/occupancy/dashboard',              isFinance, occupancyCtrl.getOccupancyDashboard);
+
+// ── Staff Cost Analytics (Finance) ───────────────────────────────────────
+router.post('/staff-costs',                     isFinance, staffCostsCtrl.recordStaffCost);
+router.get('/staff-costs/summary',              isFinance, staffCostsCtrl.getStaffCostsSummary);
+router.get('/staff-costs/per-resident',         isFinance, staffCostsCtrl.getCostPerResident);
+router.get('/staff-costs/budget-vs-actual',     isFinance, staffCostsCtrl.getBudgetVsActual);
+router.get('/staff-costs/budgets',              isFinance, staffCostsCtrl.listBudgets);
+router.post('/staff-costs/budgets',             isFinance, staffCostsCtrl.createBudget);
+
+// ── Recruitment Pipeline (HR) ─────────────────────────────────────────────
+router.get('/recruitment/postings',             isManager, recruitmentCtrl.listJobPostings);
+router.post('/recruitment/postings',            isManager, recruitmentCtrl.createJobPosting);
+router.patch('/recruitment/postings/:id',       isManager, recruitmentCtrl.updateJobPosting);
+router.get('/recruitment/applications',         isManager, recruitmentCtrl.listApplications);
+router.post('/recruitment/applications',        isManager, recruitmentCtrl.createApplication);
+router.patch('/recruitment/applications/:id/stage', isManager, recruitmentCtrl.updateApplicationStage);
+router.get('/recruitment/interviews',           isManager, recruitmentCtrl.listInterviews);
+router.post('/recruitment/interviews',          isManager, recruitmentCtrl.scheduleInterview);
+router.patch('/recruitment/interviews/:id/outcome', isManager, recruitmentCtrl.updateInterviewOutcome);
+router.post('/recruitment/dbs-checks',          isManager, recruitmentCtrl.createDbsCheck);
+router.patch('/recruitment/dbs-checks/:id',     isManager, recruitmentCtrl.updateDbsCheck);
+router.get('/recruitment/pipeline',             isManager, recruitmentCtrl.getPipelineOverview);
+
+// ── Competency Matrix (HR) ────────────────────────────────────────────────
+router.get('/competencies',                     isManager, competencyMatrixCtrl.listCompetencies);
+router.post('/competencies',                    isManager, competencyMatrixCtrl.createCompetency);
+router.get('/competencies/staff',               isManager, competencyMatrixCtrl.listStaffCompetencies);
+router.post('/competencies/staff',              isManager, competencyMatrixCtrl.assignStaffCompetency);
+router.patch('/competencies/staff/:id',         isManager, competencyMatrixCtrl.updateStaffCompetency);
+router.get('/competencies/matrix',              isManager, competencyMatrixCtrl.getCompetencyMatrix);
+router.get('/competencies/expiring',            isManager, competencyMatrixCtrl.getExpiringCompetencies);
+
+// ── Absence & Sickness (HR) ──────────────────────────────────────────────
+router.post('/absence',                         isManager, absenceCtrl.recordAbsence);
+router.get('/absence',                          isManager, absenceCtrl.listAbsences);
+router.post('/absence/bradford-score',          isManager, absenceCtrl.calculateBradfordScore);
+router.get('/absence/bradford-scores',          isManager, absenceCtrl.getBradfordScores);
+router.get('/absence/patterns',                 isManager, absenceCtrl.getAbsencePatterns);
+router.get('/absence/return-to-work-due',       isManager, absenceCtrl.getReturnToWorkDue);
+router.patch('/absence/:id/return-to-work',     isManager, absenceCtrl.completeReturnToWork);
+router.get('/absence/dashboard',                isManager, absenceCtrl.getAbsenceDashboard);
+
+// ── Fire Log Book (Facilities) ────────────────────────────────────────────
+router.post('/fire-log/tests',                  isManager, fireLogCtrl.recordFireTest);
+router.get('/fire-log/tests',                   isManager, fireLogCtrl.listFireTests);
+router.post('/fire-log/equipment-checks',       isManager, fireLogCtrl.recordEquipmentCheck);
+router.get('/fire-log/equipment-checks',        isManager, fireLogCtrl.listEquipmentChecks);
+router.get('/fire-log/overdue-checks',          isManager, fireLogCtrl.getOverdueChecks);
+router.post('/fire-log/peeps',                  isManager, fireLogCtrl.createPeep);
+router.get('/fire-log/peeps',                   isManager, fireLogCtrl.listPeeps);
+router.patch('/fire-log/peeps/:id',             isManager, fireLogCtrl.updatePeep);
+router.get('/fire-log/dashboard',               isManager, fireLogCtrl.getFireDashboard);
+
+// ── Visitor Sign-In (Facilities) ─────────────────────────────────────────
+router.post('/visitors/sign-in',                isStaff, visitorsCtrl.signInVisitor);
+router.patch('/visitors/:id/sign-out',          isStaff, visitorsCtrl.signOutVisitor);
+router.get('/visitors',                         isStaff, visitorsCtrl.listVisitors);
+router.get('/visitors/dashboard',               isManager, visitorsCtrl.getVisitorDashboard);
+router.get('/visitors/fire-roll',               isStaff, visitorsCtrl.getFireRoll);
+router.get('/visitors/history/:residentId',     isStaff, visitorsCtrl.getVisitorHistory);
+router.post('/visitors/safeguarding',           isManager, visitorsCtrl.addSafeguardingFlag);
+router.get('/visitors/safeguarding',            isManager, visitorsCtrl.listSafeguardingFlags);
+
+// ── Room Turnover (Facilities) ────────────────────────────────────────────
+router.post('/room-turnovers',                  isManager, roomTurnoverCtrl.createTurnover);
+router.get('/room-turnovers',                   isManager, roomTurnoverCtrl.listTurnovers);
+router.patch('/room-turnovers/:id/status',      isManager, roomTurnoverCtrl.updateTurnoverStatus);
+router.post('/room-turnovers/checklist',        isManager, roomTurnoverCtrl.addChecklistItem);
+router.patch('/room-turnovers/checklist/:id/complete', isManager, roomTurnoverCtrl.completeChecklistItem);
+router.get('/room-turnovers/:turnoverId/checklist', isManager, roomTurnoverCtrl.getChecklistItems);
+router.get('/room-turnovers/dashboard',         isManager, roomTurnoverCtrl.getTurnoverDashboard);
+
+// ── Custom Report Builder ─────────────────────────────────────────────────
+router.get('/reports/templates',                isManager, reportBuilderCtrl.listReportTemplates);
+router.post('/reports/templates',               isManager, reportBuilderCtrl.createReportTemplate);
+router.get('/reports/templates/:id',            isManager, reportBuilderCtrl.getReportTemplate);
+router.patch('/reports/templates/:id',          isManager, reportBuilderCtrl.updateReportTemplate);
+router.delete('/reports/templates/:id',         isManager, reportBuilderCtrl.deleteReportTemplate);
+router.post('/reports/run',                     isManager, reportBuilderCtrl.runReport);
+router.get('/reports/runs',                     isManager, reportBuilderCtrl.listReportRuns);
+router.get('/reports/runs/:id',                 isManager, reportBuilderCtrl.getReportRun);
+router.get('/reports/data-sources',             isManager, reportBuilderCtrl.getAvailableDataSources);
 
 // ── AI ────────────────────────────────────────────────────────────────────
 router.post('/ai/family-summary',   isStaff, aiService.generateFamilySummary);
