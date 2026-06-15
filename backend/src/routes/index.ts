@@ -20,6 +20,7 @@ import * as activitiesCtrl from '../controllers/activities.controller';
 import * as wellbeingCtrl from '../controllers/wellbeing.controller';
 import * as predictiveCareCtrl from '../controllers/predictiveCare.controller';
 import * as familyPortalCtrl from '../controllers/familyPortal.controller';
+import * as cqcComplianceCtrl from '../controllers/cqcCompliance.controller';
 import { upload } from '../middleware/upload'; // getBillingSummary added
 import * as aiService from '../services/ai.service';
 import { query } from '../models/db';
@@ -325,6 +326,17 @@ router.patch('/compliance/actions/:id', isManager, async (req, res, next) => {
     res.json(action);
   } catch (err) { next(err); }
 });
+
+// -- CQC Compliance
+router.get('/compliance/cqc-scores',                 isManager, cqcComplianceCtrl.getDomainScores);
+router.post('/compliance/cqc-scores/calculate',      isManager, cqcComplianceCtrl.calculateDomainScores);
+router.post('/compliance/evidence-pack',             isManager, cqcComplianceCtrl.generateEvidencePack);
+router.get('/compliance/evidence-packs',             isManager, cqcComplianceCtrl.getEvidencePacks);
+router.get('/compliance/policy-reviews',             isManager, cqcComplianceCtrl.getPolicyReviewStatus);
+router.post('/compliance/policy-reviews',            isManager, cqcComplianceCtrl.createPolicyReview);
+router.get('/compliance/inspection-checklist/:domain', isManager, cqcComplianceCtrl.getInspectionChecklist);
+router.patch('/compliance/inspection-checklist/:id/item', isManager, cqcComplianceCtrl.updateChecklistItem);
+router.get('/compliance/overview',                   isManager, cqcComplianceCtrl.getComplianceOverview);
 
 router.post('/policies', isManager, async (req, res, next) => {
   try {
