@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "feat",
   "description": "Backend controllers and routes for all 10 Batch 2 features: invoicing enhancements, occupancy forecasting, staff cost analytics, digital recruitment pipeline, competency matrix, sickness/absence analytics, fire log book, visitor sign-in, room turnover manager, and custom report builder. Each feature gets its own controller file following the pattern in billing.controller.ts.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Create backend/src/controllers/invoicing.controller.ts with: listInvoicesEnhanced (with overdue alerts, rate uplift info), createRateUplift, listRateUplifts, sendPaymentReminder, getRevenueDashboard (monthly revenue summary, payment status breakdown, overdue alerts count)",
     "Create backend/src/controllers/occupancy.controller.ts with: recordOccupancy, getOccupancyHistory, generateForecast (predict vacancies based on trends), getForecasts, getOccupancyDashboard (current %, trend over time, revenue impact)",
@@ -27,5 +27,5 @@
     "cd /projects/sandbox/jubilant-waddle/backend && npm run build"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All 10 controller files created and routes registered. Backend build succeeds with exit code 0. Only pre-existing type errors remain (auth.controller.ts, photos.controller.ts, index.ts, upload.ts related to missing @types/compression and multer types). No errors from any new controller files."
 }
