@@ -126,16 +126,19 @@ export async function generateSbarHandover(req: Request, res: Response, next: Ne
     const [notes, incidents, missedMeds, missedTasks, wellbeing, flaggedNotes] = await Promise.all([
       query(
         `SELECT cn.content, cn.note_type, cn.is_significant, cn.created_at,
-                r.first_name || ' ' || r.last_name AS resident_name, r.room_number
+                r.first_name || ' ' || r.last_name AS resident_name, r.room_number,
+                cn.resident_id
          FROM care_notes cn
          JOIN residents r ON r.id = cn.resident_id
          WHERE cn.care_home_id = $1 AND cn.created_at::date = $2 AND cn.deleted_at IS NULL
+           AND cn.is_private = FALSE
          ORDER BY cn.created_at DESC`,
         [careHomeId, shiftDate]
       ),
       query(
         `SELECT i.description, i.incident_type, i.severity, i.status,
-                r.first_name || ' ' || r.last_name AS resident_name, r.room_number
+                r.first_name || ' ' || r.last_name AS resident_name, r.room_number,
+                i.resident_id
          FROM incidents i
          JOIN residents r ON r.id = i.resident_id
          WHERE i.care_home_id = $1 AND i.incident_date::date = $2`,
@@ -180,13 +183,15 @@ export async function generateSbarHandover(req: Request, res: Response, next: Ne
       ),
     ]);
 
-    // Collect unique resident IDs from notes
-    const residentIds: string[] = [];
-    const noteRows = notes.rows as Array<{ resident_name: string; room_number: string }>;
-    const residentSet = new Set<string>();
-    for (const row of noteRows) {
-      residentSet.add(row.resident_name);
+    // Collect unique resident IDs from notes and incidents
+    const residentIdSet = new Set<string>();
+    for (const row of (notes.rows as any[])) {
+      if (row.resident_id) residentIdSet.add(row.resident_id);
     }
+    for (const row of (incidents.rows as any[])) {
+      if (row.resident_id) residentIdSet.add(row.resident_id);
+    }
+    const residentsCoveredArray = Array.from(residentIdSet);
 
     const prompt = `Generate a structured SBAR handover report for a UK care home.
 
@@ -264,7 +269,7 @@ Structure your response with exactly 4 labeled sections: SITUATION, BACKGROUND, 
         careHomeId, userId, shiftDate, shiftType,
         sections.situation, sections.background,
         sections.assessment, sections.recommendation,
-        '{}', JSON.stringify(keyConcerns),
+        residentsCoveredArray, JSON.stringify(keyConcerns),
       ]
     );
 

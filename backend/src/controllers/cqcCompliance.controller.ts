@@ -85,27 +85,33 @@ export async function calculateDomainScores(req: Request, res: Response, next: N
     ];
 
     // Store each domain score and generate AI recommendations for scores below 70
+    const aiFailures: string[] = [];
     for (const ds of domainScores) {
       let recommendations: string[] = [];
 
       if (ds.score < 70) {
-        const aiResult = await runAiOperation({
-          careHomeId,
-          requestedBy: userId,
-          operation: 'cqc_domain_recommendations',
-          context: { domain: ds.domain, score: ds.score, strengths: ds.strengths, weaknesses: ds.weaknesses },
-          prompt: `The CQC domain "${ds.domain}" has scored ${ds.score}/100.
+        try {
+          const aiResult = await runAiOperation({
+            careHomeId,
+            requestedBy: userId,
+            operation: 'cqc_domain_recommendations',
+            context: { domain: ds.domain, score: ds.score, strengths: ds.strengths, weaknesses: ds.weaknesses },
+            prompt: `The CQC domain "${ds.domain}" has scored ${ds.score}/100.
 Strengths identified: ${JSON.stringify(ds.strengths)}
 Weaknesses identified: ${JSON.stringify(ds.weaknesses)}
 
 Provide 3-5 specific, actionable recommendations to improve this domain score. Focus on practical steps that can be implemented within 30 days. Format as a JSON array of strings.`,
-          systemPrompt: `You are a CQC compliance expert helping UK care homes improve their inspection readiness. Provide practical, evidence-based recommendations. Return ONLY a JSON array of recommendation strings, no other text.`,
-        });
+            systemPrompt: `You are a CQC compliance expert helping UK care homes improve their inspection readiness. Provide practical, evidence-based recommendations. Return ONLY a JSON array of recommendation strings, no other text.`,
+          });
 
-        try {
-          recommendations = JSON.parse(aiResult);
-        } catch {
-          recommendations = [aiResult];
+          try {
+            recommendations = JSON.parse(aiResult);
+          } catch {
+            recommendations = [aiResult];
+          }
+        } catch (aiErr: any) {
+          aiFailures.push(ds.domain);
+          recommendations = [`AI recommendations unavailable: ${aiErr.message || 'AI service error'}`];
         }
       }
 
@@ -128,7 +134,12 @@ Provide 3-5 specific, actionable recommendations to improve this domain score. F
       results.push(inserted);
     }
 
-    res.json({ scores: results, calculatedAt: new Date().toISOString() });
+    const response: any = { scores: results, calculatedAt: new Date().toISOString() };
+    if (aiFailures.length > 0) {
+      response.aiFailures = aiFailures;
+      response.note = `AI recommendations could not be generated for domains: ${aiFailures.join(', ')}. Scores are still valid.`;
+    }
+    res.json(response);
   } catch (err) { next(err); }
 }
 

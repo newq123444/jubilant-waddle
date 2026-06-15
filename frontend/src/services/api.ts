@@ -158,7 +158,7 @@ export const activitiesApi = {
 // ── Predictive Care ────────────────────────────────────────────────────────
 export const predictiveApi = {
   getDashboard:     () => api.get('/predictive/dashboard'),
-  getResidentRisk:  (residentId: string) => api.get(`/predictive/residents/${residentId}/risk`),
+  calculateResidentRisk:  (residentId: string) => api.post(`/predictive/residents/${residentId}/risk`),
   getResidentHistory: (residentId: string) => api.get(`/predictive/residents/${residentId}/history`),
   getAlerts:        () => api.get('/predictive/alerts'),
   acknowledgeAlert: (id: string) => api.patch(`/predictive/alerts/${id}/acknowledge`),

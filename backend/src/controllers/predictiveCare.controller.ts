@@ -446,52 +446,66 @@ export async function runPredictiveAnalysis(req: Request, res: Response, next: N
 
     const results: any[] = [];
     const alerts: any[] = [];
+    const errors: any[] = [];
 
     for (const resident of residents) {
-      // Calculate falls risk
-      const fallsResult = await calculateRiskInternal(careHomeId, resident.id, 'falls');
-      // Calculate deterioration risk
-      const detResult = await calculateRiskInternal(careHomeId, resident.id, 'deterioration');
+      try {
+        // Calculate falls risk
+        const fallsResult = await calculateRiskInternal(careHomeId, resident.id, 'falls');
+        // Calculate deterioration risk
+        const detResult = await calculateRiskInternal(careHomeId, resident.id, 'deterioration');
 
-      const residentResult: any = {
-        residentId: resident.id,
-        residentName: `${resident.first_name} ${resident.last_name}`,
-        room: resident.room_number,
-        falls: fallsResult,
-        deterioration: detResult,
-      };
+        const residentResult: any = {
+          residentId: resident.id,
+          residentName: `${resident.first_name} ${resident.last_name}`,
+          room: resident.room_number,
+          falls: fallsResult,
+          deterioration: detResult,
+        };
 
-      // Create alerts for scores > 70
-      if (fallsResult.score > 70) {
-        const { rows: [alert] } = await query(
-          `INSERT INTO predictive_alerts (care_home_id, resident_id, alert_type, risk_score, threshold, factors, status)
-           VALUES ($1, $2, 'falls_risk', $3, 70, $4, 'active') RETURNING *`,
-          [careHomeId, resident.id, fallsResult.score, JSON.stringify(fallsResult.factors)]
-        );
-        alerts.push(alert);
-      }
+        // Create alerts for scores > 70 (only if no active alert already exists)
+        if (fallsResult.score > 70) {
+          const { rows: existingFallsAlerts } = await query(
+            `SELECT id FROM predictive_alerts WHERE resident_id = $1 AND alert_type = 'falls_risk' AND status = 'active'`,
+            [resident.id]
+          );
+          if (existingFallsAlerts.length === 0) {
+            const { rows: [alert] } = await query(
+              `INSERT INTO predictive_alerts (care_home_id, resident_id, alert_type, risk_score, threshold, factors, status)
+               VALUES ($1, $2, 'falls_risk', $3, 70, $4, 'active') RETURNING *`,
+              [careHomeId, resident.id, fallsResult.score, JSON.stringify(fallsResult.factors)]
+            );
+            alerts.push(alert);
+          }
+        }
 
-      if (detResult.score > 70) {
-        const { rows: [alert] } = await query(
-          `INSERT INTO predictive_alerts (care_home_id, resident_id, alert_type, risk_score, threshold, factors, status)
-           VALUES ($1, $2, 'deterioration_risk', $3, 70, $4, 'active') RETURNING *`,
-          [careHomeId, resident.id, detResult.score, JSON.stringify(detResult.factors)]
-        );
-        alerts.push(alert);
-      }
+        if (detResult.score > 70) {
+          const { rows: existingDetAlerts } = await query(
+            `SELECT id FROM predictive_alerts WHERE resident_id = $1 AND alert_type = 'deterioration_risk' AND status = 'active'`,
+            [resident.id]
+          );
+          if (existingDetAlerts.length === 0) {
+            const { rows: [alert] } = await query(
+              `INSERT INTO predictive_alerts (care_home_id, resident_id, alert_type, risk_score, threshold, factors, status)
+               VALUES ($1, $2, 'deterioration_risk', $3, 70, $4, 'active') RETURNING *`,
+              [careHomeId, resident.id, detResult.score, JSON.stringify(detResult.factors)]
+            );
+            alerts.push(alert);
+          }
+        }
 
-      // For high-risk cases (>80), generate AI narrative explanation
-      if (fallsResult.score > 80 || detResult.score > 80) {
-        const highRiskType = fallsResult.score > detResult.score ? 'falls' : 'deterioration';
-        const highScore = Math.max(fallsResult.score, detResult.score);
-        const highFactors = highRiskType === 'falls' ? fallsResult.factors : detResult.factors;
+        // For high-risk cases (>80), generate AI narrative explanation
+        if (fallsResult.score > 80 || detResult.score > 80) {
+          const highRiskType = fallsResult.score > detResult.score ? 'falls' : 'deterioration';
+          const highScore = Math.max(fallsResult.score, detResult.score);
+          const highFactors = highRiskType === 'falls' ? fallsResult.factors : detResult.factors;
 
-        const narrative = await runAiOperation({
-          careHomeId,
-          requestedBy: userId,
-          operation: 'predictive_analysis',
-          context: { residentId: resident.id, riskType: highRiskType, score: highScore, factors: highFactors },
-          prompt: `Generate a brief clinical narrative explaining why ${resident.first_name} ${resident.last_name} (Room ${resident.room_number}) has been flagged as HIGH RISK for ${highRiskType} with a score of ${highScore}/100.
+          const narrative = await runAiOperation({
+            careHomeId,
+            requestedBy: userId,
+            operation: 'predictive_analysis',
+            context: { residentId: resident.id, riskType: highRiskType, score: highScore, factors: highFactors },
+            prompt: `Generate a brief clinical narrative explaining why ${resident.first_name} ${resident.last_name} (Room ${resident.room_number}) has been flagged as HIGH RISK for ${highRiskType} with a score of ${highScore}/100.
 
 Risk factors:
 ${JSON.stringify(highFactors, null, 2)}
@@ -502,12 +516,19 @@ Provide:
 3. Urgency level and recommended review timeframe
 
 Keep it concise and actionable for care staff. This is advisory only and requires clinical review.`,
+          });
+
+          residentResult.aiNarrative = narrative;
+        }
+
+        results.push(residentResult);
+      } catch (err: any) {
+        errors.push({
+          residentId: resident.id,
+          residentName: `${resident.first_name} ${resident.last_name}`,
+          error: err.message || 'Unknown error during analysis',
         });
-
-        residentResult.aiNarrative = narrative;
       }
-
-      results.push(residentResult);
     }
 
     res.json({
@@ -516,9 +537,11 @@ Keep it concise and actionable for care staff. This is advisory only and require
         alertsGenerated: alerts.length,
         highRiskCount: results.filter(r => r.falls.score > 70 || r.deterioration.score > 70).length,
         criticalCount: results.filter(r => r.falls.score > 80 || r.deterioration.score > 80).length,
+        errorsCount: errors.length,
       },
       results,
       alerts,
+      errors,
       generatedAt: new Date().toISOString(),
     });
   } catch (err) { next(err); }

@@ -226,7 +226,7 @@ router.put('/residents/:id/environment',                  isStaff, wellbeingCtrl
 
 // -- Predictive Care
 router.get('/predictive/dashboard',                           isManager,  predictiveCareCtrl.getRiskDashboard);
-router.get('/predictive/residents/:residentId/risk',          isClinical, predictiveCareCtrl.calculateFallsRisk);
+router.post('/predictive/residents/:residentId/risk',          isClinical, predictiveCareCtrl.calculateFallsRisk);
 router.get('/predictive/residents/:residentId/history',       isClinical, predictiveCareCtrl.getRiskHistory);
 router.get('/predictive/alerts',                              isManager,  predictiveCareCtrl.getAlerts);
 router.patch('/predictive/alerts/:id/acknowledge',            isManager,  predictiveCareCtrl.acknowledgeAlert);
