@@ -2,7 +2,7 @@
   "id": "FEAT-006",
   "type": "feat",
   "description": "Frontend pages for Facilities features (features 7-10): Digital Fire Log Book page (weekly alarm tests, quarterly drills, equipment checks, PEEPs per resident), Visitor Sign-in System page (digital registration, fire roll, safeguarding checks, visit history), Room Turnover Manager page (checklist workflow, deep clean/maintenance/redecoration tracking, ready-for-admission status), and Custom Report Builder page (drag-and-drop style field selection, filters, date ranges, report generation/scheduling).",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Create frontend/src/pages/FireLogBook.tsx with: fire dashboard KPI cards (last weekly test, next drill due, equipment status, PEEPs coverage %), weekly alarm test recording form (date, time taken, all clear yes/no, issues), quarterly drill log (participants, evacuation time, issues), equipment checks tab (extinguishers, emergency lighting with location, status, next check date), PEEPs management per resident (mobility status, evacuation method, assigned helpers, review dates). Use tabs or sections for different log types.",
     "Create frontend/src/pages/VisitorSignIn.tsx with: current visitors panel (who is signed in right now with sign-out buttons), sign-in form (name, type, company, visiting resident, purpose, car reg, badge), fire roll view (all currently signed-in visitors formatted for emergency print), visit history table (searchable by visitor name or resident), safeguarding section (flagged visitors with restrictions, add/remove flags), contractor management (DBS verified badge, regular contractor list). Statistics cards at top (visitors today, avg daily, flagged visitors).",
@@ -22,5 +22,5 @@
     "cd /projects/sandbox/jubilant-waddle/frontend && npm run build"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All 4 pages created and integrated into App.tsx navigation and routes. Build succeeds (Vite bundle completes). Pre-existing tsc strict errors in CareNotes.tsx, Emar.tsx, Incidents.tsx, Training.tsx remain unchanged - these are the same issues documented in FEAT-005."
 }
