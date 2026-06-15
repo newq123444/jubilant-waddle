@@ -21,6 +21,7 @@ import * as wellbeingCtrl from '../controllers/wellbeing.controller';
 import * as predictiveCareCtrl from '../controllers/predictiveCare.controller';
 import * as familyPortalCtrl from '../controllers/familyPortal.controller';
 import * as cqcComplianceCtrl from '../controllers/cqcCompliance.controller';
+import * as voiceSbarCtrl from '../controllers/voiceSbar.controller';
 import { upload } from '../middleware/upload'; // getBillingSummary added
 import * as aiService from '../services/ai.service';
 import { query } from '../models/db';
@@ -439,6 +440,15 @@ router.get('/family/weekly-report/:residentId',            isStaff,   familyPort
 router.post('/family/weekly-reports/generate',             isManager, familyPortalCtrl.generateWeeklyReports);
 router.get('/family/photos/:residentId',                   isStaff,   familyPortalCtrl.listPhotos);
 router.post('/family/photos/:residentId',                  isStaff,   upload.single('photo'), familyPortalCtrl.uploadFamilyPhoto);
+
+// -- Voice & SBAR
+router.post('/voice/transcribe',              isStaff, upload.single('audio'), voiceSbarCtrl.transcribeAudio);
+router.post('/voice/create-note',             isStaff, voiceSbarCtrl.createNoteFromVoice);
+router.get('/voice/history',                  isStaff, voiceSbarCtrl.getVoiceHistory);
+router.post('/sbar/generate',                 isClinical, voiceSbarCtrl.generateSbarHandover);
+router.get('/sbar/handovers',                 isClinical, voiceSbarCtrl.listSbarHandovers);
+router.get('/sbar/handovers/:id',             isClinical, voiceSbarCtrl.getSbarHandover);
+router.patch('/sbar/handovers/:id/approve',   isManager, voiceSbarCtrl.approveSbarHandover);
 
 // ── Billing ───────────────────────────────────────────────────────────────
 router.get('/invoices/summary',     isFinance, billingCtrl.getBillingSummary);
