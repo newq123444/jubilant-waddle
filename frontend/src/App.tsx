@@ -36,6 +36,9 @@ import SmartRota from './pages/SmartRota';
 import NaturalLanguageSearch from './pages/NaturalLanguageSearch';
 import RiskAssessments from './pages/RiskAssessments';
 import MedInteractionChecker from './pages/MedInteractionChecker';
+import AutomatedInvoicing from './pages/AutomatedInvoicing';
+import OccupancyForecasting from './pages/OccupancyForecasting';
+import StaffCostAnalytics from './pages/StaffCostAnalytics';
 import { ROLE_LABELS } from './utils/formatters';
 
 // ── Nav config ────────────────────────────────────────────────────────────
@@ -68,6 +71,9 @@ const NAV_ALL = [
   { path: '/family',     label: 'Family Portal', icon: '💬', roles: null, badge: 'messages' },
   { section: 'Finance', roles: ['home_manager','deputy_manager','admin','finance','super_admin','group_admin'] },
   { path: '/billing',    label: 'Billing',      icon: '💷', roles: ['home_manager','deputy_manager','admin','finance','super_admin','group_admin'] },
+  { path: '/invoicing',  label: 'Invoicing',    icon: '🧾', roles: ['home_manager','deputy_manager','admin','finance','super_admin','group_admin'] },
+  { path: '/occupancy',  label: 'Occupancy',    icon: '🏠', roles: ['home_manager','deputy_manager','admin','finance','super_admin','group_admin'] },
+  { path: '/staff-costs', label: 'Staff Costs', icon: '💰', roles: ['home_manager','deputy_manager','admin','finance','super_admin','group_admin'] },
   { path: '/cd-register', label: 'CD Register',   icon: '💊', roles: ['home_manager','deputy_manager','registered_nurse','super_admin','group_admin'] },
   { section: 'Tools', roles: ['home_manager','deputy_manager','registered_nurse','super_admin','group_admin'] },
   { path: '/nl-search', label: 'Smart Search', icon: '🔍', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'] },
@@ -336,6 +342,9 @@ export default function App() {
           <Route path="/policies"       element={<Policies />} />
           <Route path="/family"         element={<FamilyPortal />} />
           <Route path="/billing"        element={<Billing />} />
+          <Route path="/invoicing"      element={<AutomatedInvoicing />} />
+          <Route path="/occupancy"      element={<OccupancyForecasting />} />
+          <Route path="/staff-costs"    element={<StaffCostAnalytics />} />
           <Route path="/ai-tools"       element={<AiTools />} />
           <Route path="/cd-register"    element={<CDRegister />} />
           <Route path="/ai-insights"    element={<AiInsights />} />
