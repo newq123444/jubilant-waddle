@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "feat",
   "description": "Database migration 012_batch3_features.sql for all 10 new features: offline sync queue, resident tablet requests, QR room codes, benchmarking KPIs, board pack reports, staff performance metrics, e-learning modules/quizzes/certificates, competency sign-off assessments, diabetes management (glucose logs, insulin doses, HbA1c), and palliative care pathway tables.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Create backend/migrations/012_batch3_features.sql with CREATE EXTENSION IF NOT EXISTS uuid-ossp at the top",
     "Add offline_sync_queue table: id UUID PK, care_home_id UUID FK, user_id UUID FK, entity_type VARCHAR(50), entity_id UUID, action VARCHAR(20) (create/update/delete), payload JSONB, status VARCHAR(20) (pending/synced/conflict), conflict_resolution JSONB, created_at TIMESTAMPTZ, synced_at TIMESTAMPTZ",
@@ -33,5 +33,5 @@
   ],
   "verification": ["cd /projects/sandbox/jubilant-waddle/backend && npm run build"],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Backend TypeScript build has pre-existing errors in auth.controller.ts, photos.controller.ts, index.ts, and upload.ts (missing @types/compression, @types/multer, jwt sign overload mismatch). These are unrelated to the SQL migration and exist on the base branch. The SQL migration file itself is valid DDL and does not affect the TypeScript compilation."
 }
