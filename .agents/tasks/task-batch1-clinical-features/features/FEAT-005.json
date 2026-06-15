@@ -2,7 +2,7 @@
   "id": "FEAT-005",
   "type": "feat",
   "description": "Frontend pages, types, API services, and hooks for Smart Rota Builder, Natural Language Search, Automated Risk Assessments, and Medication Interaction Checker (features 5-8)",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Add TypeScript types to frontend/src/types/index.ts for: RotaTemplate, RotaShift, NlSearchResult, NlSearchQuery, RiskAssessment (Waterlow/MUST/Falls), MedicationInteraction",
     "Add API service objects to frontend/src/services/api.ts: smartRotaApi (generate, getTemplate, listTemplates, updateShift, publish, getConstraints), nlSearchApi (search, getHistory), riskAssessmentsApi (calculateWaterlow, calculateMUST, calculateFalls, getResidentAssessments, getOverdue, getOverview), medInteractionsApi (check, getResidentInteractions, acknowledge, getAlerts)",

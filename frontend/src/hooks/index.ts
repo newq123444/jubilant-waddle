@@ -6,6 +6,7 @@ import {
   billingApi, aiApi, dashboardApi, auditApi, policiesApi,
   activitiesApi, wellbeingApi, predictiveApi, voiceApi, sbarApi,
   news2Api, woundsApi, infectionsApi, continenceApi,
+  smartRotaApi, nlSearchApi, riskAssessmentsApi, medInteractionsApi,
 } from '../services/api';
 import { toast } from '../utils/toast';
 
@@ -461,4 +462,74 @@ export function useCreateContinenceAssessment() {
 }
 export function useContinenceOverview() {
   return useQuery({ queryKey: ['continence', 'overview'], queryFn: () => continenceApi.getOverview().then(r => r.data) });
+}
+
+// -- Smart Rota --
+export function useGenerateRota() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => smartRotaApi.generate(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['smart-rota'] }); toast.success('Rota generated successfully'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to generate rota') });
+}
+export function useRotaTemplates() {
+  return useQuery({ queryKey: ['smart-rota', 'templates'], queryFn: () => smartRotaApi.listTemplates().then(r => r.data) });
+}
+export function useRotaTemplate(id: string) {
+  return useQuery({ queryKey: ['smart-rota', 'template', id], queryFn: () => smartRotaApi.getTemplate(id).then(r => r.data), enabled: !!id });
+}
+export function useUpdateRotaShift() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => smartRotaApi.updateShift(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['smart-rota'] }); toast.success('Shift updated'); } });
+}
+export function usePublishRota() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (id: string) => smartRotaApi.publish(id).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['smart-rota'] }); qc.invalidateQueries({ queryKey: ['schedule'] }); toast.success('Rota published'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to publish rota') });
+}
+export function useRotaConstraints() {
+  return useQuery({ queryKey: ['smart-rota', 'constraints'], queryFn: () => smartRotaApi.getConstraints().then(r => r.data) });
+}
+
+// -- Natural Language Search --
+export function useNlSearch() {
+  return useMutation({ mutationFn: (query: string) => nlSearchApi.search(query).then(r => r.data), onError: (err: any) => toast.error(err.response?.data?.error || 'Search failed') });
+}
+export function useSearchHistory() {
+  return useQuery({ queryKey: ['search-history'], queryFn: () => nlSearchApi.getHistory().then(r => r.data) });
+}
+
+// -- Risk Assessments --
+export function useCalculateWaterlow() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (residentId: string) => riskAssessmentsApi.calculateWaterlow(residentId).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['risk-assessments'] }); toast.success('Waterlow score calculated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to calculate Waterlow') });
+}
+export function useCalculateMUST() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => riskAssessmentsApi.calculateMUST(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['risk-assessments'] }); toast.success('MUST score calculated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to calculate MUST') });
+}
+export function useCalculateFallsRisk2() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (residentId: string) => riskAssessmentsApi.calculateFalls(residentId).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['risk-assessments'] }); toast.success('Falls risk calculated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to calculate falls risk') });
+}
+export function useResidentRiskAssessments(residentId: string) {
+  return useQuery({ queryKey: ['risk-assessments', residentId], queryFn: () => riskAssessmentsApi.getResidentAssessments(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useOverdueRiskReviews() {
+  return useQuery({ queryKey: ['risk-assessments', 'overdue'], queryFn: () => riskAssessmentsApi.getOverdue().then(r => r.data) });
+}
+export function useRiskOverview() {
+  return useQuery({ queryKey: ['risk-assessments', 'overview'], queryFn: () => riskAssessmentsApi.getOverview().then(r => r.data) });
+}
+
+// -- Medication Interactions --
+export function useCheckMedInteractions() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (residentId: string) => medInteractionsApi.check(residentId).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['med-interactions'] }); toast.success('Interaction check complete'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to check interactions') });
+}
+export function useResidentMedInteractions(residentId: string) {
+  return useQuery({ queryKey: ['med-interactions', residentId], queryFn: () => medInteractionsApi.getResidentInteractions(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useAcknowledgeMedInteraction() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (id: string) => medInteractionsApi.acknowledge(id).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['med-interactions'] }); toast.success('Interaction acknowledged'); } });
+}
+export function useMedInteractionAlerts() {
+  return useQuery({ queryKey: ['med-interactions', 'alerts'], queryFn: () => medInteractionsApi.getAlerts().then(r => r.data) });
 }

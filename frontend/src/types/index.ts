@@ -746,3 +746,108 @@ export interface ContinencePattern {
   incontinent_count: number;
   total_events: number;
 }
+
+// -- Smart Rota --
+export interface RotaTemplate {
+  id: string;
+  care_home_id: string;
+  name: string;
+  week_start: string;
+  status: 'draft' | 'published' | 'archived';
+  constraints?: any;
+  budget_limit_pence?: number;
+  created_by?: string;
+  created_by_name?: string;
+  shifts?: RotaShift[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RotaShift {
+  id: string;
+  template_id: string;
+  staff_id: string;
+  staff_name?: string;
+  staff_role?: string;
+  shift_date: string;
+  shift_type: string;
+  start_time: string;
+  end_time: string;
+  role_required?: string;
+  auto_generated: boolean;
+  notes?: string;
+}
+
+// -- Natural Language Search --
+export interface NlSearchResult {
+  query: string;
+  parsedIntent: any;
+  results: any[];
+  resultsCount: number;
+}
+
+export interface NlSearchQuery {
+  id: string;
+  query_text: string;
+  parsed_intent?: any;
+  results_count: number;
+  created_at: string;
+}
+
+// -- Risk Assessments --
+export interface RiskAssessment {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  room_number?: string;
+  assessed_by: string;
+  assessed_by_name?: string;
+  assessment_type: 'waterlow' | 'must' | 'falls';
+  total_score: number;
+  risk_level: 'low' | 'medium' | 'high' | 'very_high';
+  factors: any;
+  auto_populated: boolean;
+  next_review_date?: string;
+  status: 'current' | 'overdue' | 'superseded';
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RiskOverviewItem {
+  resident_id: string;
+  first_name: string;
+  last_name: string;
+  room_number: string;
+  waterlow_score?: number;
+  waterlow_level?: string;
+  must_score?: number;
+  must_level?: string;
+  falls_score?: number;
+  falls_level?: string;
+}
+
+// -- Medication Interactions --
+export interface MedicationInteraction {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  room_number?: string;
+  medication_a_id: string;
+  medication_a_name?: string;
+  medication_b_id: string;
+  medication_b_name?: string;
+  interaction_type?: string;
+  severity: 'minor' | 'moderate' | 'major' | 'contraindicated';
+  description?: string;
+  clinical_effect?: string;
+  recommendation?: string;
+  flagged_at: string;
+  acknowledged_by?: string;
+  acknowledged_by_name?: string;
+  acknowledged_at?: string;
+  status: 'active' | 'acknowledged' | 'resolved' | 'overridden';
+  created_at: string;
+}

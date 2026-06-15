@@ -32,6 +32,10 @@ import News2Calculator from './pages/News2Calculator';
 import WoundTracker from './pages/WoundTracker';
 import InfectionTracker from './pages/InfectionTracker';
 import ContinenceAssessment from './pages/ContinenceAssessment';
+import SmartRota from './pages/SmartRota';
+import NaturalLanguageSearch from './pages/NaturalLanguageSearch';
+import RiskAssessments from './pages/RiskAssessments';
+import MedInteractionChecker from './pages/MedInteractionChecker';
 import { ROLE_LABELS } from './utils/formatters';
 
 // ── Nav config ────────────────────────────────────────────────────────────
@@ -49,10 +53,13 @@ const NAV_ALL = [
   { path: '/news2',     label: 'NEWS2 Vitals', icon: '🫀', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'] },
   { path: '/wounds',    label: 'Wound Tracker', icon: '🩹', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','admin','super_admin','group_admin'] },
   { path: '/continence', label: 'Continence Care', icon: '📋', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'] },
+  { path: '/risk-assessments', label: 'Risk Assessments', icon: '⚡', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','admin','super_admin','group_admin'] },
+  { path: '/med-interactions', label: 'Med Interactions', icon: '💊', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','admin','super_admin','group_admin'] },
   { section: 'Team', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin','registered_nurse','senior_carer'] },
   { path: '/schedule',   label: 'Rota',         icon: '📅', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin','registered_nurse','senior_carer'] },
   { path: '/staff',      label: 'Staff',        icon: '👤', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin'] },
   { path: '/training',   label: 'Training',     icon: '🎓', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin'], badge: 'training' },
+  { path: '/smart-rota', label: 'AI Smart Rota', icon: '🤖', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin'] },
   { section: 'Governance', roles: ['home_manager','deputy_manager','super_admin','group_admin','registered_nurse'] },
   { path: '/compliance', label: 'CQC Compliance', icon: '✅', roles: ['home_manager','deputy_manager','super_admin','group_admin'] },
   { path: '/policies',   label: 'Policies',     icon: '📋', roles: null },
@@ -63,6 +70,7 @@ const NAV_ALL = [
   { path: '/billing',    label: 'Billing',      icon: '💷', roles: ['home_manager','deputy_manager','admin','finance','super_admin','group_admin'] },
   { path: '/cd-register', label: 'CD Register',   icon: '💊', roles: ['home_manager','deputy_manager','registered_nurse','super_admin','group_admin'] },
   { section: 'Tools', roles: ['home_manager','deputy_manager','registered_nurse','super_admin','group_admin'] },
+  { path: '/nl-search', label: 'Smart Search', icon: '🔍', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'] },
   { path: '/ai-tools',   label: 'AI Tools',     icon: '🤖', roles: ['home_manager','deputy_manager','registered_nurse','super_admin','group_admin'] },
   { path: '/ai-insights', label: 'AI Insights',   icon: '🧠', roles: ['home_manager','deputy_manager','registered_nurse','super_admin','group_admin'] },
   { path: '/predictive-care', label: 'Falls & Risk AI', icon: '🎯', roles: ['home_manager','deputy_manager','registered_nurse','super_admin','group_admin'] },
@@ -337,6 +345,10 @@ export default function App() {
           <Route path="/wounds"         element={<WoundTracker />} />
           <Route path="/infections"     element={<InfectionTracker />} />
           <Route path="/continence"     element={<ContinenceAssessment />} />
+          <Route path="/smart-rota"      element={<SmartRota />} />
+          <Route path="/nl-search"       element={<NaturalLanguageSearch />} />
+          <Route path="/risk-assessments" element={<RiskAssessments />} />
+          <Route path="/med-interactions" element={<MedInteractionChecker />} />
           <Route path="/audit-log"      element={<AuditLog />} />
           <Route path="/profile"        element={<Profile />} />
           <Route path="*"               element={<Navigate to="/" replace />} />

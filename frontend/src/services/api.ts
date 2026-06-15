@@ -232,3 +232,37 @@ export const continenceApi = {
   getAssessment: (residentId: string) => api.get(`/continence/${residentId}/assessment`),
   getOverview: () => api.get('/continence/home-overview'),
 };
+
+// -- Smart Rota Builder --
+export const smartRotaApi = {
+  generate: (data: object) => api.post('/smart-rota/generate', data),
+  listTemplates: () => api.get('/smart-rota/templates'),
+  getTemplate: (id: string) => api.get(`/smart-rota/templates/${id}`),
+  updateShift: (id: string, data: object) => api.patch(`/smart-rota/shifts/${id}`, data),
+  publish: (id: string) => api.post(`/smart-rota/templates/${id}/publish`),
+  getConstraints: () => api.get('/smart-rota/constraints'),
+};
+
+// -- Natural Language Search --
+export const nlSearchApi = {
+  search: (query: string) => api.post('/search/nl', { query }),
+  getHistory: () => api.get('/search/nl/history'),
+};
+
+// -- Automated Risk Assessments --
+export const riskAssessmentsApi = {
+  calculateWaterlow: (residentId: string) => api.post('/risk-assessments/waterlow', { residentId }),
+  calculateMUST: (data: object) => api.post('/risk-assessments/must', data),
+  calculateFalls: (residentId: string) => api.post('/risk-assessments/falls', { residentId }),
+  getResidentAssessments: (residentId: string) => api.get(`/risk-assessments/${residentId}`),
+  getOverdue: () => api.get('/risk-assessments/overdue'),
+  getOverview: () => api.get('/risk-assessments/overview'),
+};
+
+// -- Medication Interaction Checker --
+export const medInteractionsApi = {
+  check: (residentId: string) => api.post('/med-interactions/check', { residentId }),
+  getResidentInteractions: (residentId: string) => api.get(`/med-interactions/${residentId}`),
+  acknowledge: (id: string) => api.patch(`/med-interactions/${id}/acknowledge`),
+  getAlerts: () => api.get('/med-interactions/alerts'),
+};
