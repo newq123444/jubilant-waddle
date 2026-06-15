@@ -5,6 +5,7 @@ import {
   scheduleApi, staffApi, complianceApi, familyApi,
   billingApi, aiApi, dashboardApi, auditApi, policiesApi,
   activitiesApi, wellbeingApi, predictiveApi, voiceApi, sbarApi,
+  news2Api, woundsApi, infectionsApi, continenceApi,
 } from '../services/api';
 import { toast } from '../utils/toast';
 
@@ -376,4 +377,88 @@ export function useGenerateSbar() {
 export function useApproveSbar() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: (id: string) => sbarApi.approve(id).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['sbar-handovers'] }); toast.success('Handover approved'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to approve handover') });
+}
+
+// ── NEWS2 ─────────────────────────────────────────────────────────────────
+export function useNews2Calculate() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => news2Api.calculate(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['news2'] }); toast.success('NEWS2 score calculated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to calculate NEWS2') });
+}
+export function useNews2History(residentId: string) {
+  return useQuery({ queryKey: ['news2', 'history', residentId], queryFn: () => news2Api.getHistory(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useNews2Escalations(params?: object) {
+  return useQuery({ queryKey: ['news2', 'escalations', params], queryFn: () => news2Api.getEscalations(params).then(r => r.data) });
+}
+export function useRespondToEscalation() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => news2Api.respondToEscalation(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['news2'] }); toast.success('Escalation updated'); } });
+}
+export function useNews2Trend(residentId: string, days?: number) {
+  return useQuery({ queryKey: ['news2', 'trend', residentId, days], queryFn: () => news2Api.getTrend(residentId, days).then(r => r.data), enabled: !!residentId });
+}
+
+// ── Wounds ────────────────────────────────────────────────────────────────
+export function useCreateWound() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (formData: FormData) => woundsApi.create(formData).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['wounds'] }); toast.success('Wound assessment recorded'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to record wound') });
+}
+export function useActiveWounds() {
+  return useQuery({ queryKey: ['wounds', 'active'], queryFn: () => woundsApi.listActive().then(r => r.data) });
+}
+export function useWoundTimeline(residentId: string, locationBodyArea?: string) {
+  return useQuery({ queryKey: ['wounds', 'timeline', residentId, locationBodyArea], queryFn: () => woundsApi.getTimeline(residentId, locationBodyArea).then(r => r.data), enabled: !!residentId });
+}
+export function useWoundBodyMap(residentId: string) {
+  return useQuery({ queryKey: ['wounds', 'bodymap', residentId], queryFn: () => woundsApi.getBodyMap(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useUpdateWound() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => woundsApi.update(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['wounds'] }); toast.success('Wound updated'); } });
+}
+
+// ── Infections ────────────────────────────────────────────────────────────
+export function useCreateOutbreak() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => infectionsApi.createOutbreak(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['infections'] }); toast.success('Outbreak reported'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to create outbreak') });
+}
+export function useOutbreaks(params?: object) {
+  return useQuery({ queryKey: ['infections', 'outbreaks', params], queryFn: () => infectionsApi.listOutbreaks(params).then(r => r.data) });
+}
+export function useOutbreakDetails(id: string) {
+  return useQuery({ queryKey: ['infections', 'outbreak', id], queryFn: () => infectionsApi.getOutbreak(id).then(r => r.data), enabled: !!id });
+}
+export function useAddInfectionCase() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ outbreakId, data }: { outbreakId: string; data: object }) => infectionsApi.addCase(outbreakId, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['infections'] }); toast.success('Case added'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to add case') });
+}
+export function useUpdateInfectionCase() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => infectionsApi.updateCase(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['infections'] }); toast.success('Case updated'); } });
+}
+export function useUpdateOutbreakStatus() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => infectionsApi.updateOutbreakStatus(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['infections'] }); toast.success('Outbreak status updated'); } });
+}
+
+// ── Continence ────────────────────────────────────────────────────────────
+export function useLogContinence() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => continenceApi.logEvent(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['continence'] }); toast.success('Continence event logged'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to log event') });
+}
+export function useContinenceLog(residentId: string, days?: number) {
+  return useQuery({ queryKey: ['continence', 'log', residentId, days], queryFn: () => continenceApi.getResidentLog(residentId, days).then(r => r.data), enabled: !!residentId });
+}
+export function useContinencePatterns(residentId: string) {
+  return useQuery({ queryKey: ['continence', 'patterns', residentId], queryFn: () => continenceApi.getPatterns(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useContinenceAssessment(residentId: string) {
+  return useQuery({ queryKey: ['continence', 'assessment', residentId], queryFn: () => continenceApi.getAssessment(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useCreateContinenceAssessment() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => continenceApi.createAssessment(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['continence'] }); toast.success('Assessment saved'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to save assessment') });
+}
+export function useContinenceOverview() {
+  return useQuery({ queryKey: ['continence', 'overview'], queryFn: () => continenceApi.getOverview().then(r => r.data) });
 }

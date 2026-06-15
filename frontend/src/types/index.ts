@@ -613,3 +613,136 @@ export interface SbarHandover {
   approved_at?: string;
   created_at: string;
 }
+
+// -- NEWS2 --
+export interface News2Assessment {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  assessed_by: string;
+  assessed_by_name?: string;
+  respiratory_rate: number;
+  spo2: number;
+  supplemental_oxygen: boolean;
+  systolic_bp: number;
+  pulse: number;
+  consciousness: 'alert' | 'confusion' | 'voice' | 'pain' | 'unresponsive';
+  temperature: number;
+  total_score: number;
+  risk_level: 'low' | 'medium' | 'high' | 'critical';
+  escalation_action?: string;
+  escalation_triggered_at?: string;
+  notes?: string;
+  created_at: string;
+}
+
+export interface News2Escalation {
+  id: string;
+  assessment_id: string;
+  resident_id: string;
+  resident_name?: string;
+  escalation_level: 'low' | 'medium' | 'high' | 'critical';
+  action_taken?: string;
+  responded_by?: string;
+  responded_by_name?: string;
+  responded_at?: string;
+  status: 'pending' | 'acknowledged' | 'resolved';
+  created_at: string;
+}
+
+// -- Wounds --
+export interface WoundAssessment {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  assessed_by: string;
+  assessed_by_name?: string;
+  resident_name?: string;
+  room_number?: string;
+  wound_type: string;
+  location_body_area: string;
+  location_x?: number;
+  location_y?: number;
+  width_mm?: number;
+  height_mm?: number;
+  depth_mm?: number;
+  wound_bed?: string;
+  exudate_level?: string;
+  exudate_type?: string;
+  surrounding_skin?: string;
+  pain_level?: number;
+  photo_url?: string;
+  notes?: string;
+  status: 'active' | 'healing' | 'healed' | 'worsening';
+  created_at: string;
+  updated_at: string;
+}
+
+// -- Infections --
+export interface InfectionOutbreak {
+  id: string;
+  care_home_id: string;
+  outbreak_type: string;
+  start_date: string;
+  end_date?: string;
+  status: 'active' | 'contained' | 'resolved';
+  affected_count: number;
+  isolation_protocol?: string;
+  notes?: string;
+  reported_by?: string;
+  reported_by_name?: string;
+  case_count?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InfectionCase {
+  id: string;
+  outbreak_id: string;
+  resident_id: string;
+  resident_name?: string;
+  room_number?: string;
+  symptoms?: string;
+  onset_date: string;
+  isolation_start?: string;
+  isolation_end?: string;
+  status: 'active' | 'recovering' | 'resolved' | 'deceased';
+  notes?: string;
+  created_at: string;
+}
+
+// -- Continence --
+export interface ContinenceLog {
+  id: string;
+  resident_id: string;
+  logged_by: string;
+  logged_by_name?: string;
+  event_type: 'continent' | 'incontinent_urine' | 'incontinent_faeces' | 'incontinent_both' | 'pad_change' | 'toileted_successfully' | 'toileted_unsuccessfully';
+  event_time: string;
+  pad_status?: 'dry' | 'wet' | 'soiled' | 'not_applicable';
+  location?: string;
+  notes?: string;
+  created_at: string;
+}
+
+export interface ContinenceAssessment {
+  id: string;
+  resident_id: string;
+  assessed_by: string;
+  pattern_analysis?: any;
+  recommended_schedule?: any;
+  pad_type?: string;
+  current_pad_usage?: number;
+  target_pad_usage?: number;
+  dignity_notes?: string;
+  review_date?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ContinencePattern {
+  hour: number;
+  continent_count: number;
+  incontinent_count: number;
+  total_events: number;
+}

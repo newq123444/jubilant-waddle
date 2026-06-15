@@ -193,3 +193,42 @@ export const sbarApi = {
   get: (id: string) => api.get(`/sbar/handovers/${id}`),
   approve: (id: string) => api.patch(`/sbar/handovers/${id}/approve`),
 };
+
+// -- NEWS2 Auto-Calculator --
+export const news2Api = {
+  calculate: (data: object) => api.post('/news2/calculate', data),
+  getHistory: (residentId: string) => api.get('/news2/history', { params: { residentId } }),
+  getEscalations: (params?: object) => api.get('/news2/escalations', { params }),
+  respondToEscalation: (id: string, data: object) => api.patch(`/news2/escalations/${id}`, data),
+  getTrend: (residentId: string, days?: number) => api.get('/news2/trend', { params: { residentId, days } }),
+};
+
+// -- Wound Photography Timeline --
+export const woundsApi = {
+  create: (formData: FormData) => api.post('/wounds', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  listActive: () => api.get('/wounds'),
+  getTimeline: (residentId: string, locationBodyArea?: string) => api.get(`/wounds/${residentId}/timeline`, { params: { locationBodyArea } }),
+  getBodyMap: (residentId: string) => api.get(`/wounds/${residentId}/body-map`),
+  update: (id: string, data: object) => api.patch(`/wounds/${id}`, data),
+};
+
+// -- Infection Outbreak Tracker --
+export const infectionsApi = {
+  createOutbreak: (data: object) => api.post('/infections/outbreaks', data),
+  listOutbreaks: (params?: object) => api.get('/infections/outbreaks', { params }),
+  getOutbreak: (id: string) => api.get(`/infections/outbreaks/${id}`),
+  addCase: (outbreakId: string, data: object) => api.post(`/infections/outbreaks/${outbreakId}/cases`, data),
+  updateCase: (id: string, data: object) => api.patch(`/infections/cases/${id}`, data),
+  updateOutbreakStatus: (id: string, data: object) => api.patch(`/infections/outbreaks/${id}/status`, data),
+  getTimeline: (id: string) => api.get(`/infections/outbreaks/${id}/timeline`),
+};
+
+// -- Continence Assessment --
+export const continenceApi = {
+  logEvent: (data: object) => api.post('/continence/log', data),
+  getResidentLog: (residentId: string, days?: number) => api.get(`/continence/${residentId}`, { params: { days } }),
+  getPatterns: (residentId: string) => api.get(`/continence/${residentId}/patterns`),
+  createAssessment: (data: object) => api.post('/continence/assessment', data),
+  getAssessment: (residentId: string) => api.get(`/continence/${residentId}/assessment`),
+  getOverview: () => api.get('/continence/home-overview'),
+};

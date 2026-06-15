@@ -28,6 +28,10 @@ import Activities     from './pages/Activities';
 import WellbeingHub   from './pages/WellbeingHub';
 import NotificationCentre from './components/NotificationCentre';
 import SbarHandover from './pages/SbarHandover';
+import News2Calculator from './pages/News2Calculator';
+import WoundTracker from './pages/WoundTracker';
+import InfectionTracker from './pages/InfectionTracker';
+import ContinenceAssessment from './pages/ContinenceAssessment';
 import { ROLE_LABELS } from './utils/formatters';
 
 // ── Nav config ────────────────────────────────────────────────────────────
@@ -42,6 +46,9 @@ const NAV_ALL = [
   { path: '/incidents',  label: 'Incidents',    icon: '⚠️', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'], badge: 'incidents' },
   { path: '/activities', label: 'Activities',   icon: '🎯', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','activities','admin','super_admin','group_admin'] },
   { path: '/wellbeing',  label: 'Wellbeing Hub', icon: '💚', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','activities','admin','super_admin','group_admin'] },
+  { path: '/news2',     label: 'NEWS2 Vitals', icon: '🫀', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'] },
+  { path: '/wounds',    label: 'Wound Tracker', icon: '🩹', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','admin','super_admin','group_admin'] },
+  { path: '/continence', label: 'Continence Care', icon: '📋', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'] },
   { section: 'Team', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin','registered_nurse','senior_carer'] },
   { path: '/schedule',   label: 'Rota',         icon: '📅', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin','registered_nurse','senior_carer'] },
   { path: '/staff',      label: 'Staff',        icon: '👤', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin'] },
@@ -49,6 +56,7 @@ const NAV_ALL = [
   { section: 'Governance', roles: ['home_manager','deputy_manager','super_admin','group_admin','registered_nurse'] },
   { path: '/compliance', label: 'CQC Compliance', icon: '✅', roles: ['home_manager','deputy_manager','super_admin','group_admin'] },
   { path: '/policies',   label: 'Policies',     icon: '📋', roles: null },
+  { path: '/infections', label: 'Infection Control', icon: '🦠', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','admin','super_admin','group_admin'] },
   { section: 'Communications' },
   { path: '/family',     label: 'Family Portal', icon: '💬', roles: null, badge: 'messages' },
   { section: 'Finance', roles: ['home_manager','deputy_manager','admin','finance','super_admin','group_admin'] },
@@ -325,6 +333,10 @@ export default function App() {
           <Route path="/ai-insights"    element={<AiInsights />} />
           <Route path="/predictive-care" element={<PredictiveCare />} />
           <Route path="/sbar-handover" element={<SbarHandover />} />
+          <Route path="/news2"          element={<News2Calculator />} />
+          <Route path="/wounds"         element={<WoundTracker />} />
+          <Route path="/infections"     element={<InfectionTracker />} />
+          <Route path="/continence"     element={<ContinenceAssessment />} />
           <Route path="/audit-log"      element={<AuditLog />} />
           <Route path="/profile"        element={<Profile />} />
           <Route path="*"               element={<Navigate to="/" replace />} />

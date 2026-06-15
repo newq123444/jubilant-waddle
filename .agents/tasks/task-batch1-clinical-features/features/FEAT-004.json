@@ -2,7 +2,7 @@
   "id": "FEAT-004",
   "type": "feat",
   "description": "Frontend pages, types, API services, and hooks for NEWS2 Auto-Calculator, Wound Photography Timeline, Infection Outbreak Tracker, and Continence Assessment Tool (features 1-4)",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Add TypeScript types to frontend/src/types/index.ts for: News2Assessment, News2Escalation, WoundAssessment, InfectionOutbreak, InfectionCase, ContinenceLog, ContinenceAssessment",
     "Add API service objects to frontend/src/services/api.ts: news2Api (calculate, getHistory, getEscalations, respondToEscalation, getTrend), woundsApi (create, getTimeline, listActive, update, getBodyMap), infectionsApi (createOutbreak, list, getDetails, addCase, updateCase, updateOutbreak, getTimeline), continenceApi (logEvent, getResidentLog, getPatterns, createAssessment, getAssessment, getOverview)",
