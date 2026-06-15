@@ -2,7 +2,7 @@
   "id": "FEAT-003",
   "type": "feat",
   "description": "Frontend API services, hooks, and TypeScript types for all 10 Batch 2 features. Add API client objects to frontend/src/services/api.ts, React Query hooks to frontend/src/hooks/index.ts, and type interfaces to frontend/src/types/index.ts.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Add to frontend/src/types/index.ts: interfaces for RateUplift, PaymentReminder, OccupancyRecord, OccupancyForecast, StaffCost, CostBudget, JobPosting, JobApplication, Interview, DbsCheck, Competency, StaffCompetency, AbsenceRecord, BradfordScore, FireTest, FireEquipmentCheck, Peep, VisitorRecord, VisitorSafeguarding, RoomTurnover, TurnoverChecklistItem, ReportTemplate, ReportRun",
     "Add to frontend/src/services/api.ts: invoicingApi object with methods for rate uplifts, payment reminders, revenue dashboard",
@@ -28,5 +28,5 @@
     "cd /projects/sandbox/jubilant-waddle/frontend && npm run build"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All types, API objects, and hooks added successfully. The 19 TypeScript errors in the build are all pre-existing (in CareNotes.tsx, Emar.tsx, Incidents.tsx, Training.tsx) and unrelated to this feature. Verified by stashing changes and running build on base commit - identical errors."
 }
