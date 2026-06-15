@@ -26,6 +26,10 @@ import * as news2Ctrl from '../controllers/news2.controller';
 import * as woundsCtrl from '../controllers/wounds.controller';
 import * as infectionsCtrl from '../controllers/infections.controller';
 import * as continenceCtrl from '../controllers/continence.controller';
+import * as smartRotaCtrl from '../controllers/smartRota.controller';
+import * as nlSearchCtrl from '../controllers/nlSearch.controller';
+import * as riskAssessmentsCtrl from '../controllers/riskAssessments.controller';
+import * as medInteractionsCtrl from '../controllers/medInteractions.controller';
 import { upload } from '../middleware/upload'; // getBillingSummary added
 import * as aiService from '../services/ai.service';
 import { query } from '../models/db';
@@ -484,6 +488,32 @@ router.get('/continence/overview', isManager, continenceCtrl.getHomeOverview);
 router.get('/continence/:residentId', isStaff, continenceCtrl.getResidentLog);
 router.get('/continence/:residentId/patterns', isClinical, continenceCtrl.getPatternAnalysis);
 router.get('/continence/:residentId/assessment', isStaff, continenceCtrl.getAssessment);
+
+// -- Smart Rota Builder
+router.post('/smart-rota/generate', isManager, smartRotaCtrl.generateRota);
+router.get('/smart-rota/templates', isManager, smartRotaCtrl.listRotaTemplates);
+router.get('/smart-rota/templates/:id', isManager, smartRotaCtrl.getRotaTemplate);
+router.patch('/smart-rota/shifts/:id', isManager, smartRotaCtrl.updateRotaShift);
+router.post('/smart-rota/templates/:id/publish', isManager, smartRotaCtrl.publishRota);
+router.get('/smart-rota/constraints', isManager, smartRotaCtrl.getStaffConstraints);
+
+// -- Natural Language Search
+router.post('/search/nl', isStaff, nlSearchCtrl.search);
+router.get('/search/nl/history', isStaff, nlSearchCtrl.getSearchHistory);
+
+// -- Automated Risk Assessments
+router.post('/risk-assessments/waterlow', isClinical, riskAssessmentsCtrl.calculateWaterlow);
+router.post('/risk-assessments/must', isClinical, riskAssessmentsCtrl.calculateMUST);
+router.post('/risk-assessments/falls', isClinical, riskAssessmentsCtrl.calculateFallsRisk);
+router.get('/risk-assessments/overdue', isClinical, riskAssessmentsCtrl.getOverdueReviews);
+router.get('/risk-assessments/overview', isClinical, riskAssessmentsCtrl.getHomeRiskOverview);
+router.get('/risk-assessments/:residentId', isClinical, riskAssessmentsCtrl.getResidentAssessments);
+
+// -- Medication Interaction Checker
+router.post('/med-interactions/check', isClinical, medInteractionsCtrl.checkInteractions);
+router.get('/med-interactions/alerts', isClinical, medInteractionsCtrl.getInteractionAlerts);
+router.get('/med-interactions/:residentId', isClinical, medInteractionsCtrl.getResidentInteractions);
+router.patch('/med-interactions/:id/acknowledge', isClinical, medInteractionsCtrl.acknowledgeInteraction);
 
 // ── Billing ───────────────────────────────────────────────────────────────
 router.get('/invoices/summary',     isFinance, billingCtrl.getBillingSummary);

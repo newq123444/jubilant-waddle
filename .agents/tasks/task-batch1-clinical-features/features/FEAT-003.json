@@ -2,7 +2,7 @@
   "id": "FEAT-003",
   "type": "feat",
   "description": "Backend controllers and routes for Smart Rota Builder, Natural Language Search, Automated Risk Assessments, and Medication Interaction Checker (features 5-8)",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Create backend/src/controllers/smartRota.controller.ts with functions: generateRota (POST - AI generates optimal rota based on staff skills, preferences, resident acuity, budget, legal constraints; returns populated week grid), getRotaTemplate (GET - retrieve a generated rota), listRotaTemplates (GET - list saved templates), updateRotaShift (PATCH - manual edit/drag-drop adjustment), publishRota (POST - finalize and copy to main schedule), getStaffConstraints (GET - working time directive checks, contracted hours, preferences)",
     "Create backend/src/controllers/nlSearch.controller.ts with functions: search (POST - takes natural language query, parses intent using keyword/pattern matching for residents, incidents, medications, falls, risk levels; executes appropriate SQL; returns results), getSearchHistory (GET - recent searches by user). Intent parsing should handle patterns like 'residents who had a fall', 'residents on [medication]', 'high fall risk', 'last month/week/year' time ranges, 'blood thinners' medication category mapping.",
