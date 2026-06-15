@@ -75,7 +75,7 @@ export async function getWellbeingOverview(req: Request, res: Response, next: Ne
          SELECT mood, pain_level, log_date FROM wellbeing_logs
          WHERE resident_id = r.id ORDER BY log_date DESC, created_at DESC LIMIT 1
        ) wl ON TRUE
-       WHERE r.care_home_id = $1 AND r.status = 'active'
+       WHERE r.care_home_id = $1 AND r.active = TRUE
          AND (wl.mood IN ('low','very_low') OR wl.pain_level >= 7)
        ORDER BY wl.pain_level DESC NULLS LAST, wl.mood ASC`,
       [careHomeId]
@@ -234,7 +234,7 @@ export async function generateIsolationAlerts(req: Request, res: Response, next:
                 r.admission_date::date
               ) AS last_activity_date
        FROM residents r
-       WHERE r.care_home_id = $1 AND r.status = 'active'`,
+       WHERE r.care_home_id = $1 AND r.active = TRUE`,
       [careHomeId]
     );
 
@@ -264,7 +264,7 @@ export async function generateIsolationAlerts(req: Request, res: Response, next:
     // Find residents with low social engagement in wellbeing logs
     const { rows: lowEngagement } = await query(
       `SELECT r.id FROM residents r
-       WHERE r.care_home_id = $1 AND r.status = 'active'
+       WHERE r.care_home_id = $1 AND r.active = TRUE
          AND EXISTS (
            SELECT 1 FROM wellbeing_logs wl
            WHERE wl.resident_id = r.id AND wl.social_engagement = 'isolated'
