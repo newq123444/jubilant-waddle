@@ -2,7 +2,7 @@
   "id": "FEAT-005",
   "type": "feat",
   "description": "Frontend pages, types, API services, and hooks for Smart Rota Builder, Natural Language Search, Automated Risk Assessments, and Medication Interaction Checker (features 5-8)",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Add TypeScript types to frontend/src/types/index.ts for: RotaTemplate, RotaShift, NlSearchResult, NlSearchQuery, RiskAssessment (Waterlow/MUST/Falls), MedicationInteraction",
     "Add API service objects to frontend/src/services/api.ts: smartRotaApi (generate, getTemplate, listTemplates, updateShift, publish, getConstraints), nlSearchApi (search, getHistory), riskAssessmentsApi (calculateWaterlow, calculateMUST, calculateFalls, getResidentAssessments, getOverdue, getOverview), medInteractionsApi (check, getResidentInteractions, acknowledge, getAlerts)",
@@ -28,5 +28,5 @@
     "Run: cd /projects/sandbox/jubilant-waddle/frontend && npm run build"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All 4 frontend pages (SmartRota, NaturalLanguageSearch, RiskAssessments, MedInteractionChecker) created. Types (RotaTemplate, RotaShift, NlSearchResult, NlSearchQuery, RiskAssessment, RiskOverviewItem, MedicationInteraction) added to types/index.ts. API services (smartRotaApi, nlSearchApi, riskAssessmentsApi, medInteractionsApi) added to services/api.ts. 16 hooks added to hooks/index.ts. All 4 pages registered in App.tsx with routes and NAV_ALL entries. Vite build succeeds (dist output generated). Pre-existing TS errors in CareNotes.tsx, Emar.tsx, Incidents.tsx, and Training.tsx remain unchanged from prior commits - these block tsc but not vite build. SmartRota has week grid with shift blocks color-coded by type, NL Search has prominent search bar with example chips, Risk Assessments has traffic-light overview, Med Interactions has severity-coded alerts with acknowledge workflow."
 }
