@@ -18,6 +18,7 @@ import * as weightCtrl from '../controllers/weight.controller';
 import * as photosCtrl from '../controllers/photos.controller';
 import * as activitiesCtrl from '../controllers/activities.controller';
 import * as wellbeingCtrl from '../controllers/wellbeing.controller';
+import * as predictiveCareCtrl from '../controllers/predictiveCare.controller';
 import { upload } from '../middleware/upload'; // getBillingSummary added
 import * as aiService from '../services/ai.service';
 import { query } from '../models/db';
@@ -218,6 +219,15 @@ router.get('/residents/:id/life-story',                   isStaff, wellbeingCtrl
 router.put('/residents/:id/life-story',                   isStaff, wellbeingCtrl.updateResidentLifeStory);
 router.get('/residents/:id/environment',                  isStaff, wellbeingCtrl.getEnvironmentPreferences);
 router.put('/residents/:id/environment',                  isStaff, wellbeingCtrl.updateEnvironmentPreferences);
+
+
+// -- Predictive Care
+router.get('/predictive/dashboard',                           isManager,  predictiveCareCtrl.getRiskDashboard);
+router.get('/predictive/residents/:residentId/risk',          isClinical, predictiveCareCtrl.calculateFallsRisk);
+router.get('/predictive/residents/:residentId/history',       isClinical, predictiveCareCtrl.getRiskHistory);
+router.get('/predictive/alerts',                              isManager,  predictiveCareCtrl.getAlerts);
+router.patch('/predictive/alerts/:id/acknowledge',            isManager,  predictiveCareCtrl.acknowledgeAlert);
+router.post('/predictive/analyze',                            isManager,  predictiveCareCtrl.runPredictiveAnalysis);
 
 
 // ── Controlled Drug Register ─────────────────────────────────────────────
