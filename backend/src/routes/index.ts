@@ -19,6 +19,7 @@ import * as photosCtrl from '../controllers/photos.controller';
 import * as activitiesCtrl from '../controllers/activities.controller';
 import * as wellbeingCtrl from '../controllers/wellbeing.controller';
 import * as predictiveCareCtrl from '../controllers/predictiveCare.controller';
+import * as familyPortalCtrl from '../controllers/familyPortal.controller';
 import { upload } from '../middleware/upload'; // getBillingSummary added
 import * as aiService from '../services/ai.service';
 import { query } from '../models/db';
@@ -417,6 +418,15 @@ router.post('/family/messages/:id/reply', isStaff, async (req, res, next) => {
     res.status(201).json(reply);
   } catch (err) { next(err); }
 });
+
+// ── Family Portal (Enhanced) ──────────────────────────────────────────────
+router.get('/family/dashboard/:residentId',                isStaff,   familyPortalCtrl.getFamilyDashboard);
+router.get('/family/daily-summary/:residentId',            isStaff,   familyPortalCtrl.getDailySummary);
+router.post('/family/daily-summary/:residentId/generate',  isStaff,   familyPortalCtrl.generateDailySummary);
+router.get('/family/weekly-report/:residentId',            isStaff,   familyPortalCtrl.getWeeklyReport);
+router.post('/family/weekly-reports/generate',             isManager, familyPortalCtrl.generateWeeklyReports);
+router.get('/family/photos/:residentId',                   isStaff,   familyPortalCtrl.listPhotos);
+router.post('/family/photos/:residentId',                  isStaff,   upload.single('photo'), familyPortalCtrl.uploadFamilyPhoto);
 
 // ── Billing ───────────────────────────────────────────────────────────────
 router.get('/invoices/summary',     isFinance, billingCtrl.getBillingSummary);
