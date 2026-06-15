@@ -22,6 +22,10 @@ import * as predictiveCareCtrl from '../controllers/predictiveCare.controller';
 import * as familyPortalCtrl from '../controllers/familyPortal.controller';
 import * as cqcComplianceCtrl from '../controllers/cqcCompliance.controller';
 import * as voiceSbarCtrl from '../controllers/voiceSbar.controller';
+import * as news2Ctrl from '../controllers/news2.controller';
+import * as woundsCtrl from '../controllers/wounds.controller';
+import * as infectionsCtrl from '../controllers/infections.controller';
+import * as continenceCtrl from '../controllers/continence.controller';
 import { upload } from '../middleware/upload'; // getBillingSummary added
 import * as aiService from '../services/ai.service';
 import { query } from '../models/db';
@@ -449,6 +453,37 @@ router.post('/sbar/generate',                 isClinical, voiceSbarCtrl.generate
 router.get('/sbar/handovers',                 isClinical, voiceSbarCtrl.listSbarHandovers);
 router.get('/sbar/handovers/:id',             isClinical, voiceSbarCtrl.getSbarHandover);
 router.patch('/sbar/handovers/:id/approve',   isManager, voiceSbarCtrl.approveSbarHandover);
+
+// -- NEWS2 Auto-Calculator
+router.post('/news2/calculate', isClinical, news2Ctrl.calculateNews2Score);
+router.get('/news2/history', isClinical, news2Ctrl.getAssessmentHistory);
+router.get('/news2/escalations', isClinical, news2Ctrl.getEscalationHistory);
+router.patch('/news2/escalations/:id', isClinical, news2Ctrl.respondToEscalation);
+router.get('/news2/trend', isClinical, news2Ctrl.getResidentTrend);
+
+// -- Wound Photography Timeline
+router.post('/wounds', isClinical, upload.single('photo'), woundsCtrl.createWoundAssessment);
+router.get('/wounds', isClinical, woundsCtrl.listActiveWounds);
+router.get('/wounds/:residentId/timeline', isClinical, woundsCtrl.getWoundTimeline);
+router.get('/wounds/:residentId/body-map', isClinical, woundsCtrl.getBodyMapOverview);
+router.patch('/wounds/:id', isClinical, woundsCtrl.updateWoundAssessment);
+
+// -- Infection Outbreak Tracker
+router.post('/infections/outbreaks', isManager, infectionsCtrl.createOutbreak);
+router.get('/infections/outbreaks', isStaff, infectionsCtrl.listOutbreaks);
+router.get('/infections/outbreaks/:id', isStaff, infectionsCtrl.getOutbreakDetails);
+router.post('/infections/outbreaks/:outbreakId/cases', isClinical, infectionsCtrl.addInfectionCase);
+router.patch('/infections/cases/:id', isClinical, infectionsCtrl.updateCaseStatus);
+router.patch('/infections/outbreaks/:id/status', isManager, infectionsCtrl.updateOutbreakStatus);
+router.get('/infections/outbreaks/:id/timeline', isStaff, infectionsCtrl.getOutbreakTimeline);
+
+// -- Continence Assessment
+router.post('/continence/log', isStaff, continenceCtrl.logContinenceEvent);
+router.post('/continence/assessment', isClinical, continenceCtrl.createAssessment);
+router.get('/continence/overview', isManager, continenceCtrl.getHomeOverview);
+router.get('/continence/:residentId', isStaff, continenceCtrl.getResidentLog);
+router.get('/continence/:residentId/patterns', isClinical, continenceCtrl.getPatternAnalysis);
+router.get('/continence/:residentId/assessment', isStaff, continenceCtrl.getAssessment);
 
 // ── Billing ───────────────────────────────────────────────────────────────
 router.get('/invoices/summary',     isFinance, billingCtrl.getBillingSummary);
