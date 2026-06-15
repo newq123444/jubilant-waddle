@@ -1,0 +1,7 @@
+{
+  "task_id": "task-batch3-mobile-analytics-integrations-training",
+  "task_description": "Batch 3 features for CareVista: Offline Mode Support, Resident Tablet Interface, QR Room Scanning, Benchmarking Dashboard, Board Pack Generator, Staff Performance Insights, Built-in e-Learning Module, Competency Sign-off Workflow, Diabetes Management Module, and Palliative Care Pathway. Full backend APIs (migrations, controllers, routes) and frontend pages integrated into existing navigation.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
+  "blocked_reason": null
+}
