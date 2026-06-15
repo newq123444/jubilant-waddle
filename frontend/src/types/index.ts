@@ -510,3 +510,71 @@ export interface FamilyDashboardData {
   unread_messages: number;
   latest_wellbeing: any;
 }
+
+// ── CQC Compliance ────────────────────────────────────────────────────────
+export interface CqcDomainScore {
+  id: string;
+  domain: string;
+  score: number;
+  evidence_count: number;
+  gaps_count: number;
+  strengths: string[];
+  weaknesses: string[];
+  recommendations: string[];
+  calculated_at: string;
+}
+
+export interface CqcEvidencePack {
+  id: string;
+  domains_included: string[];
+  date_range_start: string;
+  date_range_end: string;
+  content: any;
+  status: 'generating' | 'complete' | 'failed';
+  created_at: string;
+}
+
+export interface PolicyReview {
+  id: string;
+  policy_id: string;
+  policy_title?: string;
+  reviewer_name?: string;
+  reviewer_id: string;
+  review_date: string;
+  next_review_date: string | null;
+  status: string;
+  changes_made: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface PolicyWithReview {
+  id: string;
+  title: string;
+  category: string | null;
+  review_date: string | null;
+  status: string;
+  version: string | null;
+  latest_review_date: string | null;
+  latest_reviewer: string | null;
+  next_review_date: string | null;
+  is_overdue: boolean;
+}
+
+export interface InspectionChecklist {
+  id: string;
+  title: string;
+  domain: string;
+  items: Array<{ label: string; completed: boolean; evidence?: string }>;
+  completed_items: number;
+  total_items: number;
+  status: string;
+}
+
+export interface ComplianceOverview {
+  domain_scores: CqcDomainScore[];
+  overdue_policies_count: number;
+  expiring_training_count: number;
+  open_actions_count: number;
+  overall_readiness_score: number;
+}

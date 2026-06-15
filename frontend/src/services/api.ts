@@ -76,6 +76,15 @@ export const complianceApi = {
   createAction: (data: object) => api.post('/compliance/actions', data),
   updateAction: (id: string, data: object) => api.patch(`/compliance/actions/${id}`, data),
   getFramework: () => api.get('/compliance/framework'),
+  getCqcScores: () => api.get('/compliance/cqc-scores'),
+  calculateCqcScores: () => api.post('/compliance/cqc-scores/calculate'),
+  generateEvidencePack: (data: object) => api.post('/compliance/evidence-pack', data),
+  getEvidencePacks: () => api.get('/compliance/evidence-packs'),
+  getPolicyReviews: () => api.get('/compliance/policy-reviews'),
+  createPolicyReview: (data: object) => api.post('/compliance/policy-reviews', data),
+  getInspectionChecklist: (domain: string) => api.get(`/compliance/inspection-checklist/${domain}`),
+  updateChecklistItem: (id: string, data: object) => api.patch(`/compliance/inspection-checklist/${id}/item`, data),
+  getOverview: () => api.get('/compliance/overview'),
 };
 
 // ── Family Portal ──────────────────────────────────────────────────────────

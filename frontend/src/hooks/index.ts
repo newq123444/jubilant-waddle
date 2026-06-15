@@ -322,3 +322,36 @@ export function useUploadFamilyPhoto() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: ({ residentId, formData }: { residentId: string; formData: FormData }) => familyApi.uploadPhoto(residentId, formData).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['family-photos'] }); qc.invalidateQueries({ queryKey: ['family-dashboard'] }); toast.success('Photo uploaded'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to upload photo') });
 }
+
+// ── CQC Compliance ────────────────────────────────────────────────────────
+export function useCqcDomainScores() {
+  return useQuery({ queryKey: ['cqc-scores'], queryFn: () => complianceApi.getCqcScores().then(r => r.data) });
+}
+export function useCalculateCqcScores() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: () => complianceApi.calculateCqcScores().then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['cqc-scores'] }); qc.invalidateQueries({ queryKey: ['compliance-overview'] }); toast.success('CQC scores calculated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to calculate scores') });
+}
+export function useGenerateEvidencePack() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => complianceApi.generateEvidencePack(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['evidence-packs'] }); toast.success('Evidence pack generated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to generate evidence pack') });
+}
+export function useCqcEvidencePacks() {
+  return useQuery({ queryKey: ['evidence-packs'], queryFn: () => complianceApi.getEvidencePacks().then(r => r.data) });
+}
+export function usePolicyReviews() {
+  return useQuery({ queryKey: ['policy-reviews'], queryFn: () => complianceApi.getPolicyReviews().then(r => r.data) });
+}
+export function useCreatePolicyReview() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => complianceApi.createPolicyReview(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['policy-reviews'] }); toast.success('Policy review recorded'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to record review') });
+}
+export function useInspectionChecklist(domain: string) {
+  return useQuery({ queryKey: ['inspection-checklist', domain], queryFn: () => complianceApi.getInspectionChecklist(domain).then(r => r.data), enabled: !!domain });
+}
+export function useUpdateChecklistItem() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => complianceApi.updateChecklistItem(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['inspection-checklist'] }); toast.success('Checklist updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update checklist') });
+}
+export function useComplianceOverview() {
+  return useQuery({ queryKey: ['compliance-overview'], queryFn: () => complianceApi.getOverview().then(r => r.data) });
+}
