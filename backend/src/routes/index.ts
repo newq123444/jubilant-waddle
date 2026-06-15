@@ -17,6 +17,7 @@ import * as aiInsightsCtrl from '../controllers/aiInsights.controller';
 import * as weightCtrl from '../controllers/weight.controller';
 import * as photosCtrl from '../controllers/photos.controller';
 import * as activitiesCtrl from '../controllers/activities.controller';
+import * as wellbeingCtrl from '../controllers/wellbeing.controller';
 import { upload } from '../middleware/upload'; // getBillingSummary added
 import * as aiService from '../services/ai.service';
 import { query } from '../models/db';
@@ -205,6 +206,18 @@ router.post('/activities/sessions/:id/participants',  isStaff, activitiesCtrl.ad
 router.patch('/activities/sessions/:sessionId/participants/:residentId', isStaff, activitiesCtrl.updateParticipant);
 router.delete('/activities/sessions/:sessionId/participants/:residentId', isStaff, activitiesCtrl.removeParticipant);
 router.get('/residents/:id/activities',               isStaff, activitiesCtrl.getResidentActivityHistory);
+
+// ── Wellbeing ─────────────────────────────────────────────────────────────
+router.post('/wellbeing/log',                             isStaff, wellbeingCtrl.logWellbeing);
+router.get('/wellbeing/overview',                         isStaff, wellbeingCtrl.getWellbeingOverview);
+router.get('/wellbeing/isolation-alerts',                 isStaff, wellbeingCtrl.getSocialIsolationAlerts);
+router.patch('/wellbeing/isolation-alerts/:id',           isManager, wellbeingCtrl.acknowledgeSocialAlert);
+router.post('/wellbeing/generate-isolation-alerts',       isManager, wellbeingCtrl.generateIsolationAlerts);
+router.get('/wellbeing/:residentId',                      isStaff, wellbeingCtrl.getResidentWellbeing);
+router.get('/residents/:id/life-story',                   isStaff, wellbeingCtrl.getResidentLifeStory);
+router.put('/residents/:id/life-story',                   isStaff, wellbeingCtrl.updateResidentLifeStory);
+router.get('/residents/:id/environment',                  isStaff, wellbeingCtrl.getEnvironmentPreferences);
+router.put('/residents/:id/environment',                  isStaff, wellbeingCtrl.updateEnvironmentPreferences);
 
 
 // ── Controlled Drug Register ─────────────────────────────────────────────

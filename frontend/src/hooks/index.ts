@@ -4,7 +4,7 @@ import {
   api, residentsApi, notesApi, emarApi, incidentsApi,
   scheduleApi, staffApi, complianceApi, familyApi,
   billingApi, aiApi, dashboardApi, auditApi, policiesApi,
-  activitiesApi,
+  activitiesApi, wellbeingApi,
 } from '../services/api';
 import { toast } from '../utils/toast';
 
@@ -243,4 +243,37 @@ export function useResidentActivityHistory(residentId: string) {
 }
 export function useWellbeingDashboard() {
   return useQuery({ queryKey: ['wellbeing-dashboard'], queryFn: () => activitiesApi.wellbeingDashboard().then(r => r.data) });
+}
+
+// ── Wellbeing Tracking ────────────────────────────────────────────────────
+export function useLogWellbeing() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => wellbeingApi.log(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['wellbeing'] }); qc.invalidateQueries({ queryKey: ['wellbeing-overview'] }); toast.success('Wellbeing logged'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to log wellbeing') });
+}
+export function useResidentWellbeing(residentId: string, days?: number) {
+  return useQuery({ queryKey: ['wellbeing', residentId, days], queryFn: () => wellbeingApi.getResidentWellbeing(residentId, days).then(r => r.data), enabled: !!residentId });
+}
+export function useWellbeingOverview() {
+  return useQuery({ queryKey: ['wellbeing-overview'], queryFn: () => wellbeingApi.getOverview().then(r => r.data), refetchInterval: 60_000 });
+}
+export function useResidentLifeStory(residentId: string) {
+  return useQuery({ queryKey: ['life-story', residentId], queryFn: () => wellbeingApi.getLifeStory(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useUpdateLifeStory() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ residentId, data }: { residentId: string; data: object }) => wellbeingApi.updateLifeStory(residentId, data).then(r => r.data), onSuccess: (_: any, vars: any) => { qc.invalidateQueries({ queryKey: ['life-story', vars.residentId] }); toast.success('Life story updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update life story') });
+}
+export function useSocialIsolationAlerts(status?: string) {
+  return useQuery({ queryKey: ['isolation-alerts', status], queryFn: () => wellbeingApi.getIsolationAlerts(status).then(r => r.data) });
+}
+export function useAcknowledgeAlert() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => wellbeingApi.acknowledgeAlert(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['isolation-alerts'] }); toast.success('Alert updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update alert') });
+}
+export function useEnvironmentPreferences(residentId: string) {
+  return useQuery({ queryKey: ['environment', residentId], queryFn: () => wellbeingApi.getEnvironment(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useUpdateEnvironmentPreferences() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ residentId, data }: { residentId: string; data: object }) => wellbeingApi.updateEnvironment(residentId, data).then(r => r.data), onSuccess: (_: any, vars: any) => { qc.invalidateQueries({ queryKey: ['environment', vars.residentId] }); toast.success('Environment preferences updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update') });
 }

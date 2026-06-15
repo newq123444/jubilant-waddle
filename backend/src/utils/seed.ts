@@ -959,6 +959,99 @@ async function seed() {
       }
     }
 
+    // ── Wellbeing Logs (30 days for all residents) ─────────────────────────
+    console.log('  ▶  Wellbeing logs (30 days)…');
+    const moodOptions = ['very_happy', 'happy', 'happy', 'neutral', 'neutral', 'low', 'very_low'];
+    const sleepOptions = ['excellent', 'good', 'good', 'fair', 'poor', 'very_poor'];
+    const engagementOptions = ['high', 'moderate', 'moderate', 'low', 'isolated'];
+    const appetiteOptions = ['excellent', 'good', 'good', 'fair', 'poor', 'refused'];
+    const energyOptions = ['high', 'moderate', 'moderate', 'low', 'very_low'];
+    const logStaff = [carer1Id, carer2Id, seniorId, nurseId];
+
+    for (let daysBack = 0; daysBack < 30; daysBack++) {
+      const logDate = dateStr(daysAgo(daysBack));
+      for (const room of Object.keys(residentIds)) {
+        // Not every resident is logged every day (80% chance)
+        if (Math.random() > 0.8) continue;
+        await client.query(
+          `INSERT INTO wellbeing_logs (care_home_id, resident_id, logged_by, log_date, mood, pain_level, sleep_quality, social_engagement, appetite, energy_level, notes)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+          [homeId, residentIds[room], rand(logStaff), logDate,
+           rand(moodOptions), randInt(0, 6),
+           rand(sleepOptions), rand(engagementOptions),
+           rand(appetiteOptions), rand(energyOptions),
+           Math.random() > 0.7 ? rand(['Settled and comfortable', 'Requested extra blanket', 'Enjoyed morning tea in garden', 'Asked about family', 'Chatted with staff about the news', 'Slept well after warm drink']) : null]
+        );
+      }
+    }
+
+    // ── Life Stories (12+ residents) ──────────────────────────────────────
+    console.log('  ▶  Life stories (12 residents)…');
+    const lifeStories = [
+      { room: '1', occupation: 'Primary school headteacher', hometown: 'Didsbury, Manchester', spouse: 'Married to Frank for 52 years (deceased 2018)', children: '3 children (Susan, David, Martin), 7 grandchildren', pets: 'Had a tabby cat called Marmalade', hobbies: ['Knitting', 'Crosswords', 'Gardening'], music: ['Vera Lynn', 'Frank Sinatra', 'Hymns'], tv: ['Antiques Roadshow', 'Countdown', 'Songs of Praise'], foods: ['Scones with jam', 'Fish and chips', 'Victoria sponge'], topics: ['Her teaching career', 'Grandchildren', 'Knitting patterns'], comfort: ['Soft blanket from daughter', 'Photo album', 'Radio 4'], routine: 'Likes tea at 7am with one sugar. Prefers bath in the evening. Reads before bed.', religious: 'Church of England - enjoys Sunday hymns on radio', traits: ['Warm', 'Sociable', 'Organised'], communication: 'Clear spoken, enjoys conversation, prefers quiet one-to-one chats' },
+      { room: '2', occupation: 'Factory foreman (textile mill)', hometown: 'Oldham, Lancashire', spouse: 'Married to Betty for 60 years (wife visits weekly)', children: '2 sons (Robert, William), 5 grandchildren', pets: 'Kept racing pigeons for 40 years', hobbies: ['Pigeon racing', 'Woodwork', 'Watching cricket'], music: ['Brass band music', 'George Formby', 'The Beatles'], tv: ['Cricket', 'Coronation Street', 'Antiques Roadshow'], foods: ['Lancashire hotpot', 'Meat and potato pie', 'Custard'], topics: ['His pigeons', 'Cricket', 'The old mill'], comfort: ['Flat cap', 'Wooden bird carving he made', 'Cricket on radio'], routine: 'Likes to sit by the window. Responds well to music. Calmer in mornings.', religious: 'Methodist - sings along to hymns', traits: ['Gentle', 'Stubborn sometimes', 'Musical'], communication: 'Advanced dementia - responds to touch, music, and calm voice. Recognises wife.' },
+      { room: '3', occupation: 'District nurse', hometown: 'Sale, Cheshire', spouse: 'Widowed - husband was an electrician (deceased 2010)', children: '1 daughter (Christine), 2 grandchildren', pets: 'Dog called Toby (border collie)', hobbies: ['Baking', 'Bridge club', 'Flower arranging'], music: ['Classical music', 'Elgar', 'Chopin'], tv: ['Bake Off', 'Gardeners World', 'Period dramas'], foods: ['Lemon drizzle cake', 'Soup', 'Chocolate'], topics: ['Her nursing days', 'Baking', 'Garden flowers'], comfort: ['Knitted blanket', 'Fresh flowers in room', 'Lavender pillow'], routine: 'Early riser. Enjoys helping others. Likes routine and predictability.', religious: 'Catholic - rosary beads are important to her', traits: ['Caring', 'Independent minded', 'Chatty'], communication: 'Good communication, some word-finding difficulty. Patient and kind.' },
+      { room: '5', occupation: 'Post office clerk', hometown: 'Stretford, Manchester', spouse: 'Never married - lived with sister until 2019', children: 'No children - close to nieces and nephews', pets: 'Had budgerigars', hobbies: ['Reading', 'Jigsaw puzzles', 'Birdwatching'], music: ['Radio 2', 'Ella Fitzgerald', 'Big band'], tv: ['Springwatch', 'Murder mysteries', 'The Chase'], foods: ['Toast with marmalade', 'Roast dinner', 'Rice pudding'], topics: ['Birds', 'Books she has read', 'Local history'], comfort: ['Binoculars for window birdwatching', 'Reading glasses', 'Fleece throw'], routine: 'Independent. Quiet. Likes breakfast in her room. Enjoys afternoon activities.', religious: 'No particular faith but enjoys quiet reflection', traits: ['Quiet', 'Observant', 'Intellectual'], communication: 'Soft spoken. Needs time to respond. Very polite.' },
+      { room: '6', occupation: 'Chartered accountant', hometown: 'Altrincham, Cheshire', spouse: 'Married to Jean for 55 years (wife has mobility issues)', children: '2 daughters, 4 grandchildren', pets: 'Family Labrador called Biscuit', hobbies: ['Golf', 'Sudoku', 'Bridge'], music: ['Jazz', 'Nat King Cole', 'Dean Martin'], tv: ['Golf', 'News', 'Quiz shows'], foods: ['Steak (soft cooked)', 'Cheese and biscuits', 'Fruit cake'], topics: ['Golf stories', 'His career', 'Financial news'], comfort: ['Newspaper daily', 'Golf trophy on shelf', 'Cashmere cardigan'], routine: 'Likes structure. Morning paper. Afternoon nap 2-3pm. Evening TV.', religious: 'Church of England - attends when chaplain visits', traits: ['Precise', 'Witty', 'Dignified'], communication: 'Articulate, slightly hard of hearing left ear. Uses hearing aid.' },
+      { room: '7', occupation: 'Florist (owned shop for 30 years)', hometown: 'Salford, Manchester', spouse: 'Married to Ronald (deceased 2020)', children: '4 children, 8 grandchildren, 2 great-grandchildren', pets: 'Cat called Poppy', hobbies: ['Flower arranging', 'Singing', 'Dancing'], music: ['Motown', 'ABBA', 'Show tunes'], tv: ['Strictly Come Dancing', 'EastEnders', 'Loose Women'], foods: ['Chocolate cake', 'Full English', 'Apple crumble'], topics: ['Her flower shop', 'Dancing', 'Family'], comfort: ['Silk flowers in room', 'Family photos', 'Hand cream'], routine: 'Social butterfly. Joins all activities. Likes company. Late riser.', religious: 'Spiritual but not religious - enjoys meditation', traits: ['Vibrant', 'Friendly', 'Optimistic'], communication: 'Very chatty. Loves telling stories. Good hearing.' },
+      { room: '9', occupation: 'Secretary at solicitors firm', hometown: 'Eccles, Manchester', spouse: 'Married to George (deceased 2015)', children: '2 sons, 3 grandchildren', pets: 'Poodle called Pierre', hobbies: ['Reading romance novels', 'Watercolour painting', 'Tea dances'], music: ['Shirley Bassey', 'Tom Jones', 'Musical theatre'], tv: ['Downton Abbey', 'Call the Midwife', 'The Royal'], foods: ['Afternoon tea', 'Salmon sandwiches', 'Battenberg cake'], topics: ['Old films', 'Fashion', 'Her painting'], comfort: ['Silk scarf collection', 'Watercolour set', 'Good quality hand cream'], routine: 'Likes things elegant. Dresses well daily. Afternoon tea ritual important.', religious: 'Church of England', traits: ['Elegant', 'Creative', 'Particular'], communication: 'Well spoken. Appreciates being addressed formally (Mrs Hartley).' },
+      { room: '11', occupation: 'University lecturer (English Literature)', hometown: 'Chorlton, Manchester', spouse: 'Partner of 30 years (Margaret, visits twice weekly)', children: 'No children', pets: 'Two rescue cats', hobbies: ['Poetry', 'Theatre', 'Walking'], music: ['Opera', 'Debussy', 'Joni Mitchell'], tv: ['University Challenge', 'Only Connect', 'Documentaries'], foods: ['Vegetable curry', 'Hummus and bread', 'Dark chocolate'], topics: ['Literature', 'Poetry', 'Travel memories'], comfort: ['Books everywhere', 'Poetry anthology', 'Cashmere throw'], routine: 'Night owl. Reads late. Slow mornings. Intellectual stimulation important.', religious: 'Buddhist meditation practice', traits: ['Intellectual', 'Witty', 'Private'], communication: 'Articulate and dry-humoured. Values her privacy.' },
+      { room: '12', occupation: 'Bus driver (40 years with local service)', hometown: 'Failsworth, Manchester', spouse: 'Married to Iris (deceased 2017)', children: '3 children, 6 grandchildren', pets: 'Kept chickens in garden', hobbies: ['Dominoes', 'Watching football', 'Gardening'], music: ['The Hollies', 'Status Quo', 'Northern Soul'], tv: ['Football', 'Only Fools and Horses', 'Bargain Hunt'], foods: ['Corned beef sandwiches', 'Chips', 'Treacle toffee'], topics: ['Manchester United', 'Bus routes he drove', 'His allotment'], comfort: ['Football scarf', 'Dominoes set', 'Old route maps'], routine: 'Early riser (old habit from driving). Likes routine. Restless by evening.', religious: 'No particular faith', traits: ['Jovial', 'Repetitive questions', 'Social'], communication: 'Dementia affects short-term memory. Responds well to familiar topics.' },
+      { room: '13', occupation: 'Fashion buyer (department store)', hometown: 'Wilmslow, Cheshire', spouse: 'Divorced - enjoys independence', children: '1 daughter (lives in London)', pets: 'Persian cat called Coco', hobbies: ['Fashion magazines', 'Bridge', 'Shopping'], music: ['Classical', 'Norah Jones', 'Bossa nova'], tv: ['Fashion shows', 'Travel programmes', 'Bake Off'], foods: ['Gluten free bread', 'Smoked salmon', 'Meringue'], topics: ['Fashion', 'Travel', 'Her daughter'], comfort: ['Designer handbag', 'Good perfume', 'Silk pillowcase'], routine: 'Particular about appearance. Hair must be done. Values independence.', religious: 'No religion', traits: ['Stylish', 'Independent', 'Particular'], communication: 'Direct and clear. Coeliac disease - careful with food.' },
+      { room: '15', occupation: 'Practice manager (dental surgery)', hometown: 'Worsley, Manchester', spouse: 'Married to Peter (visits daily)', children: '2 children, 5 grandchildren', pets: 'Golden retriever called Honey', hobbies: ['Gardening', 'Craft making', 'Cooking'], music: ['ABBA', 'The Carpenters', 'Michael Buble'], tv: ['Gardeners World', 'Great Pottery Throwdown', 'Saturday Kitchen'], foods: ['Homemade soup', 'Scones', 'Shepherd pie'], topics: ['Gardening tips', 'Grandchildren', 'Cooking recipes'], comfort: ['Garden view room', 'Craft supplies', 'Family photo frame'], routine: 'Active. Likes to help with table setting. Morning walk in garden.', religious: 'Methodist - enjoys fellowship', traits: ['Nurturing', 'Organised', 'Active'], communication: 'Warm and friendly. Good communicator. Loves helping.' },
+      { room: '16', occupation: 'Pub landlord (The Red Lion, 25 years)', hometown: 'Swinton, Manchester', spouse: 'Married to Pauline (deceased 2019)', children: '3 children, 8 grandchildren', pets: 'Pub dog called Guinness', hobbies: ['Darts', 'Horse racing', 'Singing'], music: ['Frank Sinatra', 'Dean Martin', 'Irish folk'], tv: ['Horse racing', 'Coronation Street', 'QI'], foods: ['Steak and ale pie', 'Fish and chips', 'Spotted dick'], topics: ['The pub', 'Horse racing', 'Manchester'], comfort: ['Darts set', 'Racing Post', 'Favourite armchair'], routine: 'Late riser (pub hours!). Sociable. Likes a sherry in evening.', religious: 'Catholic Irish heritage', traits: ['Gregarious', 'Storyteller', 'Generous'], communication: 'Loud and cheerful. Tells wonderful stories. Hard of hearing.' },
+    ];
+
+    for (const story of lifeStories) {
+      if (!residentIds[story.room]) continue;
+      await client.query(
+        `INSERT INTO resident_life_story (resident_id, occupation, hometown, spouse_info, children_info, pets, hobbies, favorite_music, favorite_tv, favorite_foods, conversation_topics, comfort_items, daily_routine_preferences, religious_preferences, personality_traits, communication_style, updated_by)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
+        [residentIds[story.room], story.occupation, story.hometown, story.spouse, story.children, story.pets,
+         story.hobbies, story.music, story.tv, story.foods, story.topics, story.comfort,
+         story.routine, story.religious, story.traits, story.communication, managerId]
+      );
+    }
+
+    // ── Environment Preferences (8 residents) ─────────────────────────────
+    console.log('  ▶  Environment preferences (8 residents)…');
+    const envPrefs = [
+      { room: '1', lighting: 'Soft warm light', temp: 'Warm (22-24C)', music: 'Background (quiet)', sounds: ['Radio 4', 'Birdsong'], aroma: ['Lavender'], noise: 'moderate' },
+      { room: '2', lighting: 'Soft warm light', temp: 'Warm (22-24C)', music: 'Moderate', sounds: ['Brass band music', 'Cricket commentary'], aroma: ['None preferred'], noise: 'low' },
+      { room: '3', lighting: 'Bright natural light', temp: 'Comfortable (20-22C)', music: 'Background (quiet)', sounds: ['Classical music', 'Nature sounds'], aroma: ['Lavender', 'Rose'], noise: 'moderate' },
+      { room: '5', lighting: 'Bright natural light', temp: 'Comfortable (20-22C)', music: 'Background (quiet)', sounds: ['Birdsong', 'Nature sounds'], aroma: ['None preferred'], noise: 'high' },
+      { room: '7', lighting: 'Bright natural light', temp: 'Comfortable (20-22C)', music: 'Moderate', sounds: ['Motown', 'ABBA'], aroma: ['Rose', 'Vanilla'], noise: 'low' },
+      { room: '8', lighting: 'Dim ambient', temp: 'Warm (22-24C)', music: 'Background (quiet)', sounds: ['White noise', 'Rainfall'], aroma: ['Chamomile', 'Lavender'], noise: 'high' },
+      { room: '11', lighting: 'Soft warm light', temp: 'Cool (18-20C)', music: 'Background (quiet)', sounds: ['Classical music', 'Ocean waves'], aroma: ['Eucalyptus'], noise: 'high' },
+      { room: '15', lighting: 'Bright natural light', temp: 'Comfortable (20-22C)', music: 'Moderate', sounds: ['Radio 2', 'Nature sounds'], aroma: ['Lavender', 'Peppermint'], noise: 'low' },
+    ];
+    for (const ep of envPrefs) {
+      if (!residentIds[ep.room]) continue;
+      await client.query(
+        `INSERT INTO environment_preferences (resident_id, preferred_lighting, preferred_temperature, preferred_music_volume, calming_sounds, aromatherapy, noise_sensitivity)
+         VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+        [residentIds[ep.room], ep.lighting, ep.temp, ep.music, ep.sounds, ep.aroma, ep.noise]
+      );
+    }
+
+    // ── Social Isolation Alerts ────────────────────────────────────────────
+    console.log('  ▶  Social isolation alerts…');
+    const isolationAlerts = [
+      { room: '4', type: 'no_activities', days: 12, severity: 'moderate' },
+      { room: '10', type: 'no_activities', days: 18, severity: 'severe' },
+      { room: '14', type: 'no_visitors', days: 21, severity: 'severe' },
+      { room: '8', type: 'low_engagement', days: 7, severity: 'mild' },
+      { room: '20', type: 'no_activities', days: 8, severity: 'mild' },
+    ];
+    for (const alert of isolationAlerts) {
+      if (!residentIds[alert.room]) continue;
+      await client.query(
+        `INSERT INTO social_isolation_alerts (care_home_id, resident_id, alert_type, days_since_last, severity, status)
+         VALUES ($1,$2,$3,$4,$5,'active')`,
+        [homeId, residentIds[alert.room], alert.type, alert.days, alert.severity]
+      );
+    }
+
     await client.query('COMMIT');
 
     console.log('\n✅  GODMODE Seed complete!\n');

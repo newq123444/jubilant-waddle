@@ -1,14 +1,16 @@
 // src/pages/ResidentDetail.tsx — Full resident profile with timeline
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useResident, useCareNotes, useResidentMedications, useIncidents, useResidentActivityHistory } from '../hooks';
+import { useResident, useCareNotes, useResidentMedications, useIncidents, useResidentActivityHistory, useResidentWellbeing } from '../hooks';
 import { WeightChart } from '../components/WeightChart';
 import { BodyMap, type BodyMapMark } from '../components/BodyMap';
+import { LifeStoryBoard } from '../components/LifeStoryBoard';
+import { EnvironmentCard } from '../components/EnvironmentCard';
 import { api } from '../services/api';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatDate, formatAge, formatDateTime, NOTE_TYPE_LABELS } from '../utils/formatters';
 
-const TABS = ['Overview', 'Timeline', 'Medications', 'Incidents', 'Notes', 'Activities', 'Belongings', 'Weight', 'Body Map'] as const;
+const TABS = ['Overview', 'Timeline', 'Medications', 'Incidents', 'Notes', 'Activities', 'Life Story', 'Wellbeing', 'Belongings', 'Weight', 'Body Map'] as const;
 type Tab = typeof TABS[number];
 
 const BELONGING_CATEGORIES = ['general','clothing','jewellery','electronics','documents','valuables','toiletries','other'];
@@ -667,6 +669,14 @@ export default function ResidentDetail() {
       {/* ── ACTIVITIES ─────────────────────────────────────────── */}
       {tab === 'Activities' && <ResidentActivitiesTab residentId={id!} resident={resident} />}
 
+      {/* ── LIFE STORY ─────────────────────────────────────────── */}
+      {tab === 'Life Story' && (
+        <LifeStoryBoard residentId={id!} residentName={`${(resident as any).first_name} ${(resident as any).last_name}`} canEdit={true} />
+      )}
+
+      {/* ── WELLBEING ──────────────────────────────────────────── */}
+      {tab === 'Wellbeing' && <ResidentWellbeingTab residentId={id!} />}
+
       {/* ── BELONGINGS ──────────────────────────────────────────── */}
       {tab === 'Belongings' && <BelongingsTab residentId={id!} />}
 
@@ -706,6 +716,83 @@ export default function ResidentDetail() {
         </div>
       )}
 
+    </div>
+  );
+}
+
+// ── Resident Wellbeing Tab ─────────────────────────────────────────────────
+function ResidentWellbeingTab({ residentId }: { residentId: string }) {
+  const { data } = useResidentWellbeing(residentId, 30);
+  const logs = data?.logs || [];
+  const trend = data?.trend || 'insufficient_data';
+
+  const MOOD_EMOJI: Record<string, string> = { very_happy: '😄', happy: '😊', neutral: '😐', low: '😔', very_low: '😢' };
+  const MOOD_COLORS: Record<string, string> = { very_happy: '#10b981', happy: '#22c55e', neutral: '#f59e0b', low: '#f97316', very_low: '#dc2626' };
+  const TREND_LABELS: Record<string, { label: string; color: string; icon: string }> = {
+    improving: { label: 'Improving', color: '#10b981', icon: '📈' },
+    declining: { label: 'Declining', color: '#dc2626', icon: '📉' },
+    stable: { label: 'Stable', color: '#2563eb', icon: '➡️' },
+    insufficient_data: { label: 'Not enough data', color: '#6b7280', icon: '📊' },
+  };
+  const trendInfo = TREND_LABELS[trend] || TREND_LABELS.insufficient_data;
+
+  return (
+    <div>
+      {/* Trend summary */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12, marginBottom: 20 }}>
+        <div style={{ padding: '14px', borderRadius: 12, background: trendInfo.color + '10', border: `1px solid ${trendInfo.color}30` }}>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>Mood Trend (7 days)</div>
+          <div style={{ fontSize: 16, fontWeight: 800, color: trendInfo.color }}>
+            {trendInfo.icon} {trendInfo.label}
+          </div>
+        </div>
+        <div style={{ padding: '14px', borderRadius: 12, background: '#8b5cf610', border: '1px solid #8b5cf630' }}>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>Total Logs (30 days)</div>
+          <div style={{ fontSize: 16, fontWeight: 800, color: '#8b5cf6' }}>{logs.length}</div>
+        </div>
+        {data?.avgMoodScore && (
+          <div style={{ padding: '14px', borderRadius: 12, background: '#f59e0b10', border: '1px solid #f59e0b30' }}>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>Avg Mood Score</div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#f59e0b' }}>{parseFloat(data.avgMoodScore).toFixed(1)}/5</div>
+          </div>
+        )}
+      </div>
+
+      {/* Environment Preferences */}
+      <div style={{ marginBottom: 20 }}>
+        <EnvironmentCard residentId={residentId} canEdit={true} />
+      </div>
+
+      {/* Recent Logs */}
+      <h3 style={{ fontSize: 14, fontWeight: 700, margin: '0 0 10px' }}>Recent Wellbeing Logs</h3>
+      {logs.length === 0 ? (
+        <div style={{ padding: 30, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>No wellbeing logs yet. Use the Wellbeing Hub to start logging.</div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {logs.slice(0, 20).map((log: any) => (
+            <div key={log.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 10, background: 'var(--bg-card, white)', border: '1px solid var(--border)' }}>
+              <span style={{ fontSize: 24 }}>{MOOD_EMOJI[log.mood] || '😐'}</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}>
+                  <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 10, background: (MOOD_COLORS[log.mood] || '#6b7280') + '15', color: MOOD_COLORS[log.mood] || '#6b7280', fontWeight: 700, textTransform: 'capitalize' }}>
+                    {log.mood?.replace(/_/g, ' ')}
+                  </span>
+                  {log.sleep_quality && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 10, background: '#2563eb10', color: '#2563eb' }}>Sleep: {log.sleep_quality}</span>}
+                  {log.appetite && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 10, background: '#10b98110', color: '#10b981' }}>Appetite: {log.appetite}</span>}
+                  {log.social_engagement && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 10, background: '#8b5cf610', color: '#8b5cf6' }}>Social: {log.social_engagement}</span>}
+                  {log.energy_level && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 10, background: '#f59e0b10', color: '#f59e0b' }}>Energy: {log.energy_level}</span>}
+                  {log.pain_level != null && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 10, background: log.pain_level >= 7 ? '#dc262615' : '#6b728010', color: log.pain_level >= 7 ? '#dc2626' : '#6b7280' }}>Pain: {log.pain_level}/10</span>}
+                </div>
+                {log.notes && <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>{log.notes}</p>}
+              </div>
+              <div style={{ textAlign: 'right', fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>
+                <div>{new Date(log.log_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</div>
+                <div>{log.logged_by_name}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

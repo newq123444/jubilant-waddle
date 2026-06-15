@@ -7,6 +7,7 @@ import { useAuthStore } from '../../store/auth.store';
 import {
   useDashboard, useResidents, useCreateNote, useStaff,
   useTasks, useCompleteTask, useDeferTask, useStartTask, useReleaseTask, useGenerateTasks,
+  useWellbeingOverview,
 } from '../../hooks';
 import { useTaskSSE } from '../../hooks/useSSE';
 import { formatAge, todayISO } from '../../utils/formatters';
@@ -840,6 +841,40 @@ function ClinicalForm({ resident, noteType, task, onClose, onSaved, isAdHoc=fals
   );
 }
 
+// ── Wellbeing Alert Widget ─────────────────────────────────────────────────
+function WellbeingAlertWidget({ residents }: { residents: Resident[] }) {
+  const { data: overview } = useWellbeingOverview();
+  const needsAttention = overview?.needsAttention || [];
+
+  if (needsAttention.length === 0) return null;
+
+  const MOOD_EMOJI: Record<string, string> = { very_low: '😢', low: '😔', neutral: '😐', happy: '😊', very_happy: '😄' };
+
+  return (
+    <div style={{ background: '#fef9f0', border: '1px solid #fed7aa', borderRadius: 10, padding: '10px 14px', marginBottom: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: '#9a3412' }}>💚 Wellbeing Concerns Today</span>
+        <Link to="/wellbeing" style={{ fontSize: 11, color: '#2563eb', fontWeight: 600, textDecoration: 'none' }}>View Hub →</Link>
+      </div>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {needsAttention.slice(0, 4).map((r: any) => (
+          <Link key={r.id} to={`/residents/${r.id}`} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 8, background: 'white', border: '1px solid #fed7aa', textDecoration: 'none', color: 'inherit', fontSize: 12 }}>
+            <span>{MOOD_EMOJI[r.mood] || '😐'}</span>
+            <span style={{ fontWeight: 600 }}>{r.first_name}</span>
+            <span style={{ color: 'var(--text-muted)' }}>Rm {r.room_number}</span>
+            {r.pain_level != null && r.pain_level >= 7 && (
+              <span style={{ fontSize: 10, color: '#dc2626', fontWeight: 700 }}>Pain {r.pain_level}</span>
+            )}
+          </Link>
+        ))}
+        {needsAttention.length > 4 && (
+          <span style={{ fontSize: 11, color: '#9a3412', alignSelf: 'center' }}>+{needsAttention.length - 4} more</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Main CarerDashboard ───────────────────────────────────────────────────
 export default function CarerDashboard() {
   const { user }            = useAuthStore();
@@ -955,6 +990,9 @@ export default function CarerDashboard() {
           <Link to="/incidents" style={{ marginLeft:'auto', fontSize:13, color:'#dc2626', fontWeight:600 }}>View →</Link>
         </div>
       )}
+
+      {/* ── Wellbeing Quick Alert ───────────────────────────── */}
+      <WellbeingAlertWidget residents={residents} />
 
       {/* ── Main split layout ───────────────────────────────── */}
       <div style={{ display:'grid', gridTemplateColumns: showForm || showTypePicker ? '1fr 1fr' : '1fr', gap:16, alignItems:'start' }}>

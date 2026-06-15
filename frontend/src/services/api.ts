@@ -138,3 +138,17 @@ export const activitiesApi = {
   residentHistory:    (residentId: string) => api.get(`/residents/${residentId}/activities`),
   wellbeingDashboard: () => api.get('/activities/wellbeing-dashboard'),
 };
+
+// ── Wellbeing ──────────────────────────────────────────────────────────────
+export const wellbeingApi = {
+  log:                    (data: object) => api.post('/wellbeing/log', data),
+  getResidentWellbeing:   (residentId: string, days?: number) => api.get(`/wellbeing/${residentId}`, { params: { days } }),
+  getOverview:            () => api.get('/wellbeing/overview'),
+  getIsolationAlerts:     (status?: string) => api.get('/wellbeing/isolation-alerts', { params: { status } }),
+  acknowledgeAlert:       (id: string, data: object) => api.patch(`/wellbeing/isolation-alerts/${id}`, data),
+  generateAlerts:         () => api.post('/wellbeing/generate-isolation-alerts'),
+  getLifeStory:           (residentId: string) => api.get(`/residents/${residentId}/life-story`),
+  updateLifeStory:        (residentId: string, data: object) => api.put(`/residents/${residentId}/life-story`, data),
+  getEnvironment:         (residentId: string) => api.get(`/residents/${residentId}/environment`),
+  updateEnvironment:      (residentId: string, data: object) => api.put(`/residents/${residentId}/environment`, data),
+};

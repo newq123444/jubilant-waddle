@@ -24,6 +24,7 @@ import TaskBoard      from './pages/TaskBoard';
 import CDRegister     from './pages/CDRegister';
 import AiInsights     from './pages/AiInsights';
 import Activities     from './pages/Activities';
+import WellbeingHub   from './pages/WellbeingHub';
 import NotificationCentre from './components/NotificationCentre';
 import { ROLE_LABELS } from './utils/formatters';
 
@@ -38,6 +39,7 @@ const NAV_ALL = [
   { path: '/emar',       label: 'Medications',  icon: '💊', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'], badge: 'meds' },
   { path: '/incidents',  label: 'Incidents',    icon: '⚠️', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'], badge: 'incidents' },
   { path: '/activities', label: 'Activities',   icon: '🎯', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','activities','admin','super_admin','group_admin'] },
+  { path: '/wellbeing',  label: 'Wellbeing Hub', icon: '💚', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','activities','admin','super_admin','group_admin'] },
   { section: 'Team', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin','registered_nurse','senior_carer'] },
   { path: '/schedule',   label: 'Rota',         icon: '📅', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin','registered_nurse','senior_carer'] },
   { path: '/staff',      label: 'Staff',        icon: '👤', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin'] },
@@ -306,6 +308,7 @@ export default function App() {
           <Route path="/emar"           element={<Emar />} />
           <Route path="/incidents"      element={<Incidents />} />
           <Route path="/activities"     element={<Activities />} />
+          <Route path="/wellbeing"      element={<WellbeingHub />} />
           <Route path="/schedule"       element={<Schedule />} />
           <Route path="/staff"          element={<Staff />} />
           <Route path="/training"       element={<Training />} />

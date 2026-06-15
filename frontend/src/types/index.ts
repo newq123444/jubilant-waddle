@@ -325,3 +325,97 @@ export interface WellbeingStats {
     upcoming: string;
   };
 }
+
+// ── Wellbeing Tracking ────────────────────────────────────────────────────
+export type MoodLevel = 'very_happy' | 'happy' | 'neutral' | 'low' | 'very_low';
+export type SleepQuality = 'excellent' | 'good' | 'fair' | 'poor' | 'very_poor';
+export type SocialEngagement = 'high' | 'moderate' | 'low' | 'isolated';
+export type AppetiteLevel = 'excellent' | 'good' | 'fair' | 'poor' | 'refused';
+export type EnergyLevel = 'high' | 'moderate' | 'low' | 'very_low';
+
+export interface WellbeingLog {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  logged_by: string;
+  logged_by_name?: string;
+  log_date: string;
+  mood: MoodLevel;
+  pain_level: number | null;
+  sleep_quality: SleepQuality;
+  social_engagement: SocialEngagement;
+  appetite: AppetiteLevel;
+  energy_level: EnergyLevel;
+  notes?: string;
+  created_at: string;
+}
+
+export interface WellbeingOverview {
+  todayLogs: Array<WellbeingLog & { first_name: string; last_name: string; room_number: string; photo_url?: string }>;
+  needsAttention: Array<{ id: string; first_name: string; last_name: string; room_number: string; photo_url?: string; mood: MoodLevel; pain_level: number | null; log_date: string }>;
+  stats: { happy_count: string; neutral_count: string; low_count: string; avg_pain: string; logged_residents: string };
+}
+
+export interface ResidentLifeStory {
+  id: string;
+  resident_id: string;
+  occupation?: string;
+  hometown?: string;
+  spouse_info?: string;
+  children_info?: string;
+  pets?: string;
+  hobbies?: string[];
+  favorite_music?: string[];
+  favorite_tv?: string[];
+  favorite_foods?: string[];
+  conversation_topics?: string[];
+  comfort_items?: string[];
+  daily_routine_preferences?: string;
+  religious_preferences?: string;
+  dislikes?: string[];
+  important_dates?: Record<string, string>;
+  life_achievements?: string;
+  war_service?: string;
+  personality_traits?: string[];
+  communication_style?: string;
+  updated_at?: string;
+  updated_by?: string;
+  updated_by_name?: string;
+}
+
+export type AlertSeverity = 'mild' | 'moderate' | 'severe';
+export type AlertStatus = 'active' | 'acknowledged' | 'resolved';
+
+export interface SocialIsolationAlert {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  first_name?: string;
+  last_name?: string;
+  room_number?: string;
+  photo_url?: string;
+  alert_type: 'no_visitors' | 'no_activities' | 'no_social_notes' | 'low_engagement';
+  days_since_last: number;
+  severity: AlertSeverity;
+  status: AlertStatus;
+  acknowledged_by?: string;
+  acknowledged_by_name?: string;
+  resolved_at?: string;
+  created_at: string;
+}
+
+export interface EnvironmentPreferences {
+  id: string;
+  resident_id: string;
+  preferred_lighting?: string;
+  preferred_temperature?: string;
+  preferred_music_volume?: string;
+  calming_sounds?: string[];
+  aromatherapy?: string[];
+  room_decorations?: string;
+  photo_display_preference?: string;
+  tv_volume?: string;
+  noise_sensitivity?: 'low' | 'moderate' | 'high';
+  notes?: string;
+  updated_at?: string;
+}
