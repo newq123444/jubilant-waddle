@@ -2,7 +2,7 @@
   "id": "FEAT-003",
   "type": "feat",
   "description": "Priority 1 continued: AI Predictive Care Engine - Frontend dashboard page with risk scores per resident, alerts panel, and trend visualization. Add types, API client, hooks, page component, and navigation entry.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Add TypeScript types to frontend/src/types/index.ts: PredictiveRiskScore (id, resident_id, resident_name, room_number, risk_type, score, factors, generated_at), PredictiveAlert (id, resident_id, resident_name, room_number, alert_type, risk_score, threshold, factors, status, created_at, acknowledged_by_name), PredictiveRiskDashboard (residents array with falls_score, deterioration_score, combined_risk, last_analyzed).",
     "Add API client methods to frontend/src/services/api.ts: predictiveApi object with getDashboard, getResidentRisk, getResidentHistory, getAlerts, acknowledgeAlert, runAnalysis.",
@@ -22,5 +22,5 @@
     "cd /projects/sandbox/jubilant-waddle/frontend && npm run build"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Successfully implemented predictive care frontend. All types (PredictiveRiskScore, PredictiveAlert, PredictiveRiskDashboardItem) added to types/index.ts. API client (predictiveApi) added to services/api.ts. Hooks (usePredictiveRiskDashboard, usePredictiveAlerts, useResidentRiskHistory, useRunPredictiveAnalysis, useAcknowledgePredictiveAlert) added to hooks/index.ts. PredictiveCare page with 3 tabs (Risk Dashboard, Active Alerts, Resident Detail) created. Nav item and route registered in App.tsx. Frontend builds successfully with only the 18 pre-existing type errors (no new errors introduced)."
 }
