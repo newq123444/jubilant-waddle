@@ -16,6 +16,7 @@ import * as aiHandoverCtrl from '../controllers/aiHandover.controller';
 import * as aiInsightsCtrl from '../controllers/aiInsights.controller';
 import * as weightCtrl from '../controllers/weight.controller';
 import * as photosCtrl from '../controllers/photos.controller';
+import * as activitiesCtrl from '../controllers/activities.controller';
 import { upload } from '../middleware/upload'; // getBillingSummary added
 import * as aiService from '../services/ai.service';
 import { query } from '../models/db';
@@ -188,6 +189,22 @@ router.get('/ai/care-plan/:residentId',   isManager,  aiHandoverCtrl.generateCar
 router.get('/weights',                                isStaff,   weightCtrl.getAllWeights);
 router.get('/residents/:residentId/weights',          isStaff,   weightCtrl.getWeightHistory);
 router.post('/residents/:residentId/weights',         isClinical, weightCtrl.recordWeight);
+
+// ── Activities ────────────────────────────────────────────────────────────
+router.get('/activities',                             isStaff, activitiesCtrl.listActivities);
+router.get('/activities/sessions',                    isStaff, activitiesCtrl.listSessions);
+router.get('/activities/wellbeing-dashboard',         isStaff, activitiesCtrl.getWellbeingDashboard);
+router.get('/activities/:id',                         isStaff, activitiesCtrl.getActivity);
+router.get('/activities/:id/eligible-residents',      isStaff, activitiesCtrl.getEligibleResidents);
+router.post('/activities',                            isStaff, activitiesCtrl.createActivity);
+router.patch('/activities/:id',                       isStaff, activitiesCtrl.updateActivity);
+router.delete('/activities/:id',                      isStaff, activitiesCtrl.deleteActivity);
+router.post('/activities/sessions',                   isStaff, activitiesCtrl.createSession);
+router.get('/activities/sessions/:id/participants',   isStaff, activitiesCtrl.getSessionParticipants);
+router.post('/activities/sessions/:id/participants',  isStaff, activitiesCtrl.addParticipant);
+router.patch('/activities/sessions/:sessionId/participants/:residentId', isStaff, activitiesCtrl.updateParticipant);
+router.delete('/activities/sessions/:sessionId/participants/:residentId', isStaff, activitiesCtrl.removeParticipant);
+router.get('/residents/:id/activities',               isStaff, activitiesCtrl.getResidentActivityHistory);
 
 
 // ── Controlled Drug Register ─────────────────────────────────────────────

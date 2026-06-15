@@ -7,6 +7,7 @@ import { formatDate, formatPence } from '../../utils/formatters';
 import type { Incident, ComplianceAction, Invoice, Resident } from '../../types';
 import WeatherWidget from '../../components/WeatherWidget';
 import LiveActivityFeed from '../../components/LiveActivityFeed';
+import ActivitiesWidget from '../../components/ActivitiesWidget';
 
 // Animated counter hook
 function useCountUp(target: number, duration = 900) {
@@ -231,6 +232,11 @@ export default function ManagerDashboard() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ── Activities Widget ─────────────────────────────────── */}
+      <div style={{ marginTop: 24 }}>
+        <ActivitiesWidget />
       </div>
 
       {/* ── Live Activity Feed ─────────────────────────────────── */}

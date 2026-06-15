@@ -1,14 +1,14 @@
 // src/pages/ResidentDetail.tsx — Full resident profile with timeline
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useResident, useCareNotes, useResidentMedications, useIncidents } from '../hooks';
+import { useResident, useCareNotes, useResidentMedications, useIncidents, useResidentActivityHistory } from '../hooks';
 import { WeightChart } from '../components/WeightChart';
 import { BodyMap, type BodyMapMark } from '../components/BodyMap';
 import { api } from '../services/api';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatDate, formatAge, formatDateTime, NOTE_TYPE_LABELS } from '../utils/formatters';
 
-const TABS = ['Overview', 'Timeline', 'Medications', 'Incidents', 'Notes', 'Belongings', 'Weight', 'Body Map'] as const;
+const TABS = ['Overview', 'Timeline', 'Medications', 'Incidents', 'Notes', 'Activities', 'Belongings', 'Weight', 'Body Map'] as const;
 type Tab = typeof TABS[number];
 
 const BELONGING_CATEGORIES = ['general','clothing','jewellery','electronics','documents','valuables','toiletries','other'];
@@ -664,6 +664,9 @@ export default function ResidentDetail() {
         />
       )}
 
+      {/* ── ACTIVITIES ─────────────────────────────────────────── */}
+      {tab === 'Activities' && <ResidentActivitiesTab residentId={id!} resident={resident} />}
+
       {/* ── BELONGINGS ──────────────────────────────────────────── */}
       {tab === 'Belongings' && <BelongingsTab residentId={id!} />}
 
@@ -703,6 +706,91 @@ export default function ResidentDetail() {
         </div>
       )}
 
+    </div>
+  );
+}
+
+// ── Resident Activities Tab ───────────────────────────────────────────────
+function ResidentActivitiesTab({ residentId, resident }: { residentId: string; resident: any }) {
+  const { data: history = [] } = useResidentActivityHistory(residentId);
+  const CATEGORY_ICONS: Record<string, string> = { physical: '🏃', creative: '🎨', social: '🤝', cognitive: '🧠', sensory: '✨' };
+  const MOBILITY_LABELS: Record<string, string> = { independent: 'Independent', walking_aid: 'Walking Aid', wheelchair: 'Wheelchair', bed_bound: 'Bed-bound' };
+
+  const attended = (history as any[]).filter(h => h.attendance === 'attended');
+  const highEngagement = attended.filter(h => h.engagement_level === 'high').length;
+  const totalAttended = attended.length;
+
+  return (
+    <div>
+      {/* Mobility & Interests Summary */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 14, marginBottom: 20 }}>
+        <div style={{ background: 'var(--bg-card, white)', border: '1px solid var(--border, #e2e8f0)', borderRadius: 12, padding: 16 }}>
+          <h4 style={{ margin: '0 0 8px', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-muted)' }}>Mobility Status</h4>
+          <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+            {MOBILITY_LABELS[resident?.mobility_status] || 'Not set'}
+          </div>
+          <p style={{ margin: '4px 0 0', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+            Determines eligible activities
+          </p>
+        </div>
+        <div style={{ background: 'var(--bg-card, white)', border: '1px solid var(--border, #e2e8f0)', borderRadius: 12, padding: 16 }}>
+          <h4 style={{ margin: '0 0 8px', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-muted)' }}>Wellbeing Score</h4>
+          <div style={{ fontSize: '1.1rem', fontWeight: 800, color: (resident?.wellbeing_score ?? 5) >= 7 ? '#10b981' : (resident?.wellbeing_score ?? 5) >= 5 ? '#f59e0b' : '#dc2626' }}>
+            {resident?.wellbeing_score ?? '-'}/10
+          </div>
+        </div>
+        <div style={{ background: 'var(--bg-card, white)', border: '1px solid var(--border, #e2e8f0)', borderRadius: 12, padding: 16 }}>
+          <h4 style={{ margin: '0 0 8px', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-muted)' }}>Activity Engagement</h4>
+          <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#8b5cf6' }}>
+            {totalAttended} sessions
+          </div>
+          <p style={{ margin: '4px 0 0', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+            {highEngagement} high engagement
+          </p>
+        </div>
+      </div>
+
+      {/* Interests */}
+      {resident?.interests && resident.interests.length > 0 && (
+        <div style={{ marginBottom: 16 }}>
+          <h4 style={{ margin: '0 0 8px', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-muted)' }}>Interests</h4>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {(resident.interests as string[]).map((interest: string) => (
+              <span key={interest} style={{ padding: '4px 10px', borderRadius: 14, background: '#8b5cf615', border: '1px solid #8b5cf630', fontSize: '0.75rem', fontWeight: 600, color: '#8b5cf6', textTransform: 'capitalize' }}>
+                {interest.replace(/_/g, ' ')}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Activity History */}
+      <h3 style={{ margin: '20px 0 12px', fontSize: '0.92rem', fontWeight: 700 }}>Activity History</h3>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {(history as any[]).slice(0, 30).map((h: any, i: number) => (
+          <div key={h.id || i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, background: 'var(--bg-card, white)', border: '1px solid var(--border, #e2e8f0)' }}>
+            <span style={{ fontSize: '1.1rem' }}>{CATEGORY_ICONS[h.category] || '📌'}</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)' }}>{h.activity_name}</div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                {h.session_date ? new Date(h.session_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''} · {h.start_time?.slice(0, 5)}
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {h.attendance && <span style={{ padding: '2px 7px', borderRadius: 10, fontSize: '0.65rem', fontWeight: 700, background: h.attendance === 'attended' ? '#10b98118' : '#dc262618', color: h.attendance === 'attended' ? '#10b981' : '#dc2626', textTransform: 'capitalize' }}>{h.attendance}</span>}
+              {h.engagement_level && <span style={{ padding: '2px 7px', borderRadius: 10, fontSize: '0.65rem', fontWeight: 700, background: h.engagement_level === 'high' ? '#f59e0b18' : '#64748b18', color: h.engagement_level === 'high' ? '#f59e0b' : '#64748b', textTransform: 'capitalize' }}>{h.engagement_level}</span>}
+            </div>
+            {h.mood_before && h.mood_after && (
+              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textAlign: 'right', minWidth: 60 }}>
+                {h.mood_before} → {h.mood_after}
+              </div>
+            )}
+          </div>
+        ))}
+        {(history as any[]).length === 0 && (
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', textAlign: 'center', padding: 24 }}>No activity history yet</p>
+        )}
+      </div>
     </div>
   );
 }

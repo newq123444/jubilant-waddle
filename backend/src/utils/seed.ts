@@ -823,6 +823,142 @@ async function seed() {
       }
     }
 
+    // ── Activities: mobility, interests, wellbeing ──────────────────────────
+    console.log('  ▶  Setting mobility_status, interests, wellbeing…');
+    const mobilityMap: Record<string, string> = {
+      'Independent': 'independent',
+      'Independent with walking frame': 'independent',
+      'Independent with stick': 'walking_aid',
+      'Walking frame': 'walking_aid',
+      'Zimmer frame': 'walking_aid',
+      'Walking stick': 'walking_aid',
+      'Wheelchair': 'wheelchair',
+      'Hoist required': 'bed_bound',
+      'Bed-bound': 'bed_bound',
+    };
+    const interestsMap: Record<string, string[]> = {
+      '1':  ['gardening','reading','knitting','music'],
+      '2':  ['music','reminiscence','sensory'],
+      '3':  ['art','puzzles','music','baking'],
+      '4':  ['music','reading','poetry'],
+      '5':  ['dancing','gardening','bingo','cooking'],
+      '6':  ['chess','reading','woodwork','music'],
+      '7':  ['painting','yoga','gardening','theatre'],
+      '8':  ['music','sensory','reminiscence'],
+      '9':  ['knitting','reading','music','bingo'],
+      '10': ['music','sensory','hand massage'],
+      '11': ['art','yoga','gardening','book_club'],
+      '12': ['music','puzzles','reminiscence','sing_along'],
+      '13': ['cooking','reading','walking','nature'],
+      '14': ['music','audiobooks','hand massage'],
+      '15': ['art','gardening','bingo','walking'],
+      '16': ['music','puzzles','sensory','reminiscence'],
+      '17': ['dancing','bingo','cooking','socialising'],
+      '18': ['chess','reading','music','bird_watching'],
+      '19': ['knitting','cooking','reading','walking'],
+      '20': ['music','hand massage','sensory'],
+      '21': ['yoga','gardening','painting','cooking'],
+      '22': ['music','reminiscence','sensory','puzzles'],
+      '23': ['reading','walking','gardening','bingo'],
+      '24': ['music','hand massage','reading','sensory'],
+    };
+    for (const r of residentsData) {
+      const mobStatus = mobilityMap[r.mob] || 'independent';
+      const interests = interestsMap[r.room] || ['music','social'];
+      const wellbeing = ['2','4','8','10','14','20','24'].includes(r.room) ? randInt(3,5) :
+                        ['3','12','16','22'].includes(r.room) ? randInt(5,7) : randInt(6,9);
+      await client.query(
+        `UPDATE residents SET mobility_status=$1, interests=$2, wellbeing_score=$3 WHERE id=$4`,
+        [mobStatus, interests, wellbeing, residentIds[r.room]]
+      );
+    }
+
+    // ── Seed activities ───────────────────────────────────────────────────
+    console.log('  ▶  Activities (15 diverse)…');
+    const activitiesData = [
+      { name:'Morning Chair Yoga',       type:'physical',  mobility:'wheelchair_or_better', dur:45,  max:12, loc:'Lounge', cat:'physical',  sensory:false, cog:'any',      desc:'Gentle seated yoga focusing on breathing, stretching, and relaxation. Suitable for wheelchair users.' },
+      { name:'Gardening Club',           type:'physical',  mobility:'walking_aid_or_better', dur:60, max:8,  loc:'Garden', cat:'physical',  sensory:false, cog:'any',      desc:'Hands-on gardening including planting, weeding, and watering raised beds.' },
+      { name:'Art & Painting',           type:'creative',  mobility:'any',                  dur:60,  max:10, loc:'Activity Room', cat:'creative', sensory:false, cog:'any', desc:'Guided art sessions using watercolours, acrylics, or pastels. All abilities welcome.' },
+      { name:'Music & Sing-Along',       type:'social',    mobility:'any',                  dur:45,  max:20, loc:'Main Lounge', cat:'social', sensory:true, cog:'any',     desc:'Live music session with familiar songs. Instruments provided. Proven to boost mood in dementia residents.' },
+      { name:'Bingo Afternoon',          type:'social',    mobility:'any',                  dur:60,  max:20, loc:'Dining Hall', cat:'social', sensory:false, cog:'mild',    desc:'Classic bingo with prizes. Helps maintain cognitive function and social interaction.' },
+      { name:'Reminiscence Therapy',     type:'cognitive', mobility:'any',                  dur:45,  max:8,  loc:'Quiet Room', cat:'cognitive', sensory:true, cog:'any',    desc:'Guided sessions using old photographs, music, and objects to stimulate memory and conversation.' },
+      { name:'Gentle Walking Group',     type:'physical',  mobility:'walking_aid_or_better', dur:30, max:6,  loc:'Garden Path', cat:'physical', sensory:false, cog:'any',   desc:'Short supervised walk around the garden. Walking frames welcome.' },
+      { name:'Cooking & Baking',         type:'creative',  mobility:'walking_aid_or_better', dur:75, max:6,  loc:'Kitchen', cat:'creative', sensory:true, cog:'mild',      desc:'Making simple recipes together. Sensory engagement through smell, taste, and touch.' },
+      { name:'Hand Massage & Relaxation',type:'sensory',   mobility:'any',                  dur:30,  max:4,  loc:'Quiet Room', cat:'sensory', sensory:true, cog:'any',     desc:'One-to-one hand massage with aromatherapy oils. Reduces anxiety and improves wellbeing.' },
+      { name:'Film Afternoon',           type:'social',    mobility:'any',                  dur:120, max:20, loc:'Main Lounge', cat:'social', sensory:false, cog:'any',     desc:'Classic film screening with tea and cake. Subtitles available.' },
+      { name:'Puzzle & Brain Games',     type:'cognitive', mobility:'any',                  dur:45,  max:8,  loc:'Activity Room', cat:'cognitive', sensory:false, cog:'moderate', desc:'Jigsaws, crosswords, word searches, and card games. Adapted to individual ability.' },
+      { name:'Pet Therapy Visit',        type:'sensory',   mobility:'any',                  dur:60,  max:15, loc:'Main Lounge', cat:'sensory', sensory:true, cog:'any',     desc:'Visiting therapy dogs. Proven to reduce blood pressure and boost mood.' },
+      { name:'Dance & Movement',         type:'physical',  mobility:'independent_only',     dur:45,  max:8,  loc:'Activity Room', cat:'physical', sensory:false, cog:'any',  desc:'Gentle dance to music from the 1940s-60s. Improves balance and coordination.' },
+      { name:'Book Club',                type:'cognitive', mobility:'any',                  dur:45,  max:8,  loc:'Library Corner', cat:'cognitive', sensory:false, cog:'moderate', desc:'Weekly reading and discussion group. Large print books and audiobooks available.' },
+      { name:'Sensory Stimulation',      type:'sensory',   mobility:'any',                  dur:30,  max:4,  loc:'Sensory Room', cat:'sensory', sensory:true, cog:'any',    desc:'Multi-sensory session using lights, textures, sounds, and aromas. Ideal for advanced dementia.' },
+    ];
+    const activityIds: string[] = [];
+    for (const a of activitiesData) {
+      const { rows: [act] } = await client.query(
+        `INSERT INTO activities (care_home_id, name, description, activity_type, required_mobility_level, duration_minutes, max_participants, location, category, sensory_friendly, cognitive_level)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,
+        [homeId, a.name, a.desc, a.type, a.mobility, a.dur, a.max, a.loc, a.cat, a.sensory, a.cog]
+      );
+      activityIds.push(act.id);
+    }
+
+    // ── Seed 30 days of sessions ──────────────────────────────────────────
+    console.log('  ▶  Activity sessions (30 days)…');
+    const activitiesCoordId = userIds['activities@demo.carevista.co.uk'];
+    const sessionTimes = [
+      { start: '09:30', end: '10:15' },
+      { start: '10:30', end: '11:30' },
+      { start: '14:00', end: '15:00' },
+      { start: '15:30', end: '16:15' },
+    ];
+    const sessionIds: string[] = [];
+    for (let daysBack = 0; daysBack <= 29; daysBack++) {
+      const sessionDate = dateStr(daysAgo(daysBack));
+      // 3-4 activities per day
+      const numSessions = randInt(3, 4);
+      for (let s = 0; s < numSessions; s++) {
+        const actIdx = (daysBack * 4 + s) % activitiesData.length;
+        const timeSlot = sessionTimes[s % sessionTimes.length];
+        const status = daysBack > 0 ? 'completed' : (s < 2 ? 'completed' : 'scheduled');
+        const { rows: [sess] } = await client.query(
+          `INSERT INTO activity_sessions (care_home_id, activity_id, session_date, start_time, end_time, status, facilitator_id)
+           VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
+          [homeId, activityIds[actIdx], sessionDate, timeSlot.start, timeSlot.end, status, activitiesCoordId]
+        );
+        sessionIds.push(sess.id);
+
+        // Add participants based on mobility eligibility
+        const actMobility = activitiesData[actIdx].mobility;
+        const eligibleRooms = residentsData.filter(r => {
+          const mob = mobilityMap[r.mob] || 'independent';
+          if (actMobility === 'any') return true;
+          const mobLevel: Record<string, number> = { bed_bound: 0, wheelchair: 1, walking_aid: 2, independent: 3 };
+          const resLevel = mobLevel[mob] ?? 0;
+          if (actMobility === 'independent_only') return resLevel >= 3;
+          if (actMobility === 'walking_aid_or_better') return resLevel >= 2;
+          if (actMobility === 'wheelchair_or_better') return resLevel >= 1;
+          return true;
+        }).map(r => r.room);
+
+        // Pick 4-8 random eligible residents
+        const numParticipants = Math.min(randInt(4, 8), eligibleRooms.length);
+        const shuffled = [...eligibleRooms].sort(() => Math.random() - 0.5).slice(0, numParticipants);
+        const moods = ['happy','content','neutral','anxious','calm','cheerful','tired','engaged'];
+        const engagements: Array<'high'|'medium'|'low'|'none'> = ['high','medium','medium','low'];
+        for (const room of shuffled) {
+          const attendance = status === 'completed' ? (Math.random() > 0.1 ? 'attended' : 'declined') : 'registered';
+          const engagement = attendance === 'attended' ? rand(engagements) : null;
+          const moodBefore = attendance === 'attended' ? rand(moods) : null;
+          const moodAfter = attendance === 'attended' ? rand(moods) : null;
+          await client.query(
+            `INSERT INTO activity_participants (session_id, resident_id, attendance, engagement_level, mood_before, mood_after)
+             VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT DO NOTHING`,
+            [sess.id, residentIds[room], attendance, engagement, moodBefore, moodAfter]
+          );
+        }
+      }
+    }
+
     await client.query('COMMIT');
 
     console.log('\n✅  GODMODE Seed complete!\n');

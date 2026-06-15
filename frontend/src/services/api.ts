@@ -120,3 +120,21 @@ export const policiesApi = {
 export const auditApi = {
   list: (params?: object) => api.get('/audit-log', { params }),
 };
+
+// ── Activities ─────────────────────────────────────────────────────────────
+export const activitiesApi = {
+  list:               (params?: object) => api.get('/activities', { params }),
+  get:                (id: string) => api.get(`/activities/${id}`),
+  create:             (data: object) => api.post('/activities', data),
+  update:             (id: string, data: object) => api.patch(`/activities/${id}`, data),
+  delete:             (id: string) => api.delete(`/activities/${id}`),
+  listSessions:       (params?: object) => api.get('/activities/sessions', { params }),
+  createSession:      (data: object) => api.post('/activities/sessions', data),
+  getParticipants:    (sessionId: string) => api.get(`/activities/sessions/${sessionId}/participants`),
+  addParticipant:     (sessionId: string, data: object) => api.post(`/activities/sessions/${sessionId}/participants`, data),
+  updateParticipant:  (sessionId: string, residentId: string, data: object) => api.patch(`/activities/sessions/${sessionId}/participants/${residentId}`, data),
+  removeParticipant:  (sessionId: string, residentId: string) => api.delete(`/activities/sessions/${sessionId}/participants/${residentId}`),
+  eligibleResidents:  (activityId: string) => api.get(`/activities/${activityId}/eligible-residents`),
+  residentHistory:    (residentId: string) => api.get(`/residents/${residentId}/activities`),
+  wellbeingDashboard: () => api.get('/activities/wellbeing-dashboard'),
+};

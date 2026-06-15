@@ -4,6 +4,7 @@ import {
   api, residentsApi, notesApi, emarApi, incidentsApi,
   scheduleApi, staffApi, complianceApi, familyApi,
   billingApi, aiApi, dashboardApi, auditApi, policiesApi,
+  activitiesApi,
 } from '../services/api';
 import { toast } from '../utils/toast';
 
@@ -199,4 +200,47 @@ export function useGenerateTasks() {
     mutationFn: (date?: string) => api.post('/tasks/generate', {}, { params: { date } }).then(r => r.data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['tasks'], exact: false }),
   });
+}
+
+// ── Activities ────────────────────────────────────────────────────────────
+export function useActivities(params?: object) {
+  return useQuery({ queryKey: ['activities', params], queryFn: () => activitiesApi.list(params).then(r => r.data) });
+}
+export function useActivity(id: string) {
+  return useQuery({ queryKey: ['activities', id], queryFn: () => activitiesApi.get(id).then(r => r.data), enabled: !!id });
+}
+export function useCreateActivity() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => activitiesApi.create(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['activities'] }); toast.success('Activity created'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to create activity') });
+}
+export function useUpdateActivity() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => activitiesApi.update(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['activities'] }); toast.success('Activity updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update activity') });
+}
+export function useSessions(params?: object) {
+  return useQuery({ queryKey: ['activity-sessions', params], queryFn: () => activitiesApi.listSessions(params).then(r => r.data) });
+}
+export function useCreateSession() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => activitiesApi.createSession(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['activity-sessions'] }); toast.success('Session scheduled'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to create session') });
+}
+export function useSessionParticipants(sessionId: string) {
+  return useQuery({ queryKey: ['session-participants', sessionId], queryFn: () => activitiesApi.getParticipants(sessionId).then(r => r.data), enabled: !!sessionId });
+}
+export function useAddParticipant() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ sessionId, data }: { sessionId: string; data: object }) => activitiesApi.addParticipant(sessionId, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['session-participants'] }); qc.invalidateQueries({ queryKey: ['activity-sessions'] }); toast.success('Participant added'); }, onError: (err: any) => toast.error(err.response?.data?.message || err.response?.data?.error || 'Cannot add participant') });
+}
+export function useUpdateParticipant() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ sessionId, residentId, data }: { sessionId: string; residentId: string; data: object }) => activitiesApi.updateParticipant(sessionId, residentId, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['session-participants'] }); toast.success('Participant updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update') });
+}
+export function useEligibleResidents(activityId: string) {
+  return useQuery({ queryKey: ['eligible-residents', activityId], queryFn: () => activitiesApi.eligibleResidents(activityId).then(r => r.data), enabled: !!activityId });
+}
+export function useResidentActivityHistory(residentId: string) {
+  return useQuery({ queryKey: ['resident-activities', residentId], queryFn: () => activitiesApi.residentHistory(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useWellbeingDashboard() {
+  return useQuery({ queryKey: ['wellbeing-dashboard'], queryFn: () => activitiesApi.wellbeingDashboard().then(r => r.data) });
 }

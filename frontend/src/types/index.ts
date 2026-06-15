@@ -33,6 +33,9 @@ export interface Resident {
   allergies?: string;
   dietary_requirements?: string;
   mobility_notes?: string;
+  mobility_status?: 'independent' | 'walking_aid' | 'wheelchair' | 'bed_bound';
+  interests?: string[];
+  wellbeing_score?: number;
   key_worker_id?: string;
   gp_name?: string;
   gp_phone?: string;
@@ -223,4 +226,102 @@ export interface DashboardData {
   unreadMessages: string;
   notesToday: string;
   occupancyRate?: number;
+}
+
+// ── Activities & Wellbeing ────────────────────────────────────────────────
+export type MobilityStatus = 'independent' | 'walking_aid' | 'wheelchair' | 'bed_bound';
+export type MobilityRequirement = 'any' | 'walking_aid_or_better' | 'wheelchair_or_better' | 'independent_only';
+
+export interface Activity {
+  id: string;
+  care_home_id: string;
+  name: string;
+  description?: string;
+  activity_type: string;
+  required_mobility_level: MobilityRequirement;
+  duration_minutes: number;
+  max_participants: number;
+  location?: string;
+  facilitator?: string;
+  recurring: boolean;
+  recurrence_pattern?: string;
+  category: string;
+  sensory_friendly: boolean;
+  cognitive_level: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ActivitySession {
+  id: string;
+  care_home_id: string;
+  activity_id: string;
+  activity_name?: string;
+  category?: string;
+  required_mobility_level?: string;
+  location?: string;
+  duration_minutes?: number;
+  sensory_friendly?: boolean;
+  session_date: string;
+  start_time: string;
+  end_time: string;
+  status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+  facilitator_id?: string;
+  facilitator_name?: string;
+  notes?: string;
+  mood_rating_avg?: number;
+  participant_count?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ActivityParticipant {
+  id: string;
+  session_id: string;
+  resident_id: string;
+  first_name?: string;
+  last_name?: string;
+  room_number?: string;
+  mobility_status?: string;
+  photo_url?: string;
+  attendance: 'registered' | 'attended' | 'declined' | 'unable';
+  engagement_level?: 'high' | 'medium' | 'low' | 'none';
+  mood_before?: string;
+  mood_after?: string;
+  notes?: string;
+  created_at: string;
+  // For history view
+  session_date?: string;
+  start_time?: string;
+  end_time?: string;
+  session_status?: string;
+  activity_name?: string;
+  activity_type?: string;
+}
+
+export interface WellbeingStats {
+  stats: {
+    unique_participants: string;
+    total_participations: string;
+    total_attended: string;
+    high_engagement: string;
+    medium_engagement: string;
+    low_engagement: string;
+    attendance_rate: string;
+  };
+  popular_activities: Array<{ name: string; category: string; participant_count: string }>;
+  inactive_residents: Array<{
+    id: string;
+    first_name: string;
+    last_name: string;
+    room_number: string;
+    mobility_status: string;
+    last_activity_date: string | null;
+  }>;
+  week_stats: {
+    sessions_this_week: string;
+    completed: string;
+    upcoming: string;
+  };
 }
