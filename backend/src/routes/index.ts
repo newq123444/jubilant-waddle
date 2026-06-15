@@ -199,7 +199,7 @@ router.get('/activities/:id',                         isStaff, activitiesCtrl.ge
 router.get('/activities/:id/eligible-residents',      isStaff, activitiesCtrl.getEligibleResidents);
 router.post('/activities',                            isStaff, activitiesCtrl.createActivity);
 router.patch('/activities/:id',                       isStaff, activitiesCtrl.updateActivity);
-router.delete('/activities/:id',                      isStaff, activitiesCtrl.deleteActivity);
+router.delete('/activities/:id',                      isManager, activitiesCtrl.deleteActivity);
 router.post('/activities/sessions',                   isStaff, activitiesCtrl.createSession);
 router.get('/activities/sessions/:id/participants',   isStaff, activitiesCtrl.getSessionParticipants);
 router.post('/activities/sessions/:id/participants',  isStaff, activitiesCtrl.addParticipant);

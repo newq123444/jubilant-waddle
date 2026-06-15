@@ -3,6 +3,7 @@
 // ============================================================
 import { Request, Response, NextFunction } from 'express';
 import { query } from '../models/db';
+import { AppError } from '../utils/errors';
 
 // ── Log Wellbeing (POST /wellbeing/log) ───────────────────────────────────
 export async function logWellbeing(req: Request, res: Response, next: NextFunction) {
@@ -23,6 +24,7 @@ export async function logWellbeing(req: Request, res: Response, next: NextFuncti
 // ── Get Resident Wellbeing (GET /wellbeing/:residentId) ───────────────────
 export async function getResidentWellbeing(req: Request, res: Response, next: NextFunction) {
   try {
+    const careHomeId = req.user!.care_home_id;
     const { residentId } = req.params;
     const days = parseInt(req.query.days as string) || 30;
 
@@ -30,9 +32,10 @@ export async function getResidentWellbeing(req: Request, res: Response, next: Ne
       `SELECT wl.*, u.first_name || ' ' || u.last_name AS logged_by_name
        FROM wellbeing_logs wl
        JOIN users u ON u.id = wl.logged_by
-       WHERE wl.resident_id = $1 AND wl.log_date >= CURRENT_DATE - $2::int
+       JOIN residents r ON r.id = wl.resident_id
+       WHERE wl.resident_id = $1 AND r.care_home_id = $2 AND wl.log_date >= CURRENT_DATE - $3::int
        ORDER BY wl.log_date DESC, wl.created_at DESC`,
-      [residentId, days]
+      [residentId, careHomeId, days]
     );
 
     // Calculate trends
@@ -98,13 +101,15 @@ export async function getWellbeingOverview(req: Request, res: Response, next: Ne
 // ── Get Life Story (GET /residents/:id/life-story) ────────────────────────
 export async function getResidentLifeStory(req: Request, res: Response, next: NextFunction) {
   try {
+    const careHomeId = req.user!.care_home_id;
     const { id } = req.params;
     const { rows: [story] } = await query(
       `SELECT ls.*, u.first_name || ' ' || u.last_name AS updated_by_name
        FROM resident_life_story ls
+       JOIN residents r ON r.id = ls.resident_id
        LEFT JOIN users u ON u.id = ls.updated_by
-       WHERE ls.resident_id = $1`,
-      [id]
+       WHERE ls.resident_id = $1 AND r.care_home_id = $2`,
+      [id, careHomeId]
     );
     res.json(story || null);
   } catch (err) { next(err); }
@@ -113,8 +118,17 @@ export async function getResidentLifeStory(req: Request, res: Response, next: Ne
 // ── Update Life Story (PUT /residents/:id/life-story) ─────────────────────
 export async function updateResidentLifeStory(req: Request, res: Response, next: NextFunction) {
   try {
+    const careHomeId = req.user!.care_home_id;
     const { id } = req.params;
     const userId = req.user!.id;
+
+    // Verify resident belongs to the requesting user's care home
+    const { rows: [resident] } = await query(
+      `SELECT id FROM residents WHERE id = $1 AND care_home_id = $2`,
+      [id, careHomeId]
+    );
+    if (!resident) return next(new AppError(404, 'Resident not found'));
+
     const {
       occupation, hometown, spouseInfo, childrenInfo, pets,
       hobbies, favoriteMusic, favoriteTv, favoriteFoods,
@@ -279,10 +293,13 @@ export async function generateIsolationAlerts(req: Request, res: Response, next:
 // ── Get Environment Preferences (GET /residents/:id/environment) ──────────
 export async function getEnvironmentPreferences(req: Request, res: Response, next: NextFunction) {
   try {
+    const careHomeId = req.user!.care_home_id;
     const { id } = req.params;
     const { rows: [prefs] } = await query(
-      `SELECT * FROM environment_preferences WHERE resident_id = $1`,
-      [id]
+      `SELECT ep.* FROM environment_preferences ep
+       JOIN residents r ON r.id = ep.resident_id
+       WHERE ep.resident_id = $1 AND r.care_home_id = $2`,
+      [id, careHomeId]
     );
     res.json(prefs || null);
   } catch (err) { next(err); }
@@ -291,7 +308,16 @@ export async function getEnvironmentPreferences(req: Request, res: Response, nex
 // ── Update Environment Preferences (PUT /residents/:id/environment) ───────
 export async function updateEnvironmentPreferences(req: Request, res: Response, next: NextFunction) {
   try {
+    const careHomeId = req.user!.care_home_id;
     const { id } = req.params;
+
+    // Verify resident belongs to the requesting user's care home
+    const { rows: [resident] } = await query(
+      `SELECT id FROM residents WHERE id = $1 AND care_home_id = $2`,
+      [id, careHomeId]
+    );
+    if (!resident) return next(new AppError(404, 'Resident not found'));
+
     const {
       preferredLighting, preferredTemperature, preferredMusicVolume,
       calmingSounds, aromatherapy, roomDecorations,

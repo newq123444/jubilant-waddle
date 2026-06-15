@@ -336,28 +336,29 @@ export async function getEligibleResidents(req: Request, res: Response, next: Ne
     );
     if (!activity) return next(new AppError(404, 'Activity not found'));
 
-    // Build mobility filter
-    let mobilityFilter = '';
+    // Build mobility filter using parameterized array
+    let allowedStatuses: string[];
     switch (activity.required_mobility_level) {
       case 'independent_only':
-        mobilityFilter = `AND mobility_status = 'independent'`;
+        allowedStatuses = ['independent'];
         break;
       case 'walking_aid_or_better':
-        mobilityFilter = `AND mobility_status IN ('independent','walking_aid')`;
+        allowedStatuses = ['independent', 'walking_aid'];
         break;
       case 'wheelchair_or_better':
-        mobilityFilter = `AND mobility_status IN ('independent','walking_aid','wheelchair')`;
+        allowedStatuses = ['independent', 'walking_aid', 'wheelchair'];
         break;
       default: // 'any'
+        allowedStatuses = ['independent', 'walking_aid', 'wheelchair', 'bed_bound'];
         break;
     }
 
     const { rows } = await query(
       `SELECT id, first_name, last_name, room_number, mobility_status, interests, wellbeing_score, photo_url
        FROM residents
-       WHERE care_home_id = $1 AND active = TRUE ${mobilityFilter}
+       WHERE care_home_id = $1 AND active = TRUE AND mobility_status = ANY($2)
        ORDER BY last_name, first_name`,
-      [careHomeId]
+      [careHomeId, allowedStatuses]
     );
     res.json(rows);
   } catch (err) { next(err); }
