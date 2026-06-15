@@ -7,6 +7,9 @@ import {
   activitiesApi, wellbeingApi, predictiveApi, voiceApi, sbarApi,
   news2Api, woundsApi, infectionsApi, continenceApi,
   smartRotaApi, nlSearchApi, riskAssessmentsApi, medInteractionsApi,
+  invoicingApi, occupancyApi, staffCostsApi, recruitmentApi,
+  competencyApi, absenceApi, fireLogApi, visitorsApi,
+  roomTurnoverApi, reportBuilderApi,
 } from '../services/api';
 import { toast } from '../utils/toast';
 
@@ -532,4 +535,287 @@ export function useAcknowledgeMedInteraction() {
 }
 export function useMedInteractionAlerts() {
   return useQuery({ queryKey: ['med-interactions', 'alerts'], queryFn: () => medInteractionsApi.getAlerts().then(r => r.data) });
+}
+
+// ── Enhanced Invoicing (Finance) ──────────────────────────────────────────
+export function useRateUplifts(params?: object) {
+  return useQuery({ queryKey: ['rate-uplifts', params], queryFn: () => invoicingApi.listRateUplifts(params).then(r => r.data) });
+}
+export function useCreateRateUplift() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => invoicingApi.createRateUplift(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['rate-uplifts'] }); toast.success('Rate uplift created'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to create rate uplift') });
+}
+export function useApproveRateUplift() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => invoicingApi.approveRateUplift(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['rate-uplifts'] }); toast.success('Rate uplift updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update rate uplift') });
+}
+export function usePaymentReminders(params?: object) {
+  return useQuery({ queryKey: ['payment-reminders', params], queryFn: () => invoicingApi.listReminders(params).then(r => r.data) });
+}
+export function useRevenueDashboard() {
+  return useQuery({ queryKey: ['revenue-dashboard'], queryFn: () => invoicingApi.getRevenueDashboard().then(r => r.data) });
+}
+
+// ── Occupancy Forecasting (Finance) ──────────────────────────────────────
+export function useOccupancyHistory(params?: object) {
+  return useQuery({ queryKey: ['occupancy', 'history', params], queryFn: () => occupancyApi.getHistory(params).then(r => r.data) });
+}
+export function useRecordOccupancy() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => occupancyApi.record(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['occupancy'] }); toast.success('Occupancy recorded'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to record occupancy') });
+}
+export function useOccupancyForecasts(params?: object) {
+  return useQuery({ queryKey: ['occupancy', 'forecasts', params], queryFn: () => occupancyApi.getForecasts(params).then(r => r.data) });
+}
+export function useGenerateOccupancyForecast() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => occupancyApi.generateForecast(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['occupancy'] }); toast.success('Forecast generated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to generate forecast') });
+}
+export function useOccupancyDashboard() {
+  return useQuery({ queryKey: ['occupancy', 'dashboard'], queryFn: () => occupancyApi.getDashboard().then(r => r.data) });
+}
+
+// ── Staff Cost Analytics (Finance) ───────────────────────────────────────
+export function useRecordStaffCost() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => staffCostsApi.record(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['staff-costs'] }); toast.success('Staff cost recorded'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to record staff cost') });
+}
+export function useStaffCostsSummary(params?: object) {
+  return useQuery({ queryKey: ['staff-costs', 'summary', params], queryFn: () => staffCostsApi.getSummary(params).then(r => r.data) });
+}
+export function useStaffCostsPerResident(params?: object) {
+  return useQuery({ queryKey: ['staff-costs', 'per-resident', params], queryFn: () => staffCostsApi.getPerResident(params).then(r => r.data) });
+}
+export function useStaffCostsBudgetVsActual(params?: object) {
+  return useQuery({ queryKey: ['staff-costs', 'budget-vs-actual', params], queryFn: () => staffCostsApi.getBudgetVsActual(params).then(r => r.data) });
+}
+export function useStaffCostsBudgets(params?: object) {
+  return useQuery({ queryKey: ['staff-costs', 'budgets', params], queryFn: () => staffCostsApi.listBudgets(params).then(r => r.data) });
+}
+export function useCreateStaffCostBudget() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => staffCostsApi.createBudget(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['staff-costs'] }); toast.success('Budget created'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to create budget') });
+}
+
+// ── Recruitment Pipeline (HR) ─────────────────────────────────────────────
+export function useJobPostings(params?: object) {
+  return useQuery({ queryKey: ['recruitment', 'postings', params], queryFn: () => recruitmentApi.listPostings(params).then(r => r.data) });
+}
+export function useCreateJobPosting() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => recruitmentApi.createPosting(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['recruitment'] }); toast.success('Job posting created'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to create posting') });
+}
+export function useUpdateJobPosting() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => recruitmentApi.updatePosting(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['recruitment'] }); toast.success('Job posting updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update posting') });
+}
+export function useJobApplications(params?: object) {
+  return useQuery({ queryKey: ['recruitment', 'applications', params], queryFn: () => recruitmentApi.listApplications(params).then(r => r.data) });
+}
+export function useCreateJobApplication() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => recruitmentApi.createApplication(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['recruitment'] }); toast.success('Application submitted'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to submit application') });
+}
+export function useUpdateApplicationStage() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => recruitmentApi.updateApplicationStage(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['recruitment'] }); toast.success('Application stage updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update stage') });
+}
+export function useInterviews(params?: object) {
+  return useQuery({ queryKey: ['recruitment', 'interviews', params], queryFn: () => recruitmentApi.listInterviews(params).then(r => r.data) });
+}
+export function useScheduleInterview() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => recruitmentApi.scheduleInterview(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['recruitment'] }); toast.success('Interview scheduled'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to schedule interview') });
+}
+export function useUpdateInterviewOutcome() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => recruitmentApi.updateInterviewOutcome(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['recruitment'] }); toast.success('Interview outcome recorded'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to record outcome') });
+}
+export function useCreateDbsCheck() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => recruitmentApi.createDbsCheck(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['recruitment'] }); toast.success('DBS check created'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to create DBS check') });
+}
+export function useUpdateDbsCheck() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => recruitmentApi.updateDbsCheck(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['recruitment'] }); toast.success('DBS check updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update DBS check') });
+}
+export function useRecruitmentPipeline() {
+  return useQuery({ queryKey: ['recruitment', 'pipeline'], queryFn: () => recruitmentApi.getPipeline().then(r => r.data) });
+}
+
+// ── Competency Matrix (HR) ────────────────────────────────────────────────
+export function useCompetencies(params?: object) {
+  return useQuery({ queryKey: ['competencies', params], queryFn: () => competencyApi.listCompetencies(params).then(r => r.data) });
+}
+export function useCreateCompetency() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => competencyApi.createCompetency(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['competencies'] }); toast.success('Competency created'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to create competency') });
+}
+export function useStaffCompetencies(params?: object) {
+  return useQuery({ queryKey: ['competencies', 'staff', params], queryFn: () => competencyApi.listStaffCompetencies(params).then(r => r.data) });
+}
+export function useAssignStaffCompetency() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => competencyApi.assignStaffCompetency(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['competencies'] }); toast.success('Competency assigned'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to assign competency') });
+}
+export function useUpdateStaffCompetency() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => competencyApi.updateStaffCompetency(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['competencies'] }); toast.success('Competency updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update competency') });
+}
+export function useCompetencyMatrix() {
+  return useQuery({ queryKey: ['competencies', 'matrix'], queryFn: () => competencyApi.getMatrix().then(r => r.data) });
+}
+export function useExpiringCompetencies(params?: object) {
+  return useQuery({ queryKey: ['competencies', 'expiring', params], queryFn: () => competencyApi.getExpiring(params).then(r => r.data) });
+}
+
+// ── Absence & Sickness (HR) ──────────────────────────────────────────────
+export function useAbsences(params?: object) {
+  return useQuery({ queryKey: ['absence', 'records', params], queryFn: () => absenceApi.list(params).then(r => r.data) });
+}
+export function useRecordAbsence() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => absenceApi.record(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['absence'] }); toast.success('Absence recorded'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to record absence') });
+}
+export function useCalculateBradfordScore() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => absenceApi.calculateBradford(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['absence'] }); toast.success('Bradford score calculated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to calculate Bradford score') });
+}
+export function useBradfordScores(params?: object) {
+  return useQuery({ queryKey: ['absence', 'bradford', params], queryFn: () => absenceApi.getBradfordScores(params).then(r => r.data) });
+}
+export function useAbsencePatterns(params?: object) {
+  return useQuery({ queryKey: ['absence', 'patterns', params], queryFn: () => absenceApi.getPatterns(params).then(r => r.data) });
+}
+export function useReturnToWorkDue(params?: object) {
+  return useQuery({ queryKey: ['absence', 'return-to-work', params], queryFn: () => absenceApi.getReturnToWorkDue(params).then(r => r.data) });
+}
+export function useCompleteReturnToWork() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => absenceApi.completeReturnToWork(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['absence'] }); toast.success('Return to work completed'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to complete return to work') });
+}
+export function useAbsenceDashboard() {
+  return useQuery({ queryKey: ['absence', 'dashboard'], queryFn: () => absenceApi.getDashboard().then(r => r.data) });
+}
+
+// ── Fire Log Book (Facilities) ────────────────────────────────────────────
+export function useFireTests(params?: object) {
+  return useQuery({ queryKey: ['fire-log', 'tests', params], queryFn: () => fireLogApi.listTests(params).then(r => r.data) });
+}
+export function useRecordFireTest() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => fireLogApi.recordTest(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['fire-log'] }); toast.success('Fire test recorded'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to record fire test') });
+}
+export function useFireEquipmentChecks(params?: object) {
+  return useQuery({ queryKey: ['fire-log', 'equipment', params], queryFn: () => fireLogApi.listEquipmentChecks(params).then(r => r.data) });
+}
+export function useRecordFireEquipmentCheck() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => fireLogApi.recordEquipmentCheck(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['fire-log'] }); toast.success('Equipment check recorded'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to record equipment check') });
+}
+export function useFireOverdueChecks() {
+  return useQuery({ queryKey: ['fire-log', 'overdue'], queryFn: () => fireLogApi.getOverdueChecks().then(r => r.data) });
+}
+export function usePeeps(params?: object) {
+  return useQuery({ queryKey: ['fire-log', 'peeps', params], queryFn: () => fireLogApi.listPeeps(params).then(r => r.data) });
+}
+export function useCreatePeep() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => fireLogApi.createPeep(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['fire-log'] }); toast.success('PEEP created'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to create PEEP') });
+}
+export function useUpdatePeep() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => fireLogApi.updatePeep(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['fire-log'] }); toast.success('PEEP updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update PEEP') });
+}
+export function useFireDashboard() {
+  return useQuery({ queryKey: ['fire-log', 'dashboard'], queryFn: () => fireLogApi.getDashboard().then(r => r.data) });
+}
+
+// ── Visitor Sign-In (Facilities) ─────────────────────────────────────────
+export function useVisitors(params?: object) {
+  return useQuery({ queryKey: ['visitors', params], queryFn: () => visitorsApi.list(params).then(r => r.data) });
+}
+export function useSignInVisitor() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => visitorsApi.signIn(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['visitors'] }); toast.success('Visitor signed in'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to sign in visitor') });
+}
+export function useSignOutVisitor() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (id: string) => visitorsApi.signOut(id).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['visitors'] }); toast.success('Visitor signed out'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to sign out visitor') });
+}
+export function useVisitorDashboard() {
+  return useQuery({ queryKey: ['visitors', 'dashboard'], queryFn: () => visitorsApi.getDashboard().then(r => r.data) });
+}
+export function useVisitorFireRoll() {
+  return useQuery({ queryKey: ['visitors', 'fire-roll'], queryFn: () => visitorsApi.getFireRoll().then(r => r.data) });
+}
+export function useVisitorHistory(residentId: string, params?: object) {
+  return useQuery({ queryKey: ['visitors', 'history', residentId, params], queryFn: () => visitorsApi.getHistory(residentId, params).then(r => r.data), enabled: !!residentId });
+}
+export function useAddVisitorSafeguarding() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => visitorsApi.addSafeguarding(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['visitors'] }); toast.success('Safeguarding flag added'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to add safeguarding flag') });
+}
+export function useVisitorSafeguarding(params?: object) {
+  return useQuery({ queryKey: ['visitors', 'safeguarding', params], queryFn: () => visitorsApi.listSafeguarding(params).then(r => r.data) });
+}
+
+// ── Room Turnover (Facilities) ────────────────────────────────────────────
+export function useRoomTurnovers(params?: object) {
+  return useQuery({ queryKey: ['room-turnovers', params], queryFn: () => roomTurnoverApi.list(params).then(r => r.data) });
+}
+export function useCreateRoomTurnover() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => roomTurnoverApi.create(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['room-turnovers'] }); toast.success('Room turnover created'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to create room turnover') });
+}
+export function useUpdateRoomTurnoverStatus() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => roomTurnoverApi.updateStatus(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['room-turnovers'] }); toast.success('Turnover status updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update status') });
+}
+export function useAddTurnoverChecklistItem() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => roomTurnoverApi.addChecklistItem(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['room-turnovers'] }); toast.success('Checklist item added'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to add checklist item') });
+}
+export function useCompleteTurnoverChecklistItem() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (id: string) => roomTurnoverApi.completeChecklistItem(id).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['room-turnovers'] }); toast.success('Checklist item completed'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to complete item') });
+}
+export function useTurnoverChecklist(turnoverId: string) {
+  return useQuery({ queryKey: ['room-turnovers', 'checklist', turnoverId], queryFn: () => roomTurnoverApi.getChecklist(turnoverId).then(r => r.data), enabled: !!turnoverId });
+}
+export function useRoomTurnoverDashboard() {
+  return useQuery({ queryKey: ['room-turnovers', 'dashboard'], queryFn: () => roomTurnoverApi.getDashboard().then(r => r.data) });
+}
+
+// ── Custom Report Builder ─────────────────────────────────────────────────
+export function useReportTemplates(params?: object) {
+  return useQuery({ queryKey: ['reports', 'templates', params], queryFn: () => reportBuilderApi.listTemplates(params).then(r => r.data) });
+}
+export function useReportTemplate(id: string) {
+  return useQuery({ queryKey: ['reports', 'template', id], queryFn: () => reportBuilderApi.getTemplate(id).then(r => r.data), enabled: !!id });
+}
+export function useCreateReportTemplate() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => reportBuilderApi.createTemplate(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['reports'] }); toast.success('Report template created'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to create template') });
+}
+export function useUpdateReportTemplate() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => reportBuilderApi.updateTemplate(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['reports'] }); toast.success('Report template updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update template') });
+}
+export function useDeleteReportTemplate() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (id: string) => reportBuilderApi.deleteTemplate(id).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['reports'] }); toast.success('Report template deleted'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to delete template') });
+}
+export function useRunReport() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => reportBuilderApi.runReport(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['reports', 'runs'] }); toast.success('Report generated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to run report') });
+}
+export function useReportRuns(params?: object) {
+  return useQuery({ queryKey: ['reports', 'runs', params], queryFn: () => reportBuilderApi.listRuns(params).then(r => r.data) });
+}
+export function useReportRun(id: string) {
+  return useQuery({ queryKey: ['reports', 'run', id], queryFn: () => reportBuilderApi.getRun(id).then(r => r.data), enabled: !!id });
+}
+export function useReportDataSources() {
+  return useQuery({ queryKey: ['reports', 'data-sources'], queryFn: () => reportBuilderApi.getDataSources().then(r => r.data) });
 }

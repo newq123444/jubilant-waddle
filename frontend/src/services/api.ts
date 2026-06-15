@@ -266,3 +266,119 @@ export const medInteractionsApi = {
   acknowledge: (id: string) => api.patch(`/med-interactions/${id}/acknowledge`),
   getAlerts: () => api.get('/med-interactions/alerts'),
 };
+
+// ── Enhanced Invoicing (Finance) ──────────────────────────────────────────
+export const invoicingApi = {
+  listRateUplifts:    (params?: object) => api.get('/invoicing/rate-uplifts', { params }),
+  createRateUplift:   (data: object) => api.post('/invoicing/rate-uplifts', data),
+  approveRateUplift:  (id: string, data: object) => api.patch(`/invoicing/rate-uplifts/${id}`, data),
+  listReminders:      (params?: object) => api.get('/invoicing/payment-reminders', { params }),
+  getRevenueDashboard:() => api.get('/invoicing/revenue-dashboard'),
+};
+
+// ── Occupancy Forecasting (Finance) ──────────────────────────────────────
+export const occupancyApi = {
+  record:         (data: object) => api.post('/occupancy', data),
+  getHistory:     (params?: object) => api.get('/occupancy/history', { params }),
+  generateForecast: (data: object) => api.post('/occupancy/forecasts', data),
+  getForecasts:   (params?: object) => api.get('/occupancy/forecasts', { params }),
+  getDashboard:   () => api.get('/occupancy/dashboard'),
+};
+
+// ── Staff Cost Analytics (Finance) ───────────────────────────────────────
+export const staffCostsApi = {
+  record:         (data: object) => api.post('/staff-costs', data),
+  getSummary:     (params?: object) => api.get('/staff-costs/summary', { params }),
+  getPerResident: (params?: object) => api.get('/staff-costs/per-resident', { params }),
+  getBudgetVsActual: (params?: object) => api.get('/staff-costs/budget-vs-actual', { params }),
+  listBudgets:    (params?: object) => api.get('/staff-costs/budgets', { params }),
+  createBudget:   (data: object) => api.post('/staff-costs/budgets', data),
+};
+
+// ── Recruitment Pipeline (HR) ─────────────────────────────────────────────
+export const recruitmentApi = {
+  listPostings:       (params?: object) => api.get('/recruitment/postings', { params }),
+  createPosting:      (data: object) => api.post('/recruitment/postings', data),
+  updatePosting:      (id: string, data: object) => api.patch(`/recruitment/postings/${id}`, data),
+  listApplications:   (params?: object) => api.get('/recruitment/applications', { params }),
+  createApplication:  (data: object) => api.post('/recruitment/applications', data),
+  updateApplicationStage: (id: string, data: object) => api.patch(`/recruitment/applications/${id}/stage`, data),
+  listInterviews:     (params?: object) => api.get('/recruitment/interviews', { params }),
+  scheduleInterview:  (data: object) => api.post('/recruitment/interviews', data),
+  updateInterviewOutcome: (id: string, data: object) => api.patch(`/recruitment/interviews/${id}/outcome`, data),
+  createDbsCheck:     (data: object) => api.post('/recruitment/dbs-checks', data),
+  updateDbsCheck:     (id: string, data: object) => api.patch(`/recruitment/dbs-checks/${id}`, data),
+  getPipeline:        () => api.get('/recruitment/pipeline'),
+};
+
+// ── Competency Matrix (HR) ────────────────────────────────────────────────
+export const competencyApi = {
+  listCompetencies:   (params?: object) => api.get('/competencies', { params }),
+  createCompetency:   (data: object) => api.post('/competencies', data),
+  listStaffCompetencies: (params?: object) => api.get('/competencies/staff', { params }),
+  assignStaffCompetency: (data: object) => api.post('/competencies/staff', data),
+  updateStaffCompetency: (id: string, data: object) => api.patch(`/competencies/staff/${id}`, data),
+  getMatrix:          () => api.get('/competencies/matrix'),
+  getExpiring:        (params?: object) => api.get('/competencies/expiring', { params }),
+};
+
+// ── Absence & Sickness (HR) ──────────────────────────────────────────────
+export const absenceApi = {
+  record:             (data: object) => api.post('/absence', data),
+  list:               (params?: object) => api.get('/absence', { params }),
+  calculateBradford:  (data: object) => api.post('/absence/bradford-score', data),
+  getBradfordScores:  (params?: object) => api.get('/absence/bradford-scores', { params }),
+  getPatterns:        (params?: object) => api.get('/absence/patterns', { params }),
+  getReturnToWorkDue: (params?: object) => api.get('/absence/return-to-work-due', { params }),
+  completeReturnToWork: (id: string, data: object) => api.patch(`/absence/${id}/return-to-work`, data),
+  getDashboard:       () => api.get('/absence/dashboard'),
+};
+
+// ── Fire Log Book (Facilities) ────────────────────────────────────────────
+export const fireLogApi = {
+  recordTest:         (data: object) => api.post('/fire-log/tests', data),
+  listTests:          (params?: object) => api.get('/fire-log/tests', { params }),
+  recordEquipmentCheck: (data: object) => api.post('/fire-log/equipment-checks', data),
+  listEquipmentChecks: (params?: object) => api.get('/fire-log/equipment-checks', { params }),
+  getOverdueChecks:   () => api.get('/fire-log/overdue-checks'),
+  createPeep:         (data: object) => api.post('/fire-log/peeps', data),
+  listPeeps:          (params?: object) => api.get('/fire-log/peeps', { params }),
+  updatePeep:         (id: string, data: object) => api.patch(`/fire-log/peeps/${id}`, data),
+  getDashboard:       () => api.get('/fire-log/dashboard'),
+};
+
+// ── Visitor Sign-In (Facilities) ─────────────────────────────────────────
+export const visitorsApi = {
+  signIn:             (data: object) => api.post('/visitors/sign-in', data),
+  signOut:            (id: string) => api.patch(`/visitors/${id}/sign-out`),
+  list:               (params?: object) => api.get('/visitors', { params }),
+  getDashboard:       () => api.get('/visitors/dashboard'),
+  getFireRoll:        () => api.get('/visitors/fire-roll'),
+  getHistory:         (residentId: string, params?: object) => api.get(`/visitors/history/${residentId}`, { params }),
+  addSafeguarding:    (data: object) => api.post('/visitors/safeguarding', data),
+  listSafeguarding:   (params?: object) => api.get('/visitors/safeguarding', { params }),
+};
+
+// ── Room Turnover (Facilities) ────────────────────────────────────────────
+export const roomTurnoverApi = {
+  create:             (data: object) => api.post('/room-turnovers', data),
+  list:               (params?: object) => api.get('/room-turnovers', { params }),
+  updateStatus:       (id: string, data: object) => api.patch(`/room-turnovers/${id}/status`, data),
+  addChecklistItem:   (data: object) => api.post('/room-turnovers/checklist', data),
+  completeChecklistItem: (id: string) => api.patch(`/room-turnovers/checklist/${id}/complete`),
+  getChecklist:       (turnoverId: string) => api.get(`/room-turnovers/${turnoverId}/checklist`),
+  getDashboard:       () => api.get('/room-turnovers/dashboard'),
+};
+
+// ── Custom Report Builder ─────────────────────────────────────────────────
+export const reportBuilderApi = {
+  listTemplates:      (params?: object) => api.get('/reports/templates', { params }),
+  getTemplate:        (id: string) => api.get(`/reports/templates/${id}`),
+  createTemplate:     (data: object) => api.post('/reports/templates', data),
+  updateTemplate:     (id: string, data: object) => api.patch(`/reports/templates/${id}`, data),
+  deleteTemplate:     (id: string) => api.delete(`/reports/templates/${id}`),
+  runReport:          (data: object) => api.post('/reports/run', data),
+  listRuns:           (params?: object) => api.get('/reports/runs', { params }),
+  getRun:             (id: string) => api.get(`/reports/runs/${id}`),
+  getDataSources:     () => api.get('/reports/data-sources'),
+};

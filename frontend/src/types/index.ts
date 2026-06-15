@@ -828,6 +828,378 @@ export interface RiskOverviewItem {
   falls_level?: string;
 }
 
+// ── Batch 2: Finance ──────────────────────────────────────────────────────
+export interface RateUplift {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  previous_rate_pence: number;
+  new_rate_pence: number;
+  effective_date: string;
+  reason?: string;
+  approved_by?: string;
+  approved_by_name?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PaymentReminder {
+  id: string;
+  care_home_id: string;
+  invoice_id: string;
+  invoice_number?: string;
+  resident_name?: string;
+  payer_name?: string;
+  amount_due_pence: number;
+  due_date: string;
+  days_overdue: number;
+  reminder_sent_at?: string;
+  status: 'pending' | 'sent' | 'paid';
+  created_at: string;
+}
+
+export interface OccupancyRecord {
+  id: string;
+  care_home_id: string;
+  record_date: string;
+  total_beds: number;
+  occupied_beds: number;
+  occupancy_rate: number;
+  notes?: string;
+  created_at: string;
+}
+
+export interface OccupancyForecast {
+  id: string;
+  care_home_id: string;
+  forecast_date: string;
+  predicted_occupancy: number;
+  confidence_low: number;
+  confidence_high: number;
+  model_type?: string;
+  generated_at: string;
+}
+
+export interface StaffCost {
+  id: string;
+  care_home_id: string;
+  staff_id: string;
+  staff_name?: string;
+  period_start: string;
+  period_end: string;
+  regular_hours: number;
+  overtime_hours: number;
+  agency_hours: number;
+  regular_cost_pence: number;
+  overtime_cost_pence: number;
+  agency_cost_pence: number;
+  total_cost_pence: number;
+  created_at: string;
+}
+
+export interface CostBudget {
+  id: string;
+  care_home_id: string;
+  budget_name: string;
+  period_start: string;
+  period_end: string;
+  budget_amount_pence: number;
+  actual_amount_pence?: number;
+  variance_pence?: number;
+  status: 'on_track' | 'over_budget' | 'under_budget';
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Batch 2: HR ───────────────────────────────────────────────────────────
+export interface JobPosting {
+  id: string;
+  care_home_id: string;
+  title: string;
+  department?: string;
+  description?: string;
+  requirements?: string;
+  salary_range?: string;
+  contract_type: 'full_time' | 'part_time' | 'bank' | 'agency';
+  status: 'draft' | 'open' | 'closed' | 'filled';
+  posted_date?: string;
+  closing_date?: string;
+  applications_count?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface JobApplication {
+  id: string;
+  care_home_id: string;
+  posting_id: string;
+  posting_title?: string;
+  applicant_name: string;
+  applicant_email?: string;
+  applicant_phone?: string;
+  cv_url?: string;
+  stage: 'applied' | 'screening' | 'interview' | 'offer' | 'hired' | 'rejected';
+  notes?: string;
+  applied_date: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Interview {
+  id: string;
+  care_home_id: string;
+  application_id: string;
+  applicant_name?: string;
+  posting_title?: string;
+  interviewer_id?: string;
+  interviewer_name?: string;
+  scheduled_at: string;
+  duration_minutes?: number;
+  location?: string;
+  interview_type: 'phone' | 'video' | 'in_person';
+  outcome?: 'pass' | 'fail' | 'pending';
+  notes?: string;
+  created_at: string;
+}
+
+export interface DbsCheck {
+  id: string;
+  care_home_id: string;
+  application_id?: string;
+  staff_id?: string;
+  applicant_name?: string;
+  check_type: 'basic' | 'standard' | 'enhanced';
+  status: 'pending' | 'in_progress' | 'clear' | 'flagged';
+  submitted_date?: string;
+  completed_date?: string;
+  certificate_number?: string;
+  expiry_date?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Competency {
+  id: string;
+  care_home_id: string;
+  name: string;
+  category?: string;
+  description?: string;
+  required_for_roles?: string[];
+  renewal_months?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StaffCompetency {
+  id: string;
+  care_home_id: string;
+  staff_id: string;
+  staff_name?: string;
+  competency_id: string;
+  competency_name?: string;
+  achieved_date?: string;
+  expiry_date?: string;
+  status: 'not_started' | 'in_progress' | 'achieved' | 'expired';
+  evidence_url?: string;
+  assessor_id?: string;
+  assessor_name?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AbsenceRecord {
+  id: string;
+  care_home_id: string;
+  staff_id: string;
+  staff_name?: string;
+  absence_type: 'sick' | 'holiday' | 'compassionate' | 'unpaid' | 'maternity' | 'other';
+  start_date: string;
+  end_date?: string;
+  days_lost: number;
+  reason?: string;
+  self_certified: boolean;
+  fit_note_received: boolean;
+  return_to_work_completed: boolean;
+  return_to_work_date?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BradfordScore {
+  id: string;
+  care_home_id: string;
+  staff_id: string;
+  staff_name?: string;
+  score: number;
+  spells: number;
+  total_days: number;
+  period_start: string;
+  period_end: string;
+  risk_level: 'low' | 'medium' | 'high' | 'critical';
+  calculated_at: string;
+}
+
+// ── Batch 2: Facilities ───────────────────────────────────────────────────
+export interface FireTest {
+  id: string;
+  care_home_id: string;
+  test_type: string;
+  test_date: string;
+  conducted_by: string;
+  conducted_by_name?: string;
+  location?: string;
+  result: 'pass' | 'fail' | 'partial';
+  issues_found?: string;
+  corrective_action?: string;
+  next_test_due?: string;
+  notes?: string;
+  created_at: string;
+}
+
+export interface FireEquipmentCheck {
+  id: string;
+  care_home_id: string;
+  equipment_type: string;
+  equipment_id_tag?: string;
+  location: string;
+  check_date: string;
+  checked_by: string;
+  checked_by_name?: string;
+  status: 'pass' | 'fail' | 'needs_attention';
+  issues_found?: string;
+  next_check_due?: string;
+  notes?: string;
+  created_at: string;
+}
+
+export interface Peep {
+  id: string;
+  care_home_id: string;
+  resident_id?: string;
+  resident_name?: string;
+  staff_id?: string;
+  staff_name?: string;
+  person_name: string;
+  mobility_needs?: string;
+  evacuation_method?: string;
+  assistance_required?: string;
+  location?: string;
+  floor_level?: string;
+  review_date?: string;
+  status: 'active' | 'archived';
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VisitorRecord {
+  id: string;
+  care_home_id: string;
+  visitor_name: string;
+  visitor_company?: string;
+  visitor_phone?: string;
+  visiting_resident_id?: string;
+  visiting_resident_name?: string;
+  purpose?: string;
+  sign_in_time: string;
+  sign_out_time?: string;
+  badge_number?: string;
+  car_registration?: string;
+  dbs_checked?: boolean;
+  health_declaration?: boolean;
+  signed_in_by?: string;
+  notes?: string;
+  created_at: string;
+}
+
+export interface VisitorSafeguarding {
+  id: string;
+  care_home_id: string;
+  visitor_name: string;
+  flag_type: 'banned' | 'supervised_only' | 'alert' | 'dbs_required';
+  reason?: string;
+  resident_id?: string;
+  resident_name?: string;
+  flagged_by?: string;
+  flagged_by_name?: string;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RoomTurnover {
+  id: string;
+  care_home_id: string;
+  room_number: string;
+  previous_resident_id?: string;
+  previous_resident_name?: string;
+  vacated_date: string;
+  target_ready_date?: string;
+  actual_ready_date?: string;
+  status: 'pending' | 'in_progress' | 'cleaning' | 'maintenance' | 'inspection' | 'ready';
+  assigned_to?: string;
+  assigned_to_name?: string;
+  notes?: string;
+  checklist_progress?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TurnoverChecklistItem {
+  id: string;
+  turnover_id: string;
+  task_name: string;
+  category?: string;
+  assigned_to?: string;
+  assigned_to_name?: string;
+  completed: boolean;
+  completed_at?: string;
+  completed_by?: string;
+  completed_by_name?: string;
+  notes?: string;
+  sort_order?: number;
+  created_at: string;
+}
+
+export interface ReportTemplate {
+  id: string;
+  care_home_id: string;
+  name: string;
+  description?: string;
+  data_source: string;
+  filters?: Record<string, any>;
+  columns?: string[];
+  grouping?: string;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+  chart_type?: 'table' | 'bar' | 'line' | 'pie';
+  created_by?: string;
+  created_by_name?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReportRun {
+  id: string;
+  care_home_id: string;
+  template_id: string;
+  template_name?: string;
+  run_by?: string;
+  run_by_name?: string;
+  parameters?: Record<string, any>;
+  row_count?: number;
+  status: 'running' | 'completed' | 'failed';
+  result_data?: any;
+  error_message?: string;
+  started_at: string;
+  completed_at?: string;
+}
+
 // -- Medication Interactions --
 export interface MedicationInteraction {
   id: string;
