@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "feat",
   "description": "Database migrations for all 8 new features: NEWS2 vitals scoring, wound photography tracking, infection outbreak tracking, continence assessment, smart rota builder, natural language search, automated risk assessments (Waterlow/MUST/Falls), and medication interaction checker.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Create backend/migrations/010_batch1_features.sql with tables for: news2_assessments (id, care_home_id, resident_id, assessed_by, respiratory_rate, spo2, supplemental_oxygen, systolic_bp, pulse, consciousness, temperature, total_score, risk_level, escalation_action, escalation_triggered_at, notes, created_at), news2_escalations (id, care_home_id, assessment_id, resident_id, escalation_level, action_taken, responded_by, responded_at, status, created_at)",
     "Add wound_assessments table (id, care_home_id, resident_id, assessed_by, wound_type, location_body_area, location_x, location_y, width_mm, height_mm, depth_mm, wound_bed, exudate_level, exudate_type, surrounding_skin, pain_level, photo_url, notes, status, created_at, updated_at)",
@@ -24,5 +24,5 @@
     "Run: cd /projects/sandbox/jubilant-waddle/backend && npx tsc --noEmit"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Pre-existing TypeScript errors in auth.controller.ts, photos.controller.ts, upload.ts middleware (missing @types/compression, @types/multer, JWT type issues). These are unrelated to the SQL migration. SQL files are not compiled by tsc."
 }
