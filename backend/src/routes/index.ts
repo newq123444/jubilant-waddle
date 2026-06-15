@@ -40,6 +40,16 @@ import * as fireLogCtrl from '../controllers/fireLog.controller';
 import * as visitorsCtrl from '../controllers/visitors.controller';
 import * as roomTurnoverCtrl from '../controllers/roomTurnover.controller';
 import * as reportBuilderCtrl from '../controllers/reportBuilder.controller';
+import * as offlineSyncCtrl from '../controllers/offlineSync.controller';
+import * as residentTabletCtrl from '../controllers/residentTablet.controller';
+import * as qrRoomCtrl from '../controllers/qrRoom.controller';
+import * as benchmarkingCtrl from '../controllers/benchmarking.controller';
+import * as boardPackCtrl from '../controllers/boardPack.controller';
+import * as staffPerformanceCtrl from '../controllers/staffPerformance.controller';
+import * as elearningCtrl from '../controllers/elearning.controller';
+import * as competencySignoffCtrl from '../controllers/competencySignoff.controller';
+import * as diabetesCtrl from '../controllers/diabetes.controller';
+import * as palliativeCareCtrl from '../controllers/palliativeCare.controller';
 import { upload } from '../middleware/upload'; // getBillingSummary added
 import * as aiService from '../services/ai.service';
 import { query } from '../models/db';
@@ -627,6 +637,83 @@ router.post('/reports/run',                     isManager, reportBuilderCtrl.run
 router.get('/reports/runs',                     isManager, reportBuilderCtrl.listReportRuns);
 router.get('/reports/runs/:id',                 isManager, reportBuilderCtrl.getReportRun);
 router.get('/reports/data-sources',             isManager, reportBuilderCtrl.getAvailableDataSources);
+
+// ── Offline Sync (Mobile) ─────────────────────────────────────────────────
+router.post('/offline-sync/queue',              isStaff, offlineSyncCtrl.queueOfflineAction);
+router.post('/offline-sync/sync',               isStaff, offlineSyncCtrl.syncOfflineActions);
+router.get('/offline-sync/conflicts',           isStaff, offlineSyncCtrl.getConflicts);
+router.patch('/offline-sync/conflicts/:id',     isStaff, offlineSyncCtrl.resolveConflict);
+
+// ── Resident Tablet ───────────────────────────────────────────────────────
+router.post('/tablet/requests',                 isStaff, residentTabletCtrl.createRequest);
+router.get('/tablet/requests',                  isStaff, residentTabletCtrl.listRequests);
+router.patch('/tablet/requests/:id',            isStaff, residentTabletCtrl.acknowledgeRequest);
+router.get('/tablet/residents/:residentId',     isStaff, residentTabletCtrl.getResidentView);
+
+// ── QR Room Codes ─────────────────────────────────────────────────────────
+router.post('/qr-rooms',                        isManager, qrRoomCtrl.generateQrCode);
+router.get('/qr-rooms',                         isStaff, qrRoomCtrl.getQrCodes);
+router.get('/qr-rooms/scan/:code',              isStaff, qrRoomCtrl.scanQrCode);
+router.patch('/qr-rooms/:id/deactivate',        isManager, qrRoomCtrl.deactivateQrCode);
+
+// ── Benchmarking KPIs ─────────────────────────────────────────────────────
+router.get('/benchmarking/dashboard',           isManager, benchmarkingCtrl.getDashboard);
+router.post('/benchmarking/calculate',          isManager, benchmarkingCtrl.calculateKpis);
+router.get('/benchmarking/metrics/:metricName', isManager, benchmarkingCtrl.getMetricHistory);
+router.get('/benchmarking/national-averages',   isManager, benchmarkingCtrl.getNationalAverages);
+
+// ── Board Pack Reports ────────────────────────────────────────────────────
+router.post('/board-packs',                     isManager, boardPackCtrl.generateBoardPack);
+router.get('/board-packs',                      isManager, boardPackCtrl.listBoardPacks);
+router.get('/board-packs/:id',                  isManager, boardPackCtrl.getBoardPack);
+router.patch('/board-packs/:id/approve',        isManager, boardPackCtrl.approveBoardPack);
+
+// ── Staff Performance Metrics ─────────────────────────────────────────────
+router.get('/staff-performance/team',           isManager, staffPerformanceCtrl.getTeamMetrics);
+router.get('/staff-performance/:staffId',       isManager, staffPerformanceCtrl.getIndividualMetrics);
+router.post('/staff-performance/calculate',     isManager, staffPerformanceCtrl.calculateMetrics);
+router.get('/staff-performance/response-times', isManager, staffPerformanceCtrl.getResponseTimes);
+
+// ── E-Learning ────────────────────────────────────────────────────────────
+router.get('/elearning/modules',                isStaff, elearningCtrl.listModules);
+router.post('/elearning/modules',               isManager, elearningCtrl.createModule);
+router.get('/elearning/modules/:id',            isStaff, elearningCtrl.getModule);
+router.post('/elearning/modules/:moduleId/quiz', isManager, elearningCtrl.createQuiz);
+router.post('/elearning/modules/:moduleId/quiz/submit', isStaff, elearningCtrl.submitQuizAttempt);
+router.get('/elearning/completions',            isStaff, elearningCtrl.getCompletions);
+router.get('/elearning/progress/:staffId',      isManager, elearningCtrl.getStaffProgress);
+router.get('/elearning/mandatory-status',       isManager, elearningCtrl.getMandatoryStatus);
+
+// ── Competency Signoffs ───────────────────────────────────────────────────
+router.post('/competency-signoffs',             isManager, competencySignoffCtrl.createSignoff);
+router.get('/competency-signoffs',              isManager, competencySignoffCtrl.listSignoffs);
+router.get('/competency-signoffs/:id',          isManager, competencySignoffCtrl.getSignoff);
+router.patch('/competency-signoffs/:id',        isManager, competencySignoffCtrl.updateSignoff);
+router.get('/competency-signoffs/staff/:staffId', isManager, competencySignoffCtrl.getStaffSignoffs);
+
+// ── Diabetes Management ───────────────────────────────────────────────────
+router.post('/diabetes/glucose',                isClinical, diabetesCtrl.logGlucose);
+router.get('/diabetes/glucose/:residentId',     isClinical, diabetesCtrl.getGlucoseReadings);
+router.post('/diabetes/insulin',                isClinical, diabetesCtrl.logInsulinDose);
+router.get('/diabetes/insulin/:residentId',     isClinical, diabetesCtrl.getInsulinDoses);
+router.post('/diabetes/hba1c',                  isClinical, diabetesCtrl.recordHba1c);
+router.get('/diabetes/hba1c/:residentId',       isClinical, diabetesCtrl.getHba1cHistory);
+router.get('/diabetes/alerts',                  isClinical, diabetesCtrl.getAlerts);
+router.patch('/diabetes/alerts/:id',            isClinical, diabetesCtrl.acknowledgeAlert);
+router.get('/diabetes/patterns/:residentId',    isClinical, diabetesCtrl.getGlucosePatterns);
+
+// ── Palliative Care ───────────────────────────────────────────────────────
+router.post('/palliative/care-plans',                   isClinical, palliativeCareCtrl.createCarePlan);
+router.get('/palliative/care-plans/:residentId',        isClinical, palliativeCareCtrl.getCarePlan);
+router.patch('/palliative/care-plans/:id',              isClinical, palliativeCareCtrl.updateCarePlan);
+router.post('/palliative/comfort-rounds',               isClinical, palliativeCareCtrl.scheduleComfortRound);
+router.patch('/palliative/comfort-rounds/:id',          isClinical, palliativeCareCtrl.completeComfortRound);
+router.get('/palliative/comfort-rounds/:residentId',    isClinical, palliativeCareCtrl.getComfortRounds);
+router.post('/palliative/anticipatory-meds',            isClinical, palliativeCareCtrl.addAnticipatoryMed);
+router.get('/palliative/anticipatory-meds/:residentId', isClinical, palliativeCareCtrl.getAnticipatoryMeds);
+router.patch('/palliative/anticipatory-meds/:id',       isClinical, palliativeCareCtrl.administerAnticipatoryMed);
+router.post('/palliative/family-communications',        isClinical, palliativeCareCtrl.logFamilyCommunication);
+router.get('/palliative/family-communications/:residentId', isClinical, palliativeCareCtrl.getFamilyCommunications);
 
 // ── AI ────────────────────────────────────────────────────────────────────
 router.post('/ai/family-summary',   isStaff, aiService.generateFamilySummary);

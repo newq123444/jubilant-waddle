@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "feat",
   "description": "Backend controllers and routes for all 10 Batch 3 features: offline sync, resident tablet, QR room scanning, benchmarking, board pack, staff performance, e-learning, competency sign-off, diabetes management, and palliative care.",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Create backend/src/controllers/offlineSync.controller.ts with: queueOfflineAction (POST - stores offline actions), syncOfflineActions (POST - processes queued items, detects conflicts), getConflicts (GET - lists unresolved conflicts), resolveConflict (PATCH :id - resolves a conflict with chosen resolution)",
     "Create backend/src/controllers/residentTablet.controller.ts with: createRequest (POST - resident submits help/meal_rating/activity_choice/video_call/entertainment request), listRequests (GET - list requests with filters), acknowledgeRequest (PATCH :id - staff acknowledges), getResidentView (GET :residentId - simplified data for tablet view)",
