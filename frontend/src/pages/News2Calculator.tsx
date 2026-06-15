@@ -19,12 +19,9 @@ function scoreSpo2(spo2: number, onO2: boolean): number {
     return 0;
   }
   // Scale 2 for supplemental O2
-  if (spo2 <= 83) return 3;
-  if (spo2 <= 85) return 2;
-  if (spo2 <= 87) return 1;
-  if (spo2 <= 92) return 0;
-  if (spo2 <= 94) return 1;
-  if (spo2 <= 96) return 2;
+  if (spo2 >= 97) return 0;
+  if (spo2 >= 95) return 1;
+  if (spo2 >= 93) return 2;
   return 3;
 }
 function scoreSupplementalO2(onO2: boolean): number {
@@ -106,11 +103,11 @@ export default function News2Calculator() {
     e.preventDefault();
     if (!selectedResident) return;
     calculateMutation.mutate({
-      resident_id: selectedResident,
-      respiratory_rate: respiratoryRate,
+      residentId: selectedResident,
+      respiratoryRate,
       spo2,
-      supplemental_oxygen: supplementalOxygen,
-      systolic_bp: systolicBP,
+      supplementalOxygen,
+      systolicBp: systolicBP,
       pulse,
       consciousness,
       temperature,

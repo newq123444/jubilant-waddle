@@ -230,7 +230,7 @@ export const continenceApi = {
   getPatterns: (residentId: string) => api.get(`/continence/${residentId}/patterns`),
   createAssessment: (data: object) => api.post('/continence/assessment', data),
   getAssessment: (residentId: string) => api.get(`/continence/${residentId}/assessment`),
-  getOverview: () => api.get('/continence/home-overview'),
+  getOverview: () => api.get('/continence/overview'),
 };
 
 // -- Smart Rota Builder --

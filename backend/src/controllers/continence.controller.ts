@@ -223,7 +223,7 @@ export async function getHomeOverview(req: Request, res: Response, next: NextFun
       `SELECT COUNT(*) AS pad_changes
        FROM continence_logs
        WHERE care_home_id = $1
-         AND pad_status IN ('changed', 'wet', 'soiled')
+         AND event_type = 'pad_change'
          AND event_time > NOW() - INTERVAL '7 days'`,
       [careHomeId]
     );

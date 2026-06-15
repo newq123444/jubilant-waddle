@@ -258,7 +258,7 @@ export async function respondToEscalation(req: Request, res: Response, next: Nex
        SET responded_by = $1, responded_at = NOW(), action_taken = $2, status = $3
        WHERE id = $4 AND care_home_id = $5
        RETURNING *`,
-      [respondedBy, actionTaken, status || 'responded', id, careHomeId]
+      [respondedBy, actionTaken, status || 'acknowledged', id, careHomeId]
     );
 
     if (!escalation) {
