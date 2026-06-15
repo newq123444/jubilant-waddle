@@ -139,6 +139,16 @@ export const activitiesApi = {
   wellbeingDashboard: () => api.get('/activities/wellbeing-dashboard'),
 };
 
+// ── Predictive Care ────────────────────────────────────────────────────────
+export const predictiveApi = {
+  getDashboard:     () => api.get('/predictive/dashboard'),
+  getResidentRisk:  (residentId: string) => api.get(`/predictive/residents/${residentId}/risk`),
+  getResidentHistory: (residentId: string) => api.get(`/predictive/residents/${residentId}/history`),
+  getAlerts:        () => api.get('/predictive/alerts'),
+  acknowledgeAlert: (id: string) => api.patch(`/predictive/alerts/${id}/acknowledge`),
+  runAnalysis:      () => api.post('/predictive/analyze'),
+};
+
 // ── Wellbeing ──────────────────────────────────────────────────────────────
 export const wellbeingApi = {
   log:                    (data: object) => api.post('/wellbeing/log', data),

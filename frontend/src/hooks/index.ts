@@ -4,7 +4,7 @@ import {
   api, residentsApi, notesApi, emarApi, incidentsApi,
   scheduleApi, staffApi, complianceApi, familyApi,
   billingApi, aiApi, dashboardApi, auditApi, policiesApi,
-  activitiesApi, wellbeingApi,
+  activitiesApi, wellbeingApi, predictiveApi,
 } from '../services/api';
 import { toast } from '../utils/toast';
 
@@ -276,4 +276,23 @@ export function useEnvironmentPreferences(residentId: string) {
 export function useUpdateEnvironmentPreferences() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: ({ residentId, data }: { residentId: string; data: object }) => wellbeingApi.updateEnvironment(residentId, data).then(r => r.data), onSuccess: (_: any, vars: any) => { qc.invalidateQueries({ queryKey: ['environment', vars.residentId] }); toast.success('Environment preferences updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update') });
+}
+
+// ── Predictive Care ───────────────────────────────────────────────────────
+export function usePredictiveRiskDashboard() {
+  return useQuery({ queryKey: ['predictive-dashboard'], queryFn: () => predictiveApi.getDashboard().then(r => r.data) });
+}
+export function usePredictiveAlerts() {
+  return useQuery({ queryKey: ['predictive-alerts'], queryFn: () => predictiveApi.getAlerts().then(r => r.data) });
+}
+export function useResidentRiskHistory(residentId: string) {
+  return useQuery({ queryKey: ['predictive-history', residentId], queryFn: () => predictiveApi.getResidentHistory(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useRunPredictiveAnalysis() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: () => predictiveApi.runAnalysis().then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['predictive-dashboard'] }); qc.invalidateQueries({ queryKey: ['predictive-alerts'] }); toast.success('Analysis complete'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Analysis failed') });
+}
+export function useAcknowledgePredictiveAlert() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (id: string) => predictiveApi.acknowledgeAlert(id).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['predictive-alerts'] }); toast.success('Alert acknowledged'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to acknowledge alert') });
 }

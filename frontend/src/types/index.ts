@@ -419,3 +419,43 @@ export interface EnvironmentPreferences {
   notes?: string;
   updated_at?: string;
 }
+
+// ── Predictive Care ───────────────────────────────────────────────────────
+export interface PredictiveRiskScore {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  risk_type: 'falls' | 'deterioration';
+  score: number;
+  factors: Record<string, any>;
+  generated_at: string;
+}
+
+export interface PredictiveAlert {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  room_number?: string;
+  alert_type: string;
+  risk_score: number;
+  threshold: number;
+  factors: Record<string, any>;
+  status: 'active' | 'acknowledged' | 'resolved';
+  acknowledged_by?: string;
+  acknowledged_by_name?: string;
+  resolved_at?: string;
+  created_at: string;
+}
+
+export interface PredictiveRiskDashboardItem {
+  resident_id: string;
+  first_name: string;
+  last_name: string;
+  room_number: string;
+  risk_level: string;
+  falls_score: number | null;
+  falls_generated_at: string | null;
+  deterioration_score: number | null;
+  deterioration_generated_at: string | null;
+}
