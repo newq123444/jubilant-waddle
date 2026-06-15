@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "feat",
   "description": "Database migration 011_batch2_features.sql with all tables for Batch 2: automated invoicing enhancements (rate_uplifts, payment_reminders, revenue_dashboard_cache), occupancy forecasting (occupancy_records, occupancy_forecasts), staff cost analytics (staff_costs, cost_budgets), digital recruitment pipeline (job_postings, job_applications, interviews, dbs_checks), competency matrix (competencies, staff_competencies), sickness/absence analytics (absence_records, bradford_scores, return_to_work), fire log book (fire_tests, fire_drills, fire_equipment_checks, peeps), visitor sign-in (visitor_records, visitor_safeguarding), room turnover (room_turnovers, turnover_checklist_items), and custom report builder (report_templates, report_runs).",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Create backend/migrations/011_batch2_features.sql with CREATE EXTENSION IF NOT EXISTS uuid-ossp at top",
     "Add rate_uplifts table (id UUID PK, care_home_id FK, resident_id FK, previous_rate_pence INT, new_rate_pence INT, effective_date DATE, reason TEXT, approved_by UUID FK, status VARCHAR, created_at TIMESTAMPTZ)",
@@ -40,5 +40,5 @@
     "cd /projects/sandbox/jubilant-waddle/backend && npm run build"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Backend tsc build has pre-existing errors in auth.controller.ts, photos.controller.ts, index.ts, and upload.ts (missing type declarations for compression/multer and JWT typing issues). These are not related to the SQL migration. The migration file is valid SQL and does not affect TypeScript compilation."
 }
