@@ -42,6 +42,10 @@ import StaffCostAnalytics from './pages/StaffCostAnalytics';
 import RecruitmentPipeline from './pages/RecruitmentPipeline';
 import CompetencyMatrix from './pages/CompetencyMatrix';
 import SicknessAbsence from './pages/SicknessAbsence';
+import FireLogBook from './pages/FireLogBook';
+import VisitorSignIn from './pages/VisitorSignIn';
+import RoomTurnoverManager from './pages/RoomTurnoverManager';
+import ReportBuilder from './pages/ReportBuilder';
 import { ROLE_LABELS } from './utils/formatters';
 
 // ── Nav config ────────────────────────────────────────────────────────────
@@ -59,6 +63,7 @@ const NAV_ALL = [
   { path: '/news2',     label: 'NEWS2 Vitals', icon: '🫀', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'] },
   { path: '/wounds',    label: 'Wound Tracker', icon: '🩹', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','admin','super_admin','group_admin'] },
   { path: '/continence', label: 'Continence Care', icon: '📋', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'] },
+  { path: '/room-turnover', label: 'Room Turnover', icon: '🛏️', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin','maintenance'] },
   { path: '/risk-assessments', label: 'Risk Assessments', icon: '⚡', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','admin','super_admin','group_admin'] },
   { path: '/med-interactions', label: 'Med Interactions', icon: '💊', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','admin','super_admin','group_admin'] },
   { section: 'Team', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin','registered_nurse','senior_carer'] },
@@ -73,6 +78,8 @@ const NAV_ALL = [
   { path: '/compliance', label: 'CQC Compliance', icon: '✅', roles: ['home_manager','deputy_manager','super_admin','group_admin'] },
   { path: '/policies',   label: 'Policies',     icon: '📋', roles: null },
   { path: '/infections', label: 'Infection Control', icon: '🦠', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','admin','super_admin','group_admin'] },
+  { path: '/fire-log', label: 'Fire Log', icon: '🔥', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin'] },
+  { path: '/visitor-sign-in', label: 'Visitors', icon: '🚪', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin','senior_carer','carer','registered_nurse'] },
   { section: 'Communications' },
   { path: '/family',     label: 'Family Portal', icon: '💬', roles: null, badge: 'messages' },
   { section: 'Finance', roles: ['home_manager','deputy_manager','admin','finance','super_admin','group_admin'] },
@@ -88,6 +95,7 @@ const NAV_ALL = [
   { path: '/predictive-care', label: 'Falls & Risk AI', icon: '🎯', roles: ['home_manager','deputy_manager','registered_nurse','super_admin','group_admin'] },
   { path: '/sbar-handover', label: 'SBAR Handover', icon: '📋', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','super_admin','group_admin'] },
   { path: '/audit-log',  label: 'Audit Log',    icon: '🔍', roles: ['home_manager','super_admin','group_admin'] },
+  { path: '/report-builder', label: 'Report Builder', icon: '📑', roles: ['home_manager','deputy_manager','super_admin','group_admin'] },
 ];
 
 // Bottom nav — most important 5 items for phone
@@ -367,6 +375,10 @@ export default function App() {
           <Route path="/nl-search"       element={<NaturalLanguageSearch />} />
           <Route path="/risk-assessments" element={<RiskAssessments />} />
           <Route path="/med-interactions" element={<MedInteractionChecker />} />
+          <Route path="/fire-log"        element={<FireLogBook />} />
+          <Route path="/visitor-sign-in" element={<VisitorSignIn />} />
+          <Route path="/room-turnover"   element={<RoomTurnoverManager />} />
+          <Route path="/report-builder"  element={<ReportBuilder />} />
           <Route path="/audit-log"      element={<AuditLog />} />
           <Route path="/profile"        element={<Profile />} />
           <Route path="*"               element={<Navigate to="/" replace />} />
