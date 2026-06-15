@@ -39,6 +39,9 @@ import MedInteractionChecker from './pages/MedInteractionChecker';
 import AutomatedInvoicing from './pages/AutomatedInvoicing';
 import OccupancyForecasting from './pages/OccupancyForecasting';
 import StaffCostAnalytics from './pages/StaffCostAnalytics';
+import RecruitmentPipeline from './pages/RecruitmentPipeline';
+import CompetencyMatrix from './pages/CompetencyMatrix';
+import SicknessAbsence from './pages/SicknessAbsence';
 import { ROLE_LABELS } from './utils/formatters';
 
 // ── Nav config ────────────────────────────────────────────────────────────
@@ -63,6 +66,9 @@ const NAV_ALL = [
   { path: '/staff',      label: 'Staff',        icon: '👤', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin'] },
   { path: '/training',   label: 'Training',     icon: '🎓', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin'], badge: 'training' },
   { path: '/smart-rota', label: 'AI Smart Rota', icon: '🤖', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin'] },
+  { path: '/recruitment', label: 'Recruitment', icon: '📢', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin'] },
+  { path: '/competency-matrix', label: 'Competencies', icon: '🎯', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin'] },
+  { path: '/sickness-absence', label: 'Absence', icon: '📊', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin'] },
   { section: 'Governance', roles: ['home_manager','deputy_manager','super_admin','group_admin','registered_nurse'] },
   { path: '/compliance', label: 'CQC Compliance', icon: '✅', roles: ['home_manager','deputy_manager','super_admin','group_admin'] },
   { path: '/policies',   label: 'Policies',     icon: '📋', roles: null },
@@ -355,6 +361,9 @@ export default function App() {
           <Route path="/infections"     element={<InfectionTracker />} />
           <Route path="/continence"     element={<ContinenceAssessment />} />
           <Route path="/smart-rota"      element={<SmartRota />} />
+          <Route path="/recruitment"     element={<RecruitmentPipeline />} />
+          <Route path="/competency-matrix" element={<CompetencyMatrix />} />
+          <Route path="/sickness-absence" element={<SicknessAbsence />} />
           <Route path="/nl-search"       element={<NaturalLanguageSearch />} />
           <Route path="/risk-assessments" element={<RiskAssessments />} />
           <Route path="/med-interactions" element={<MedInteractionChecker />} />
