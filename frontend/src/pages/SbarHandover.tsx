@@ -1,0 +1,222 @@
+// src/pages/SbarHandover.tsx — SBAR Handover Generation and Review
+import React, { useState } from 'react';
+import { useSbarHandovers, useGenerateSbar, useApproveSbar } from '../hooks';
+import type { SbarHandover as SbarHandoverType } from '../types';
+
+const STATUS_BADGES: Record<string, { bg: string; color: string; label: string }> = {
+  draft: { bg: '#fef3c7', color: '#92400e', label: 'Draft' },
+  approved: { bg: '#d1fae5', color: '#065f46', label: 'Approved' },
+  rejected: { bg: '#fee2e2', color: '#991b1b', label: 'Rejected' },
+};
+
+export default function SbarHandover() {
+  const [shiftDate, setShiftDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [shiftType, setShiftType] = useState('day');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const { data: rawHandovers, isLoading } = useSbarHandovers();
+  const handovers: SbarHandoverType[] = Array.isArray(rawHandovers) ? rawHandovers : (rawHandovers as any)?.handovers ?? [];
+  const generateSbar = useGenerateSbar();
+  const approveSbar = useApproveSbar();
+
+  const selectedHandover = handovers.find(h => h.id === selectedId) || null;
+
+  const handleGenerate = async () => {
+    await generateSbar.mutateAsync({ shiftDate, shiftType });
+  };
+
+  const handleApprove = async (id: string) => {
+    await approveSbar.mutateAsync(id);
+  };
+
+  return (
+    <div>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">SBAR Handover</h1>
+          <p className="page-subtitle">Generate and review structured shift handovers</p>
+        </div>
+      </div>
+
+      {/* Generate Section */}
+      <div className="card" style={{ marginBottom: 24 }}>
+        <div className="card-body">
+          <h3 style={{ margin: '0 0 16px', fontSize: '1rem', fontWeight: 700 }}>Generate SBAR Handover</h3>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <div className="form-group" style={{ margin: 0 }}>
+              <label className="form-label">Shift Date</label>
+              <input
+                className="form-input"
+                type="date"
+                value={shiftDate}
+                onChange={e => setShiftDate(e.target.value)}
+                style={{ minWidth: 160 }}
+              />
+            </div>
+            <div className="form-group" style={{ margin: 0 }}>
+              <label className="form-label">Shift Type</label>
+              <select className="form-input" value={shiftType} onChange={e => setShiftType(e.target.value)} style={{ minWidth: 140 }}>
+                <option value="day">Day</option>
+                <option value="evening">Evening</option>
+                <option value="night">Night</option>
+              </select>
+            </div>
+            <button
+              className="btn btn-primary"
+              onClick={handleGenerate}
+              disabled={generateSbar.isPending}
+              style={{ height: 40 }}
+            >
+              {generateSbar.isPending ? 'Generating...' : '🤖 Generate SBAR'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Handovers List and Detail */}
+      <div style={{ display: 'grid', gridTemplateColumns: selectedHandover ? '1fr 1.5fr' : '1fr', gap: 20 }}>
+        {/* Recent Handovers */}
+        <div>
+          <h3 style={{ margin: '0 0 12px', fontSize: '1rem', fontWeight: 700 }}>Recent Handovers</h3>
+          {isLoading ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[...Array(3)].map((_, i) => <div key={i} className="card" style={{ height: 80 }} />)}
+            </div>
+          ) : handovers.length === 0 ? (
+            <div className="card">
+              <div className="card-body table-empty">No handovers generated yet. Use the form above to generate one.</div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {handovers.map((h: SbarHandoverType) => {
+                const badge = STATUS_BADGES[h.status] || STATUS_BADGES.draft;
+                const isSelected = selectedId === h.id;
+                return (
+                  <div
+                    key={h.id}
+                    className="card"
+                    onClick={() => setSelectedId(isSelected ? null : h.id)}
+                    style={{
+                      cursor: 'pointer',
+                      borderLeft: isSelected ? '4px solid var(--primary)' : '4px solid transparent',
+                      transition: 'border-color 0.15s, box-shadow 0.15s',
+                      boxShadow: isSelected ? '0 2px 8px rgba(0,0,0,0.08)' : undefined,
+                    }}
+                  >
+                    <div className="card-body" style={{ padding: '14px 16px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>
+                            {new Date(h.shift_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                          <span className="badge badge-neutral" style={{ fontSize: '0.75rem', textTransform: 'capitalize' }}>
+                            {h.shift_type}
+                          </span>
+                        </div>
+                        <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: 12, background: badge.bg, color: badge.color, fontWeight: 600 }}>
+                          {badge.label}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                        Generated by {h.generated_by_name || 'System'}
+                        {h.residents_covered?.length > 0 && ` · ${h.residents_covered.length} residents covered`}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* SBAR Detail */}
+        {selectedHandover && (
+          <div>
+            <h3 style={{ margin: '0 0 12px', fontSize: '1rem', fontWeight: 700 }}>SBAR Detail</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {/* Situation */}
+              <div className="card" style={{ borderTop: '4px solid #2563eb' }}>
+                <div className="card-body">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                    <span style={{ width: 28, height: 28, borderRadius: '50%', background: '#2563eb', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.82rem' }}>S</span>
+                    <span style={{ fontWeight: 700, fontSize: '0.92rem', color: '#2563eb' }}>Situation</span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.88rem', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{selectedHandover.situation || 'No data'}</p>
+                </div>
+              </div>
+
+              {/* Background */}
+              <div className="card" style={{ borderTop: '4px solid #7c3aed' }}>
+                <div className="card-body">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                    <span style={{ width: 28, height: 28, borderRadius: '50%', background: '#7c3aed', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.82rem' }}>B</span>
+                    <span style={{ fontWeight: 700, fontSize: '0.92rem', color: '#7c3aed' }}>Background</span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.88rem', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{selectedHandover.background || 'No data'}</p>
+                </div>
+              </div>
+
+              {/* Assessment */}
+              <div className="card" style={{ borderTop: '4px solid #d97706' }}>
+                <div className="card-body">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                    <span style={{ width: 28, height: 28, borderRadius: '50%', background: '#d97706', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.82rem' }}>A</span>
+                    <span style={{ fontWeight: 700, fontSize: '0.92rem', color: '#d97706' }}>Assessment</span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.88rem', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{selectedHandover.assessment || 'No data'}</p>
+                </div>
+              </div>
+
+              {/* Recommendation */}
+              <div className="card" style={{ borderTop: '4px solid #059669' }}>
+                <div className="card-body">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                    <span style={{ width: 28, height: 28, borderRadius: '50%', background: '#059669', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.82rem' }}>R</span>
+                    <span style={{ fontWeight: 700, fontSize: '0.92rem', color: '#059669' }}>Recommendation</span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.88rem', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{selectedHandover.recommendation || 'No data'}</p>
+                </div>
+              </div>
+
+              {/* Key Concerns */}
+              {selectedHandover.key_concerns && selectedHandover.key_concerns.length > 0 && (
+                <div className="card">
+                  <div className="card-body">
+                    <div style={{ fontWeight: 700, fontSize: '0.88rem', marginBottom: 10, color: 'var(--danger)' }}>Key Concerns</div>
+                    <ul style={{ margin: 0, paddingLeft: 20, fontSize: '0.85rem', lineHeight: 1.7 }}>
+                      {selectedHandover.key_concerns.map((c: any, i: number) => (
+                        <li key={i}>{typeof c === 'string' ? c : JSON.stringify(c)}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* Status / Approval info */}
+              <div className="card">
+                <div className="card-body" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                    {selectedHandover.status === 'approved' && selectedHandover.approved_by_name && (
+                      <span>Approved by <strong>{selectedHandover.approved_by_name}</strong> {selectedHandover.approved_at && `on ${new Date(selectedHandover.approved_at).toLocaleDateString('en-GB')}`}</span>
+                    )}
+                    {selectedHandover.status === 'draft' && <span>Awaiting approval</span>}
+                    {selectedHandover.status === 'rejected' && <span style={{ color: 'var(--danger)' }}>Rejected</span>}
+                  </div>
+                  {selectedHandover.status === 'draft' && (
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={() => handleApprove(selectedHandover.id)}
+                      disabled={approveSbar.isPending}
+                    >
+                      {approveSbar.isPending ? 'Approving...' : 'Approve Handover'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

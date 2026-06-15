@@ -578,3 +578,38 @@ export interface ComplianceOverview {
   open_actions_count: number;
   overall_readiness_score: number;
 }
+
+// ── Voice Transcription ───────────────────────────────────────────────────
+export interface VoiceTranscription {
+  id: string;
+  user_id: string;
+  resident_id: string | null;
+  resident_name?: string;
+  audio_duration_seconds: number | null;
+  transcription_text: string;
+  confidence_score: number | null;
+  care_note_id: string | null;
+  status: 'transcribed' | 'converted_to_note' | 'discarded';
+  created_at: string;
+}
+
+// ── SBAR Handover ─────────────────────────────────────────────────────────
+export interface SbarHandover {
+  id: string;
+  care_home_id: string;
+  generated_by: string;
+  generated_by_name?: string;
+  shift_date: string;
+  shift_type: string;
+  situation: string;
+  background: string;
+  assessment: string;
+  recommendation: string;
+  residents_covered: string[];
+  key_concerns: any[];
+  status: 'draft' | 'approved' | 'rejected';
+  approved_by?: string;
+  approved_by_name?: string;
+  approved_at?: string;
+  created_at: string;
+}

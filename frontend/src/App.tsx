@@ -27,6 +27,7 @@ import PredictiveCare from './pages/PredictiveCare';
 import Activities     from './pages/Activities';
 import WellbeingHub   from './pages/WellbeingHub';
 import NotificationCentre from './components/NotificationCentre';
+import SbarHandover from './pages/SbarHandover';
 import { ROLE_LABELS } from './utils/formatters';
 
 // ── Nav config ────────────────────────────────────────────────────────────
@@ -57,6 +58,7 @@ const NAV_ALL = [
   { path: '/ai-tools',   label: 'AI Tools',     icon: '🤖', roles: ['home_manager','deputy_manager','registered_nurse','super_admin','group_admin'] },
   { path: '/ai-insights', label: 'AI Insights',   icon: '🧠', roles: ['home_manager','deputy_manager','registered_nurse','super_admin','group_admin'] },
   { path: '/predictive-care', label: 'Falls & Risk AI', icon: '🎯', roles: ['home_manager','deputy_manager','registered_nurse','super_admin','group_admin'] },
+  { path: '/sbar-handover', label: 'SBAR Handover', icon: '📋', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','super_admin','group_admin'] },
   { path: '/audit-log',  label: 'Audit Log',    icon: '🔍', roles: ['home_manager','super_admin','group_admin'] },
 ];
 
@@ -322,6 +324,7 @@ export default function App() {
           <Route path="/cd-register"    element={<CDRegister />} />
           <Route path="/ai-insights"    element={<AiInsights />} />
           <Route path="/predictive-care" element={<PredictiveCare />} />
+          <Route path="/sbar-handover" element={<SbarHandover />} />
           <Route path="/audit-log"      element={<AuditLog />} />
           <Route path="/profile"        element={<Profile />} />
           <Route path="*"               element={<Navigate to="/" replace />} />

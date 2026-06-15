@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useCareNotes, useCreateNote, useResidents, useStaff } from '../hooks';
 import { formatDateTime, NOTE_TYPE_LABELS, truncate } from '../utils/formatters';
 import type { CareNote, Resident } from '../types';
+import VoiceNoteInput from '../components/VoiceNoteInput';
 
 // Ordered list for the dropdown — clinical priority order
 const NOTE_TYPES: [string,string][] = [
@@ -157,6 +158,7 @@ export default function CareNotes() {
   const [flaggedOnly, setFlaggedOnly] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [quickResident, setQuickResident] = useState('');
+  const [showVoice, setShowVoice] = useState(false);
 
   const { data: rawNotes, isLoading } = useCareNotes({
     residentId: residentFilter || undefined,
@@ -178,6 +180,9 @@ export default function CareNotes() {
           <p className="page-subtitle">{notes.length} notes shown</p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-secondary" onClick={() => setShowVoice(v => !v)} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            🎤 {showVoice ? 'Hide Voice' : 'Voice Note'}
+          </button>
           <button className="btn btn-secondary" onClick={() => { setShowCreate(true); setQuickResident(''); }}>
             + Quick Note
           </button>
@@ -186,6 +191,11 @@ export default function CareNotes() {
           </button>
         </div>
       </div>
+
+      {/* Voice Note Input */}
+      {showVoice && (
+        <VoiceNoteInput residentId={residentFilter} onNoteCreated={() => setShowVoice(false)} />
+      )}
 
       {/* Filters */}
       <div className="card" style={{ marginBottom: 20 }}>

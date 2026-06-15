@@ -4,7 +4,7 @@ import {
   api, residentsApi, notesApi, emarApi, incidentsApi,
   scheduleApi, staffApi, complianceApi, familyApi,
   billingApi, aiApi, dashboardApi, auditApi, policiesApi,
-  activitiesApi, wellbeingApi, predictiveApi,
+  activitiesApi, wellbeingApi, predictiveApi, voiceApi, sbarApi,
 } from '../services/api';
 import { toast } from '../utils/toast';
 
@@ -354,4 +354,26 @@ export function useUpdateChecklistItem() {
 }
 export function useComplianceOverview() {
   return useQuery({ queryKey: ['compliance-overview'], queryFn: () => complianceApi.getOverview().then(r => r.data) });
+}
+
+// ── Voice Notes ───────────────────────────────────────────────────────────
+export function useVoiceHistory() {
+  return useQuery({ queryKey: ['voice-history'], queryFn: () => voiceApi.getHistory().then(r => r.data) });
+}
+export function useCreateNoteFromVoice() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => voiceApi.createNote(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['voice-history'] }); qc.invalidateQueries({ queryKey: ['care-notes'] }); toast.success('Care note created from voice'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to create note from voice') });
+}
+
+// ── SBAR Handover ─────────────────────────────────────────────────────────
+export function useSbarHandovers() {
+  return useQuery({ queryKey: ['sbar-handovers'], queryFn: () => sbarApi.list().then(r => r.data) });
+}
+export function useGenerateSbar() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => sbarApi.generate(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['sbar-handovers'] }); toast.success('SBAR handover generated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to generate SBAR handover') });
+}
+export function useApproveSbar() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (id: string) => sbarApi.approve(id).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['sbar-handovers'] }); toast.success('Handover approved'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to approve handover') });
 }

@@ -178,3 +178,18 @@ export const wellbeingApi = {
   getEnvironment:         (residentId: string) => api.get(`/residents/${residentId}/environment`),
   updateEnvironment:      (residentId: string, data: object) => api.put(`/residents/${residentId}/environment`, data),
 };
+
+// ── Voice Notes ────────────────────────────────────────────────────────────
+export const voiceApi = {
+  transcribe: (data: FormData) => api.post('/voice/transcribe', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  createNote: (data: object) => api.post('/voice/create-note', data),
+  getHistory: () => api.get('/voice/history'),
+};
+
+// ── SBAR Handover ──────────────────────────────────────────────────────────
+export const sbarApi = {
+  generate: (data: object) => api.post('/sbar/generate', data),
+  list: () => api.get('/sbar/handovers'),
+  get: (id: string) => api.get(`/sbar/handovers/${id}`),
+  approve: (id: string) => api.patch(`/sbar/handovers/${id}/approve`),
+};
