@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "feat",
   "description": "Frontend implementation for all 10 resident quality-of-life features: TypeScript types, API service methods, React Query hooks, page components, and navigation integration in App.tsx. Covers all 10 features with full UI pages integrated into the sidebar.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Add TypeScript interfaces to frontend/src/types/index.ts for all 10 features: MusicGenre, MusicPreference, MusicSession, MusicSessionSong; MenuOption, MenuDietaryProfile, MenuChoice; FriendshipObservation, FriendshipConnection; PurposeRole, PurposeRoleAssignment, PurposeEngagementLog; MoodIntervention, MoodInterventionHistory; PhotoFramePhoto, PhotoViewingHistory; SleepLog, SleepProfile; IntergenerationalProgramme, IntergenerationalVisit, IntergenerationalParticipant; RehabGoal, RehabMilestone, RehabProgressLog; Celebration, CelebrationTask.",
     "Add API service methods to frontend/src/services/api.ts for all 10 features following the existing pattern (e.g., musicTherapyApi = { getGenres, getPreferences, updatePreferences, startSession, endSession, getHistory, getEffectiveness }, menuChoiceApi = { listOptions, createOption, getDietaryProfile, updateDietaryProfile, submitChoice, getKitchenDashboard, getResidentChoices }, etc.).",
@@ -31,5 +31,5 @@
     "cd /projects/sandbox/jubilant-waddle/frontend && npm run build"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All 10 page components created, types/api/hooks/App.tsx updated. Vite build succeeds (dist output created). TSC shows 19 pre-existing errors in CareNotes.tsx, Emar.tsx, Incidents.tsx, Training.tsx - none from our new code. The base branch had 81 tsc errors before our changes (our type additions actually fixed 62 of them). Zero new errors introduced."
 }
