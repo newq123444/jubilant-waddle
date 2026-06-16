@@ -27,10 +27,17 @@ export async function getHeatmap(req: Request, res: Response, next: NextFunction
 
     // Calculate room status based on wellbeing data
     const heatmapData = residents.map((r: any) => {
-      let status: 'green' | 'amber' | 'red' = 'green';
+      let status: 'green' | 'amber' | 'red' | 'no_data' = 'green';
       let statusLabel = 'Settled';
 
-      if (r.pain_level && r.pain_level >= 7) { status = 'red'; statusLabel = 'In pain'; }
+      // Check for stale or missing data (no log in the last 24 hours)
+      const lastLog = r.last_wellbeing_log ? new Date(r.last_wellbeing_log).getTime() : null;
+      const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
+
+      if (!lastLog || lastLog < twentyFourHoursAgo) {
+        status = 'no_data';
+        statusLabel = 'No recent data';
+      } else if (r.pain_level && r.pain_level >= 7) { status = 'red'; statusLabel = 'In pain'; }
       else if (r.mood === 'distressed' || r.mood === 'agitated') { status = 'red'; statusLabel = 'Distressed'; }
       else if (r.mood === 'anxious' || r.mood === 'low') { status = 'amber'; statusLabel = 'Needs attention'; }
       else if (r.pain_level && r.pain_level >= 4) { status = 'amber'; statusLabel = 'Mild discomfort'; }
@@ -58,6 +65,7 @@ export async function getHeatmap(req: Request, res: Response, next: NextFunction
       green: heatmapData.filter((h: any) => h.status === 'green').length,
       amber: heatmapData.filter((h: any) => h.status === 'amber').length,
       red: heatmapData.filter((h: any) => h.status === 'red').length,
+      no_data: heatmapData.filter((h: any) => h.status === 'no_data').length,
       last_updated: new Date().toISOString(),
     };
 
@@ -70,7 +78,8 @@ export async function getHeatmapHistory(req: Request, res: Response, next: NextF
   try {
     const careHomeId = req.user!.care_home_id;
     const { hours } = req.query;
-    const lookbackHours = parseInt(hours as string) || 24;
+    const parsed = parseInt(hours as string, 10);
+    const lookbackHours = Number.isFinite(parsed) && parsed > 0 ? parsed : 24;
 
     const { rows } = await query(
       `SELECT wl.resident_id, r.room_number, r.first_name || ' ' || r.last_name AS resident_name,

@@ -865,9 +865,9 @@ router.post('/handover/smart/:id/action',      isClinical, smartHandoverCtrl.rec
 
 // ── Digital Consent Manager ───────────────────────────────────────────────
 router.post('/consents',                       isStaff, consentManagerCtrl.createConsent);
+router.get('/consents/expiring/all',           isManager, consentManagerCtrl.getExpiringConsents);
 router.get('/consents/:residentId',            isStaff, consentManagerCtrl.listConsents);
 router.patch('/consents/:id',                  isStaff, consentManagerCtrl.updateConsent);
-router.get('/consents/expiring/all',           isManager, consentManagerCtrl.getExpiringConsents);
 router.post('/consents/:id/capacity-assessment', isClinical, consentManagerCtrl.recordCapacityAssessment);
 
 // ── Resident Digital Twin ─────────────────────────────────────────────────

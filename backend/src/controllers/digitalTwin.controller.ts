@@ -108,7 +108,8 @@ export async function getTimeline(req: Request, res: Response, next: NextFunctio
     const careHomeId = req.user!.care_home_id;
     const { residentId } = req.params;
     const { days } = req.query;
-    const lookback = parseInt(days as string) || 30;
+    const parsed = parseInt(days as string, 10);
+    const lookback = Number.isFinite(parsed) && parsed > 0 ? parsed : 30;
 
     // Gather events from multiple sources
     const { rows: notes } = await query(

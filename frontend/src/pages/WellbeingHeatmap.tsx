@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../services/api';
 
-const statusColors = { green: '#16a34a', amber: '#d97706', red: '#dc2626' };
-const statusBg = { green: '#f0fdf4', amber: '#fffbeb', red: '#fef2f2' };
+const statusColors = { green: '#16a34a', amber: '#d97706', red: '#dc2626', no_data: '#6b7280' };
+const statusBg = { green: '#f0fdf4', amber: '#fffbeb', red: '#fef2f2', no_data: '#f3f4f6' };
 
 export default function WellbeingHeatmap() {
   const [selectedRoom, setSelectedRoom] = useState<any>(null);
@@ -53,6 +53,10 @@ export default function WellbeingHeatmap() {
         <div className="card" style={{ padding: 16, textAlign: 'center', borderLeft: '4px solid #dc2626' }}>
           <div style={{ fontSize: 28, fontWeight: 700, color: '#dc2626' }}>{summary.red}</div>
           <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Distressed / Pain</div>
+        </div>
+        <div className="card" style={{ padding: 16, textAlign: 'center', borderLeft: '4px solid #6b7280' }}>
+          <div style={{ fontSize: 28, fontWeight: 700, color: '#6b7280' }}>{summary.no_data || 0}</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>No Recent Data</div>
         </div>
       </div>
 

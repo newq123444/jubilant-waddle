@@ -61,7 +61,8 @@ export async function getExpiringConsents(req: Request, res: Response, next: Nex
   try {
     const careHomeId = req.user!.care_home_id;
     const { days } = req.query;
-    const lookAhead = parseInt(days as string) || 30;
+    const parsed = parseInt(days as string, 10);
+    const lookAhead = Number.isFinite(parsed) && parsed > 0 ? parsed : 30;
 
     const { rows } = await query(
       `SELECT cr.*, r.first_name || ' ' || r.last_name AS resident_name, r.room_number
