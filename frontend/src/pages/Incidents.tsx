@@ -39,12 +39,12 @@ export default function Incidents() {
           <div className="card-body">
             <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
               <div><label className="form-label">Resident (if applicable)</label>
-                <select className="form-input" value={form.resident_id} onChange={e => setForm(f => ({ ...f, residentId: e.target.value }))}>
+                <select className="form-input" value={form.residentId} onChange={e => setForm(f => ({ ...f, residentId: e.target.value }))}>
                   <option value="">Not resident-specific</option>
                   {(residents as Resident[]).map(r => <option key={r.id} value={r.id}>{r.first_name} {r.last_name} — Room {r.room_number}</option>)}
                 </select></div>
               <div><label className="form-label">Incident Type</label>
-                <select className="form-input" value={form.incident_type} onChange={e => setForm(f => ({ ...f, incidentType: e.target.value }))}>
+                <select className="form-input" value={form.incidentType} onChange={e => setForm(f => ({ ...f, incidentType: e.target.value }))}>
                   {INCIDENT_TYPES.map(t => <option key={t} value={t}>{t.replace(/_/g,' ')}</option>)}
                 </select></div>
               <div><label className="form-label">Severity</label>
@@ -52,7 +52,7 @@ export default function Incidents() {
                   {SEVERITIES.map(s => <option key={s} value={s}>{s}</option>)}
                 </select></div>
               <div><label className="form-label">Date & Time</label>
-                <input type="datetime-local" className="form-input" value={form.incident_date} onChange={e => setForm(f => ({ ...f, incidentDate: e.target.value }))} /></div>
+                <input type="datetime-local" className="form-input" value={form.incidentDate} onChange={e => setForm(f => ({ ...f, incidentDate: e.target.value }))} /></div>
               <div><label className="form-label">Location</label>
                 <input type="text" className="form-input" placeholder="e.g. Room 12, Dining Room…" value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))} /></div>
               <div></div>

@@ -153,7 +153,7 @@ function generateAccessToken(user: any): string {
   return jwt.sign(
     { sub: user.id, role: user.role, careHomeId: user.care_home_id },
     process.env.JWT_SECRET!,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
+    { expiresIn: process.env.JWT_EXPIRES_IN || '15m' } as jwt.SignOptions
   );
 }
 

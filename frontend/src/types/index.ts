@@ -41,6 +41,7 @@ export interface Resident {
   gp_phone?: string;
   funding_type?: string;
   weekly_fee_pence?: number;
+  care_needs_summary?: string;
   created_at: string;
   updated_at: string;
   photo_url?: string;

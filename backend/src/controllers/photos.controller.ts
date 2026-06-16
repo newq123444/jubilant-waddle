@@ -7,8 +7,12 @@ import fs from 'fs';
 
 const BASE_URL = process.env.API_URL || 'http://localhost:3001';
 
+interface MulterRequest extends Request {
+  file?: Express.Multer.File;
+}
+
 // ── Upload resident profile photo ─────────────────────────────────────────
-export async function uploadResidentPhoto(req: Request, res: Response, next: NextFunction) {
+export async function uploadResidentPhoto(req: MulterRequest, res: Response, next: NextFunction) {
   try {
     if (!req.file) throw new AppError(400, 'No image uploaded');
     const { id } = req.params;
@@ -47,7 +51,7 @@ export async function removeResidentPhoto(req: Request, res: Response, next: Nex
 }
 
 // ── Upload belonging photo ────────────────────────────────────────────────
-export async function uploadBelongingPhoto(req: Request, res: Response, next: NextFunction) {
+export async function uploadBelongingPhoto(req: MulterRequest, res: Response, next: NextFunction) {
   try {
     if (!req.file) throw new AppError(400, 'No image uploaded');
     const { residentId } = req.params;
@@ -104,7 +108,7 @@ export async function deleteBelonging(req: Request, res: Response, next: NextFun
 }
 
 // ── Upload staff avatar ───────────────────────────────────────────────────
-export async function uploadStaffAvatar(req: Request, res: Response, next: NextFunction) {
+export async function uploadStaffAvatar(req: MulterRequest, res: Response, next: NextFunction) {
   try {
     if (!req.file) throw new AppError(400, 'No image uploaded');
     const userId = req.user!.id;

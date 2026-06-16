@@ -186,13 +186,13 @@ export default function Emar() {
               ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
                   {/* Group by resident */}
-                  {Object.entries(
+                  {(Object.entries(
                     roundMeds.reduce((acc: Record<string, any[]>, med) => {
                       if (!acc[med.resident_id]) acc[med.resident_id] = [];
                       acc[med.resident_id].push(med);
                       return acc;
                     }, {})
-                  ).map(([resId, resMeds]) => {
+                  ) as [string, any[]][]).map(([resId, resMeds]) => {
                     const first = resMeds[0];
                     const roundsForThis = resMeds.map(m => m.rounds?.find((r: any) => r.time === activeRound));
                     const allGiven   = roundsForThis.every(r => r?.status === 'given');
@@ -263,13 +263,13 @@ export default function Emar() {
           {/* ── BY RESIDENT VIEW ──────────────────────────────── */}
           {view === 'resident' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {Object.entries(
+              {(Object.entries(
                 filtered.reduce((acc: Record<string, any[]>, med) => {
                   if (!acc[med.resident_id]) acc[med.resident_id] = [];
                   acc[med.resident_id].push(med);
                   return acc;
                 }, {})
-              ).map(([resId, resMeds]) => {
+              ) as [string, any[]][]).map(([resId, resMeds]) => {
                 const first = resMeds[0];
                 return (
                   <div key={resId} className="card">
@@ -400,7 +400,7 @@ export default function Emar() {
 // ── Record Administration Modal ────────────────────────────────────────────
 function AdminModal({ entry, onClose }: { entry: any; onClose: () => void }) {
   const record = useRecordAdministration();
-  const [form, setForm] = useState({ status: 'given', actualTime: entry.scheduledTime, doseGiven: entry.dose || '', notes: '', refusalReason: '', omissionReason: '' });
+  const [form, setForm] = useState({ status: 'given', actualTime: entry.scheduledTime, doseGiven: entry.dose || '', notes: '', refusalReason: '', omissionReason: '', siteApplied: '' });
   const set = (k: string, v: any) => setForm(f => ({ ...f, [k]: v }));
 
   const STATUS_OPTIONS = [
@@ -520,7 +520,7 @@ function AddMedModal({ residents, onClose }: { residents: Resident[]; onClose: (
   const [form, setForm] = useState({
     resident_id: '', name: '', generic_name: '', dose: '', route: 'oral', frequency: 'once_daily',
     times_of_day: ['08:00'], start_date: todayISO(), prescribed_by: '', indication: '', pharmacy: '', notes: '',
-    is_controlled: false, is_prn: false,
+    is_controlled: false, is_prn: false, site: '',
   });
   const set = (k: string, v: any) => setForm(f => ({ ...f, [k]: v }));
   const toggleTime = (t: string) => setForm(f => ({ ...f, times_of_day: f.times_of_day.includes(t) ? f.times_of_day.filter(x => x !== t) : [...f.times_of_day, t] }));

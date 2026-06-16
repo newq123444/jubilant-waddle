@@ -40,19 +40,19 @@ export default function Training() {
           <div className="card-body">
             <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
               <div><label className="form-label">Staff Member *</label>
-                <select className="form-input" required value={form.staff_id} onChange={e => setForm(f => ({ ...f, staffId: e.target.value }))}>
+                <select className="form-input" required value={form.staffId} onChange={e => setForm(f => ({ ...f, staffId: e.target.value }))}>
                   <option value="">Select staff…</option>
                   {(staff as any[]).map(s => <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>)}
                 </select></div>
               <div><label className="form-label">Course *</label>
-                <select className="form-input" required value={form.course_name} onChange={e => setForm(f => ({ ...f, courseName: e.target.value }))}>
+                <select className="form-input" required value={form.courseName} onChange={e => setForm(f => ({ ...f, courseName: e.target.value }))}>
                   <option value="">Select course…</option>
                   {COURSES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select></div>
               <div><label className="form-label">Completed Date *</label>
-                <input type="date" className="form-input" required value={form.completed_date} onChange={e => setForm(f => ({ ...f, completedDate: e.target.value }))} /></div>
+                <input type="date" className="form-input" required value={form.completedDate} onChange={e => setForm(f => ({ ...f, completedDate: e.target.value }))} /></div>
               <div><label className="form-label">Expiry Date</label>
-                <input type="date" className="form-input" value={form.expiry_date} onChange={e => setForm(f => ({ ...f, expiryDate: e.target.value }))} /></div>
+                <input type="date" className="form-input" value={form.expiryDate} onChange={e => setForm(f => ({ ...f, expiryDate: e.target.value }))} /></div>
               <div><label className="form-label">Provider</label>
                 <input type="text" className="form-input" placeholder="e.g. Skills for Care, In-house…" value={form.provider} onChange={e => setForm(f => ({ ...f, provider: e.target.value }))} /></div>
               <div style={{ display: 'flex', alignItems: 'flex-end' }}>
