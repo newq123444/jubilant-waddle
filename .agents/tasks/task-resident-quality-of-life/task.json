@@ -1,0 +1,7 @@
+{
+  "task_id": "task-resident-quality-of-life",
+  "task_description": "Build 10 resident quality-of-life features with full backend APIs (migrations, controllers, routes) and frontend pages integrated into existing navigation: Personal Music Therapy, Personal Menu Choice System, Friendship Mapper, Daily Purpose Planner, Mood-Responsive Environment, Digital Photo Frame Feed, Sleep Quality Tracker, Intergenerational Programme Manager, Rehabilitation Goal Tracker, Birthday & Celebration Planner.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002"],
+  "blocked_reason": null
+}

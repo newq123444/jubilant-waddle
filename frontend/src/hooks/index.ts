@@ -13,6 +13,9 @@ import {
   offlineSyncApi, residentTabletApi, qrRoomApi, benchmarkingApi,
   boardPackApi, staffPerformanceApi, elearningApi, competencySignoffApi,
   diabetesApi, palliativeCareApi,
+  musicTherapyApi, menuChoiceApi, friendshipMapperApi, purposePlannerApi,
+  moodEnvironmentApi, photoFrameApi, sleepTrackerApi, intergenerationalApi,
+  rehabGoalsApi, celebrationsApi,
 } from '../services/api';
 import { toast } from '../utils/toast';
 
@@ -1039,4 +1042,238 @@ export function useLogFamilyCommunication() {
 }
 export function useFamilyCommunications(residentId: string) {
   return useQuery({ queryKey: ['palliative', 'family-comms', residentId], queryFn: () => palliativeCareApi.getFamilyCommunications(residentId).then(r => r.data), enabled: !!residentId });
+}
+
+// ── Music Therapy (Quality of Life) ──────────────────────────────────────
+export function useMusicGenres() {
+  return useQuery({ queryKey: ['music-therapy', 'genres'], queryFn: () => musicTherapyApi.getGenres().then(r => r.data) });
+}
+export function useMusicPreferences(residentId: string) {
+  return useQuery({ queryKey: ['music-therapy', 'preferences', residentId], queryFn: () => musicTherapyApi.getPreferences(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useUpdateMusicPreferences() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ residentId, data }: { residentId: string; data: object }) => musicTherapyApi.updatePreferences(residentId, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['music-therapy'] }); toast.success('Music preferences updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update preferences') });
+}
+export function useStartMusicSession() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => musicTherapyApi.startSession(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['music-therapy'] }); toast.success('Music session started'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to start session') });
+}
+export function useEndMusicSession() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => musicTherapyApi.endSession(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['music-therapy'] }); toast.success('Music session ended'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to end session') });
+}
+export function useMusicSessionHistory(residentId: string) {
+  return useQuery({ queryKey: ['music-therapy', 'sessions', residentId], queryFn: () => musicTherapyApi.getHistory(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useMusicEffectiveness(residentId: string) {
+  return useQuery({ queryKey: ['music-therapy', 'effectiveness', residentId], queryFn: () => musicTherapyApi.getEffectiveness(residentId).then(r => r.data), enabled: !!residentId });
+}
+
+// ── Menu Choice System (Quality of Life) ─────────────────────────────────
+export function useMenuOptions(params?: object) {
+  return useQuery({ queryKey: ['menu-choices', 'options', params], queryFn: () => menuChoiceApi.listOptions(params).then(r => r.data) });
+}
+export function useCreateMenuOption() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => menuChoiceApi.createOption(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['menu-choices'] }); toast.success('Menu option created'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to create option') });
+}
+export function useMenuDietaryProfile(residentId: string) {
+  return useQuery({ queryKey: ['menu-choices', 'dietary', residentId], queryFn: () => menuChoiceApi.getDietaryProfile(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useUpdateMenuDietaryProfile() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ residentId, data }: { residentId: string; data: object }) => menuChoiceApi.updateDietaryProfile(residentId, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['menu-choices'] }); toast.success('Dietary profile updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update profile') });
+}
+export function useSubmitMenuChoice() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => menuChoiceApi.submitChoice(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['menu-choices'] }); toast.success('Menu choice submitted'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to submit choice') });
+}
+export function useKitchenDashboard() {
+  return useQuery({ queryKey: ['menu-choices', 'kitchen-dashboard'], queryFn: () => menuChoiceApi.getKitchenDashboard().then(r => r.data) });
+}
+export function useResidentMenuChoices(residentId: string) {
+  return useQuery({ queryKey: ['menu-choices', 'resident', residentId], queryFn: () => menuChoiceApi.getResidentChoices(residentId).then(r => r.data), enabled: !!residentId });
+}
+
+// ── Friendship Mapper (Quality of Life) ──────────────────────────────────
+export function useRecordFriendshipObservation() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => friendshipMapperApi.recordObservation(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['friendship-mapper'] }); toast.success('Observation recorded'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to record observation') });
+}
+export function useFriendshipConnections(residentId: string) {
+  return useQuery({ queryKey: ['friendship-mapper', 'connections', residentId], queryFn: () => friendshipMapperApi.getConnections(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useFriendshipNetwork() {
+  return useQuery({ queryKey: ['friendship-mapper', 'network'], queryFn: () => friendshipMapperApi.getNetwork().then(r => r.data) });
+}
+export function useSeatingSuggestions() {
+  return useQuery({ queryKey: ['friendship-mapper', 'seating'], queryFn: () => friendshipMapperApi.getSeatingSuggestions().then(r => r.data) });
+}
+export function useIsolatedResidents() {
+  return useQuery({ queryKey: ['friendship-mapper', 'isolated'], queryFn: () => friendshipMapperApi.getIsolatedResidents().then(r => r.data) });
+}
+
+// ── Purpose Planner (Quality of Life) ────────────────────────────────────
+export function usePurposeRoles() {
+  return useQuery({ queryKey: ['purpose-planner', 'roles'], queryFn: () => purposePlannerApi.listRoles().then(r => r.data) });
+}
+export function useCreatePurposeRole() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => purposePlannerApi.createRole(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['purpose-planner'] }); toast.success('Role created'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to create role') });
+}
+export function useAssignPurposeRole() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => purposePlannerApi.assignRole(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['purpose-planner'] }); toast.success('Role assigned'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to assign role') });
+}
+export function useResidentPurposeRoles(residentId: string) {
+  return useQuery({ queryKey: ['purpose-planner', 'resident', residentId], queryFn: () => purposePlannerApi.getResidentRoles(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useLogPurposeEngagement() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => purposePlannerApi.logEngagement(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['purpose-planner'] }); toast.success('Engagement logged'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to log engagement') });
+}
+export function usePurposeReport() {
+  return useQuery({ queryKey: ['purpose-planner', 'report'], queryFn: () => purposePlannerApi.getReport().then(r => r.data) });
+}
+export function usePurposeSuggestions(residentId: string) {
+  return useQuery({ queryKey: ['purpose-planner', 'suggestions', residentId], queryFn: () => purposePlannerApi.getSuggestions(residentId).then(r => r.data), enabled: !!residentId });
+}
+
+// ── Mood Environment (Quality of Life) ───────────────────────────────────
+export function useMoodSuggestions(residentId: string) {
+  return useQuery({ queryKey: ['mood-environment', 'suggestions', residentId], queryFn: () => moodEnvironmentApi.getSuggestions(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useRecordMoodIntervention() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => moodEnvironmentApi.recordIntervention(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['mood-environment'] }); toast.success('Intervention recorded'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to record intervention') });
+}
+export function useMoodInterventionHistory(residentId: string) {
+  return useQuery({ queryKey: ['mood-environment', 'history', residentId], queryFn: () => moodEnvironmentApi.getHistory(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useMoodEffectiveness(residentId: string) {
+  return useQuery({ queryKey: ['mood-environment', 'effectiveness', residentId], queryFn: () => moodEnvironmentApi.getEffectiveness(residentId).then(r => r.data), enabled: !!residentId });
+}
+
+// ── Photo Frame Feed (Quality of Life) ───────────────────────────────────
+export function useUploadPhoto() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (formData: FormData) => photoFrameApi.upload(formData).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['photo-frames'] }); toast.success('Photo uploaded'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to upload photo') });
+}
+export function usePhotoFramePhotos(params?: object) {
+  return useQuery({ queryKey: ['photo-frames', 'photos', params], queryFn: () => photoFrameApi.listPhotos(params).then(r => r.data) });
+}
+export function useApprovePhoto() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (id: string) => photoFrameApi.approve(id).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['photo-frames'] }); toast.success('Photo approved'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to approve photo') });
+}
+export function useRejectPhoto() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (id: string) => photoFrameApi.reject(id).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['photo-frames'] }); toast.success('Photo rejected'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to reject photo') });
+}
+export function useSchedulePhoto() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => photoFrameApi.schedule(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['photo-frames'] }); toast.success('Photo scheduled'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to schedule photo') });
+}
+export function usePhotoViewingHistory(residentId: string) {
+  return useQuery({ queryKey: ['photo-frames', 'history', residentId], queryFn: () => photoFrameApi.getHistory(residentId).then(r => r.data), enabled: !!residentId });
+}
+
+// ── Sleep Quality Tracker (Quality of Life) ──────────────────────────────
+export function useLogSleep() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => sleepTrackerApi.logSleep(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['sleep-tracker'] }); toast.success('Sleep log recorded'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to log sleep') });
+}
+export function useSleepHistory(residentId: string) {
+  return useQuery({ queryKey: ['sleep-tracker', 'history', residentId], queryFn: () => sleepTrackerApi.getHistory(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useSleepProfile(residentId: string) {
+  return useQuery({ queryKey: ['sleep-tracker', 'profile', residentId], queryFn: () => sleepTrackerApi.getProfile(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useSleepDisturbances(residentId: string) {
+  return useQuery({ queryKey: ['sleep-tracker', 'disturbances', residentId], queryFn: () => sleepTrackerApi.getDisturbances(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useSleepSuggestions(residentId: string) {
+  return useQuery({ queryKey: ['sleep-tracker', 'suggestions', residentId], queryFn: () => sleepTrackerApi.getSuggestions(residentId).then(r => r.data), enabled: !!residentId });
+}
+
+// ── Intergenerational Programme (Quality of Life) ────────────────────────
+export function useIntergenerationalProgrammes(params?: object) {
+  return useQuery({ queryKey: ['intergenerational', 'programmes', params], queryFn: () => intergenerationalApi.listProgrammes(params).then(r => r.data) });
+}
+export function useCreateIntergenerationalProgramme() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => intergenerationalApi.createProgramme(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['intergenerational'] }); toast.success('Programme created'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to create programme') });
+}
+export function useIntergenerationalVisits(params?: object) {
+  return useQuery({ queryKey: ['intergenerational', 'visits', params], queryFn: () => intergenerationalApi.listVisits(params).then(r => r.data) });
+}
+export function useCreateIntergenerationalVisit() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => intergenerationalApi.createVisit(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['intergenerational'] }); toast.success('Visit scheduled'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to schedule visit') });
+}
+export function useAddIntergenerationalParticipant() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => intergenerationalApi.addParticipant(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['intergenerational'] }); toast.success('Participant added'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to add participant') });
+}
+export function useLogIntergenerationalOutcome() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => intergenerationalApi.logOutcome(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['intergenerational'] }); toast.success('Outcome logged'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to log outcome') });
+}
+export function useIntergenerationalSafeguarding(programmeId: string) {
+  return useQuery({ queryKey: ['intergenerational', 'safeguarding', programmeId], queryFn: () => intergenerationalApi.getSafeguarding(programmeId).then(r => r.data), enabled: !!programmeId });
+}
+export function useIntergenerationalWellbeingImpact() {
+  return useQuery({ queryKey: ['intergenerational', 'wellbeing-impact'], queryFn: () => intergenerationalApi.getWellbeingImpact().then(r => r.data) });
+}
+
+// ── Rehab Goal Tracker (Quality of Life) ─────────────────────────────────
+export function useCreateRehabGoal() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => rehabGoalsApi.createGoal(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['rehab-goals'] }); toast.success('Goal created'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to create goal') });
+}
+export function useResidentRehabGoals(residentId: string) {
+  return useQuery({ queryKey: ['rehab-goals', 'resident', residentId], queryFn: () => rehabGoalsApi.getResidentGoals(residentId).then(r => r.data), enabled: !!residentId });
+}
+export function useAddRehabMilestone() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => rehabGoalsApi.addMilestone(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['rehab-goals'] }); toast.success('Milestone added'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to add milestone') });
+}
+export function useUpdateRehabMilestoneProgress() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => rehabGoalsApi.updateProgress(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['rehab-goals'] }); toast.success('Progress updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update progress') });
+}
+export function useLogRehabProgress() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => rehabGoalsApi.logProgress(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['rehab-goals'] }); toast.success('Progress logged'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to log progress') });
+}
+export function useCelebrateRehabMilestone() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (id: string) => rehabGoalsApi.celebrate(id).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['rehab-goals'] }); toast.success('Achievement celebrated!'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to celebrate') });
+}
+export function useRehabReport(residentId: string) {
+  return useQuery({ queryKey: ['rehab-goals', 'report', residentId], queryFn: () => rehabGoalsApi.getReport(residentId).then(r => r.data), enabled: !!residentId });
+}
+
+// ── Celebration Planner (Quality of Life) ────────────────────────────────
+export function useUpcomingCelebrations() {
+  return useQuery({ queryKey: ['celebrations', 'upcoming'], queryFn: () => celebrationsApi.getUpcoming().then(r => r.data) });
+}
+export function useCreateCelebration() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => celebrationsApi.create(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['celebrations'] }); toast.success('Celebration planned'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to plan celebration') });
+}
+export function useCelebrationTasks(id: string) {
+  return useQuery({ queryKey: ['celebrations', 'tasks', id], queryFn: () => celebrationsApi.getTasks(id).then(r => r.data), enabled: !!id });
+}
+export function useCompleteCelebrationTask() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (id: string) => celebrationsApi.completeTask(id).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['celebrations'] }); toast.success('Task completed'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to complete task') });
+}
+export function useCelebrationCalendar() {
+  return useQuery({ queryKey: ['celebrations', 'calendar'], queryFn: () => celebrationsApi.getCalendar().then(r => r.data) });
+}
+export function useNotifyCelebrationFamily() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (id: string) => celebrationsApi.notifyFamily(id).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['celebrations'] }); toast.success('Family notified'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to notify family') });
 }

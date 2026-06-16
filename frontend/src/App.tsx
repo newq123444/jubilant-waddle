@@ -56,6 +56,16 @@ import ElearningModule from './pages/ElearningModule';
 import CompetencySignoff from './pages/CompetencySignoff';
 import DiabetesManagement from './pages/DiabetesManagement';
 import PalliativeCarePathway from './pages/PalliativeCarePathway';
+import MusicTherapy from './pages/MusicTherapy';
+import MenuChoiceSystem from './pages/MenuChoiceSystem';
+import FriendshipMapper from './pages/FriendshipMapper';
+import DailyPurposePlanner from './pages/DailyPurposePlanner';
+import MoodEnvironment from './pages/MoodEnvironment';
+import PhotoFrameFeed from './pages/PhotoFrameFeed';
+import SleepQualityTracker from './pages/SleepQualityTracker';
+import IntergenerationalProgramme from './pages/IntergenerationalProgramme';
+import RehabGoalTracker from './pages/RehabGoalTracker';
+import CelebrationPlanner from './pages/CelebrationPlanner';
 import { ROLE_LABELS } from './utils/formatters';
 
 // ── Nav config ────────────────────────────────────────────────────────────
@@ -99,6 +109,17 @@ const NAV_ALL = [
   { path: '/visitor-sign-in', label: 'Visitors', icon: '🚪', roles: ['home_manager','deputy_manager','admin','super_admin','group_admin','senior_carer','carer','registered_nurse'] },
   { path: '/benchmarking', label: 'Benchmarking', icon: '📊', roles: ['home_manager','deputy_manager','super_admin','group_admin'] },
   { path: '/board-packs', label: 'Board Packs', icon: '📑', roles: ['home_manager','deputy_manager','super_admin','group_admin'] },
+  { section: 'Quality of Life', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','activities','admin','super_admin','group_admin'] },
+  { path: '/music-therapy', label: 'Music Therapy', icon: '🎵', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','activities','admin','super_admin','group_admin'] },
+  { path: '/menu-choices', label: 'Menu Choices', icon: '🍽️', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','activities','admin','super_admin','group_admin','kitchen'] },
+  { path: '/friendship-mapper', label: 'Friendship Mapper', icon: '🤝', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','activities','admin','super_admin','group_admin'] },
+  { path: '/purpose-planner', label: 'Purpose Planner', icon: '🌱', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','activities','admin','super_admin','group_admin'] },
+  { path: '/mood-environment', label: 'Mood Environment', icon: '🌤️', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'] },
+  { path: '/photo-frames', label: 'Photo Frames', icon: '🖼️', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','activities','admin','super_admin','group_admin'] },
+  { path: '/sleep-tracker', label: 'Sleep Tracker', icon: '😴', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'] },
+  { path: '/intergenerational', label: 'Intergenerational', icon: '👶', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','activities','admin','super_admin','group_admin'] },
+  { path: '/rehab-goals', label: 'Rehab Goals', icon: '🏋️', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'] },
+  { path: '/celebrations', label: 'Celebrations', icon: '🎉', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','activities','admin','super_admin','group_admin'] },
   { section: 'Communications' },
   { path: '/family',     label: 'Family Portal', icon: '💬', roles: null, badge: 'messages' },
   { section: 'Finance', roles: ['home_manager','deputy_manager','admin','finance','super_admin','group_admin'] },
@@ -409,6 +430,16 @@ export default function App() {
           <Route path="/competency-signoff" element={<CompetencySignoff />} />
           <Route path="/diabetes"        element={<DiabetesManagement />} />
           <Route path="/palliative-care" element={<PalliativeCarePathway />} />
+          <Route path="/music-therapy" element={<MusicTherapy />} />
+          <Route path="/menu-choices" element={<MenuChoiceSystem />} />
+          <Route path="/friendship-mapper" element={<FriendshipMapper />} />
+          <Route path="/purpose-planner" element={<DailyPurposePlanner />} />
+          <Route path="/mood-environment" element={<MoodEnvironment />} />
+          <Route path="/photo-frames" element={<PhotoFrameFeed />} />
+          <Route path="/sleep-tracker" element={<SleepQualityTracker />} />
+          <Route path="/intergenerational" element={<IntergenerationalProgramme />} />
+          <Route path="/rehab-goals" element={<RehabGoalTracker />} />
+          <Route path="/celebrations" element={<CelebrationPlanner />} />
           <Route path="/audit-log"      element={<AuditLog />} />
           <Route path="/profile"        element={<Profile />} />
           <Route path="*"               element={<Navigate to="/" replace />} />

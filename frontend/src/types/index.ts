@@ -1512,3 +1512,386 @@ export interface FamilyCommunicationLog {
   communication_date: string;
   created_at: string;
 }
+
+// ── Quality of Life: Music Therapy ───────────────────────────────────────
+export interface MusicGenre {
+  id: string;
+  name: string;
+  description?: string;
+  created_at: string;
+}
+
+export interface MusicPreference {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  genre_id: string;
+  genre_name?: string;
+  preference_level: 'love' | 'like' | 'neutral' | 'dislike';
+  specific_artists?: string[];
+  specific_songs?: string[];
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MusicSession {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  started_by: string;
+  started_by_name?: string;
+  mood_before: 'very_low' | 'low' | 'neutral' | 'good' | 'very_good';
+  mood_after?: 'very_low' | 'low' | 'neutral' | 'good' | 'very_good';
+  duration_minutes?: number;
+  notes?: string;
+  status: 'active' | 'completed';
+  started_at: string;
+  ended_at?: string;
+  created_at: string;
+}
+
+export interface MusicSessionSong {
+  id: string;
+  session_id: string;
+  song_title: string;
+  artist?: string;
+  genre_id?: string;
+  genre_name?: string;
+  resident_response?: 'positive' | 'neutral' | 'negative';
+  notes?: string;
+}
+
+// ── Quality of Life: Menu Choices ────────────────────────────────────────
+export interface MenuOption {
+  id: string;
+  care_home_id: string;
+  meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+  name: string;
+  description?: string;
+  photo_url?: string;
+  allergens?: string[];
+  texture_suitable?: string[];
+  cultural_suitable?: string[];
+  available_date: string;
+  active: boolean;
+  created_at: string;
+}
+
+export interface MenuDietaryProfile {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  cultural_needs?: string[];
+  religious_needs?: string[];
+  texture_requirement?: 'normal' | 'soft' | 'pureed' | 'liquid';
+  allergies?: string[];
+  dislikes?: string[];
+  preferences?: string[];
+  notes?: string;
+  updated_at: string;
+}
+
+export interface MenuChoice {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  menu_option_id: string;
+  option_name?: string;
+  meal_type: string;
+  meal_date: string;
+  notes?: string;
+  created_at: string;
+}
+
+// ── Quality of Life: Friendship Mapper ───────────────────────────────────
+export interface FriendshipObservation {
+  id: string;
+  care_home_id: string;
+  resident_a_id: string;
+  resident_b_id: string;
+  resident_a_name?: string;
+  resident_b_name?: string;
+  observed_by: string;
+  observed_by_name?: string;
+  interaction_type: 'conversation' | 'activity' | 'meal' | 'spontaneous' | 'conflict';
+  quality: 'positive' | 'neutral' | 'negative';
+  context?: string;
+  notes?: string;
+  observed_at: string;
+  created_at: string;
+}
+
+export interface FriendshipConnection {
+  id: string;
+  care_home_id: string;
+  resident_a_id: string;
+  resident_b_id: string;
+  resident_a_name?: string;
+  resident_b_name?: string;
+  strength: number;
+  interaction_count: number;
+  last_interaction_at?: string;
+  relationship_type?: 'friend' | 'acquaintance' | 'conflict';
+}
+
+// ── Quality of Life: Purpose Planner ─────────────────────────────────────
+export interface PurposeRole {
+  id: string;
+  care_home_id: string;
+  name: string;
+  description?: string;
+  category?: string;
+  mobility_requirement?: string;
+  cognitive_requirement?: string;
+  active: boolean;
+  created_at: string;
+}
+
+export interface PurposeRoleAssignment {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  role_id: string;
+  role_name?: string;
+  assigned_by?: string;
+  assigned_by_name?: string;
+  status: 'active' | 'paused' | 'completed';
+  start_date: string;
+  end_date?: string;
+  notes?: string;
+  created_at: string;
+}
+
+export interface PurposeEngagementLog {
+  id: string;
+  care_home_id: string;
+  assignment_id: string;
+  resident_id: string;
+  resident_name?: string;
+  role_name?: string;
+  engagement_level: 'high' | 'medium' | 'low' | 'refused';
+  satisfaction_score?: number;
+  duration_minutes?: number;
+  notes?: string;
+  logged_by?: string;
+  logged_by_name?: string;
+  logged_at: string;
+  created_at: string;
+}
+
+// ── Quality of Life: Mood Environment ────────────────────────────────────
+export interface MoodIntervention {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  intervention_type: string;
+  description?: string;
+  mood_before: 'very_low' | 'low' | 'neutral' | 'good' | 'very_good';
+  mood_after?: 'very_low' | 'low' | 'neutral' | 'good' | 'very_good';
+  effectiveness_score?: number;
+  administered_by?: string;
+  administered_by_name?: string;
+  notes?: string;
+  created_at: string;
+}
+
+export interface MoodInterventionHistory {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  intervention_type: string;
+  avg_effectiveness: number;
+  usage_count: number;
+  last_used_at: string;
+}
+
+// ── Quality of Life: Photo Frame ─────────────────────────────────────────
+export interface PhotoFramePhoto {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  uploaded_by?: string;
+  uploaded_by_name?: string;
+  photo_url: string;
+  caption?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  approved_by?: string;
+  approved_by_name?: string;
+  show_on_date?: string;
+  occasion?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PhotoViewingHistory {
+  id: string;
+  photo_id: string;
+  resident_id: string;
+  viewed_at: string;
+  reaction?: 'positive' | 'neutral' | 'negative';
+  notes?: string;
+}
+
+// ── Quality of Life: Sleep Tracker ───────────────────────────────────────
+export interface SleepLog {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  sleep_date: string;
+  bedtime: string;
+  wake_time: string;
+  disturbances_count: number;
+  disturbance_types?: string[];
+  interventions_used?: string[];
+  quality_rating: number;
+  total_sleep_hours?: number;
+  logged_by?: string;
+  logged_by_name?: string;
+  notes?: string;
+  created_at: string;
+}
+
+export interface SleepProfile {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  avg_bedtime?: string;
+  avg_wake_time?: string;
+  avg_quality_rating?: number;
+  avg_disturbances?: number;
+  common_disturbance_types?: string[];
+  trend_direction?: 'improving' | 'stable' | 'declining';
+  suggestions?: string[];
+  last_updated: string;
+}
+
+// ── Quality of Life: Intergenerational Programme ─────────────────────────
+export interface IntergenerationalProgramme {
+  id: string;
+  care_home_id: string;
+  name: string;
+  description?: string;
+  partner_organisation: string;
+  partner_type: 'school' | 'nursery' | 'youth_group' | 'other';
+  contact_name?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  safeguarding_status: 'pending' | 'approved' | 'expired';
+  dbs_requirements?: string;
+  status: 'active' | 'paused' | 'completed';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface IntergenerationalVisit {
+  id: string;
+  care_home_id: string;
+  programme_id: string;
+  programme_name?: string;
+  visit_date: string;
+  start_time: string;
+  end_time?: string;
+  activity_type: 'reading' | 'art' | 'baking' | 'singing' | 'games' | 'gardening' | 'other';
+  activity_description?: string;
+  visitor_count?: number;
+  status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+  notes?: string;
+  created_at: string;
+}
+
+export interface IntergenerationalParticipant {
+  id: string;
+  visit_id: string;
+  resident_id: string;
+  resident_name?: string;
+  engagement_level?: 'high' | 'medium' | 'low' | 'observer';
+  wellbeing_before?: number;
+  wellbeing_after?: number;
+  notes?: string;
+}
+
+// ── Quality of Life: Rehab Goals ─────────────────────────────────────────
+export interface RehabGoal {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  goal_type: 'mobility' | 'independence' | 'cognitive' | 'social' | 'other';
+  title: string;
+  description?: string;
+  target_date?: string;
+  status: 'active' | 'achieved' | 'paused' | 'discontinued';
+  created_by?: string;
+  created_by_name?: string;
+  notify_family: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RehabMilestone {
+  id: string;
+  goal_id: string;
+  title: string;
+  description?: string;
+  target_date?: string;
+  achieved_date?: string;
+  status: 'pending' | 'in_progress' | 'achieved' | 'missed';
+  celebrated: boolean;
+  order_index: number;
+}
+
+export interface RehabProgressLog {
+  id: string;
+  care_home_id: string;
+  milestone_id: string;
+  resident_id: string;
+  resident_name?: string;
+  milestone_title?: string;
+  goal_title?: string;
+  progress_notes: string;
+  score?: number;
+  logged_by?: string;
+  logged_by_name?: string;
+  logged_at: string;
+  created_at: string;
+}
+
+// ── Quality of Life: Celebrations ────────────────────────────────────────
+export interface Celebration {
+  id: string;
+  care_home_id: string;
+  resident_id?: string;
+  resident_name?: string;
+  celebration_type: 'birthday' | 'admission_anniversary' | 'religious_festival' | 'achievement' | 'other';
+  title: string;
+  description?: string;
+  celebration_date: string;
+  status: 'planned' | 'in_progress' | 'completed' | 'cancelled';
+  notify_family: boolean;
+  family_notified: boolean;
+  created_by?: string;
+  created_by_name?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CelebrationTask {
+  id: string;
+  celebration_id: string;
+  title: string;
+  assigned_to?: string;
+  assigned_to_name?: string;
+  status: 'pending' | 'in_progress' | 'completed';
+  due_date?: string;
+  completed_at?: string;
+  completed_by?: string;
+  notes?: string;
+}
