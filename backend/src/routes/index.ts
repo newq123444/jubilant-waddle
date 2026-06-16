@@ -50,6 +50,16 @@ import * as elearningCtrl from '../controllers/elearning.controller';
 import * as competencySignoffCtrl from '../controllers/competencySignoff.controller';
 import * as diabetesCtrl from '../controllers/diabetes.controller';
 import * as palliativeCareCtrl from '../controllers/palliativeCare.controller';
+import * as musicTherapyCtrl from '../controllers/musicTherapy.controller';
+import * as menuChoiceCtrl from '../controllers/menuChoice.controller';
+import * as friendshipMapperCtrl from '../controllers/friendshipMapper.controller';
+import * as purposePlannerCtrl from '../controllers/purposePlanner.controller';
+import * as moodEnvironmentCtrl from '../controllers/moodEnvironment.controller';
+import * as photoFrameCtrl from '../controllers/photoFrame.controller';
+import * as sleepTrackerCtrl from '../controllers/sleepTracker.controller';
+import * as intergenerationalCtrl from '../controllers/intergenerational.controller';
+import * as rehabGoalsCtrl from '../controllers/rehabGoals.controller';
+import * as celebrationsCtrl from '../controllers/celebrations.controller';
 import { upload } from '../middleware/upload'; // getBillingSummary added
 import * as aiService from '../services/ai.service';
 import { query } from '../models/db';
@@ -714,6 +724,89 @@ router.get('/palliative/anticipatory-meds/:residentId', isClinical, palliativeCa
 router.patch('/palliative/anticipatory-meds/:id',       isClinical, palliativeCareCtrl.administerAnticipatoryMed);
 router.post('/palliative/family-communications',        isClinical, palliativeCareCtrl.logFamilyCommunication);
 router.get('/palliative/family-communications/:residentId', isClinical, palliativeCareCtrl.getFamilyCommunications);
+
+// ── Personal Music Therapy ────────────────────────────────────────────
+router.get('/music-therapy/genres',                        isStaff, musicTherapyCtrl.getGenreLibrary);
+router.get('/music-therapy/preferences/:residentId',       isStaff, musicTherapyCtrl.getResidentPreferences);
+router.post('/music-therapy/preferences',                  isStaff, musicTherapyCtrl.updateResidentPreferences);
+router.post('/music-therapy/sessions',                     isStaff, musicTherapyCtrl.startSession);
+router.patch('/music-therapy/sessions/:id/end',            isStaff, musicTherapyCtrl.endSession);
+router.get('/music-therapy/sessions/:residentId',          isStaff, musicTherapyCtrl.getSessionHistory);
+router.get('/music-therapy/effectiveness',                 isStaff, musicTherapyCtrl.getEffectivenessReport);
+
+// ── Personal Menu Choice System ───────────────────────────────────────
+router.get('/menu-choices/options',                        isStaff, menuChoiceCtrl.listMenuOptions);
+router.post('/menu-choices/options',                       isManager, menuChoiceCtrl.createMenuOption);
+router.get('/menu-choices/dietary-profile/:residentId',    isStaff, menuChoiceCtrl.getResidentDietaryProfile);
+router.put('/menu-choices/dietary-profile/:residentId',    isStaff, menuChoiceCtrl.updateResidentDietaryProfile);
+router.post('/menu-choices',                               isStaff, menuChoiceCtrl.submitMenuChoice);
+router.get('/menu-choices/kitchen-dashboard',              isStaff, menuChoiceCtrl.getKitchenDashboard);
+router.get('/menu-choices/residents/:residentId',          isStaff, menuChoiceCtrl.getResidentChoices);
+
+// ── Friendship Mapper ─────────────────────────────────────────────────
+router.post('/friendship-mapper/observations',             isClinical, friendshipMapperCtrl.recordObservation);
+router.get('/friendship-mapper/connections/:residentId',   isStaff, friendshipMapperCtrl.getResidentConnections);
+router.get('/friendship-mapper/network',                   isClinical, friendshipMapperCtrl.getNetworkGraph);
+router.get('/friendship-mapper/seating-suggestions',       isClinical, friendshipMapperCtrl.getSeatingSuggestions);
+router.get('/friendship-mapper/isolated',                  isClinical, friendshipMapperCtrl.getIsolatedResidents);
+
+// ── Daily Purpose Planner ─────────────────────────────────────────────
+router.get('/purpose-planner/roles',                       isStaff, purposePlannerCtrl.listRoles);
+router.post('/purpose-planner/roles',                      isManager, purposePlannerCtrl.createRole);
+router.post('/purpose-planner/assign',                     isClinical, purposePlannerCtrl.assignRole);
+router.get('/purpose-planner/residents/:residentId',       isStaff, purposePlannerCtrl.getResidentRoles);
+router.post('/purpose-planner/engagement',                 isStaff, purposePlannerCtrl.logEngagement);
+router.get('/purpose-planner/report',                      isClinical, purposePlannerCtrl.getEngagementReport);
+router.get('/purpose-planner/suggestions/:residentId',     isClinical, purposePlannerCtrl.suggestNewRoles);
+
+// ── Mood-Responsive Environment ───────────────────────────────────────
+router.get('/mood-environment/suggestions/:residentId',    isStaff, moodEnvironmentCtrl.getInterventionSuggestions);
+router.post('/mood-environment/interventions',             isStaff, moodEnvironmentCtrl.recordIntervention);
+router.get('/mood-environment/history/:residentId',        isStaff, moodEnvironmentCtrl.getInterventionHistory);
+router.get('/mood-environment/effectiveness',              isStaff, moodEnvironmentCtrl.getEffectivenessReport);
+
+// ── Digital Photo Frame Feed ──────────────────────────────────────────
+router.post('/photo-frame/photos',                         isStaff, photoFrameCtrl.uploadPhoto);
+router.get('/photo-frame/photos/:residentId',              isStaff, photoFrameCtrl.listPhotos);
+router.patch('/photo-frame/photos/:id/approve',            isManager, photoFrameCtrl.approvePhoto);
+router.patch('/photo-frame/photos/:id/reject',             isManager, photoFrameCtrl.rejectPhoto);
+router.patch('/photo-frame/photos/:id/schedule',           isStaff, photoFrameCtrl.schedulePhoto);
+router.get('/photo-frame/viewing-history/:residentId',     isStaff, photoFrameCtrl.getViewingHistory);
+router.post('/photo-frame/views',                          isStaff, photoFrameCtrl.logView);
+
+// ── Sleep Quality Tracker ─────────────────────────────────────────────
+router.post('/sleep-tracker/logs',                         isStaff, sleepTrackerCtrl.logSleep);
+router.get('/sleep-tracker/history/:residentId',           isStaff, sleepTrackerCtrl.getSleepHistory);
+router.get('/sleep-tracker/profile/:residentId',           isStaff, sleepTrackerCtrl.getSleepProfile);
+router.get('/sleep-tracker/disturbances/:residentId',      isStaff, sleepTrackerCtrl.getDisturbancePatterns);
+router.get('/sleep-tracker/suggestions/:residentId',       isStaff, sleepTrackerCtrl.getSleepSuggestions);
+
+// ── Intergenerational Programme Manager ───────────────────────────────
+router.post('/intergenerational/programmes',               isManager, intergenerationalCtrl.createProgramme);
+router.get('/intergenerational/programmes',                isStaff, intergenerationalCtrl.listProgrammes);
+router.post('/intergenerational/visits',                   isClinical, intergenerationalCtrl.createVisit);
+router.get('/intergenerational/visits',                    isStaff, intergenerationalCtrl.listVisits);
+router.post('/intergenerational/participants',             isClinical, intergenerationalCtrl.addParticipant);
+router.patch('/intergenerational/visits/:id/outcome',      isClinical, intergenerationalCtrl.logOutcome);
+router.get('/intergenerational/safeguarding/:programmeId', isManager, intergenerationalCtrl.getSafeguardingRequirements);
+router.get('/intergenerational/wellbeing-impact',          isClinical, intergenerationalCtrl.getWellbeingImpact);
+
+// ── Rehabilitation Goal Tracker ───────────────────────────────────────
+router.post('/rehab-goals',                                isClinical, rehabGoalsCtrl.createGoal);
+router.get('/rehab-goals/residents/:residentId',           isStaff, rehabGoalsCtrl.getResidentGoals);
+router.post('/rehab-goals/milestones',                     isClinical, rehabGoalsCtrl.addMilestone);
+router.patch('/rehab-goals/milestones/:id',                isClinical, rehabGoalsCtrl.updateMilestoneProgress);
+router.post('/rehab-goals/progress',                       isClinical, rehabGoalsCtrl.logProgress);
+router.patch('/rehab-goals/:id/celebrate',                 isClinical, rehabGoalsCtrl.celebrateAchievement);
+router.get('/rehab-goals/report/:residentId',              isClinical, rehabGoalsCtrl.getProgressReport);
+
+// ── Birthday & Celebration Planner ────────────────────────────────────
+router.get('/celebrations/upcoming',                       isStaff, celebrationsCtrl.getUpcoming);
+router.post('/celebrations',                               isManager, celebrationsCtrl.createCelebration);
+router.post('/celebrations/tasks',                         isManager, celebrationsCtrl.assignTask);
+router.patch('/celebrations/tasks/:id/complete',           isStaff, celebrationsCtrl.completeTask);
+router.get('/celebrations/calendar',                       isStaff, celebrationsCtrl.getCelebrationCalendar);
+router.post('/celebrations/:id/notify-family',             isManager, celebrationsCtrl.notifyFamily);
 
 // ── AI ────────────────────────────────────────────────────────────────────
 router.post('/ai/family-summary',   isStaff, aiService.generateFamilySummary);
