@@ -1,0 +1,7 @@
+{
+  "task_id": "task-fix-ts-errors-add-innovative-features",
+  "task_description": "Fix all TypeScript compilation errors across the entire codebase (frontend and backend) so both builds are clean with zero errors, then add 8 innovative world-class features that make this platform unique: AI Care Plan Writer, Predictive Admission Matching, Real-time Wellbeing Heatmap, Automated Regulatory Reporting, Smart Handover Intelligence, Digital Consent Manager, Resident Digital Twin, and Environmental Intelligence.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002"],
+  "blocked_reason": null
+}

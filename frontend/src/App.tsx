@@ -66,6 +66,14 @@ import SleepQualityTracker from './pages/SleepQualityTracker';
 import IntergenerationalProgramme from './pages/IntergenerationalProgramme';
 import RehabGoalTracker from './pages/RehabGoalTracker';
 import CelebrationPlanner from './pages/CelebrationPlanner';
+import AiCarePlanWriter from './pages/AiCarePlanWriter';
+import AdmissionMatching from './pages/AdmissionMatching';
+import WellbeingHeatmap from './pages/WellbeingHeatmap';
+import RegulatoryReporting from './pages/RegulatoryReporting';
+import SmartHandover from './pages/SmartHandover';
+import ConsentManager from './pages/ConsentManager';
+import ResidentDigitalTwin from './pages/ResidentDigitalTwin';
+import EnvironmentalIntelligence from './pages/EnvironmentalIntelligence';
 import { ROLE_LABELS } from './utils/formatters';
 
 // ── Nav config ────────────────────────────────────────────────────────────
@@ -131,9 +139,17 @@ const NAV_ALL = [
   { section: 'Tools', roles: ['home_manager','deputy_manager','registered_nurse','super_admin','group_admin'] },
   { path: '/nl-search', label: 'Smart Search', icon: '🔍', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'] },
   { path: '/ai-tools',   label: 'AI Tools',     icon: '🤖', roles: ['home_manager','deputy_manager','registered_nurse','super_admin','group_admin'] },
+  { path: '/ai-care-plans', label: 'AI Care Plans', icon: '📄', roles: ['home_manager','deputy_manager','registered_nurse','super_admin','group_admin'] },
   { path: '/ai-insights', label: 'AI Insights',   icon: '🧠', roles: ['home_manager','deputy_manager','registered_nurse','super_admin','group_admin'] },
   { path: '/predictive-care', label: 'Falls & Risk AI', icon: '🎯', roles: ['home_manager','deputy_manager','registered_nurse','super_admin','group_admin'] },
+  { path: '/admission-matching', label: 'Admission Match', icon: '🏠', roles: ['home_manager','deputy_manager','super_admin','group_admin'] },
+  { path: '/smart-handover', label: 'Smart Handover', icon: '🧠', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','super_admin','group_admin'] },
   { path: '/sbar-handover', label: 'SBAR Handover', icon: '📋', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','super_admin','group_admin'] },
+  { path: '/digital-twin', label: 'Digital Twin', icon: '🧬', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','super_admin','group_admin'] },
+  { path: '/wellbeing-heatmap', label: 'Wellbeing Map', icon: '🗺️', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','super_admin','group_admin'] },
+  { path: '/environmental', label: 'Environment', icon: '🌍', roles: ['home_manager','deputy_manager','super_admin','group_admin','maintenance'] },
+  { path: '/regulatory', label: 'Regulatory', icon: '🏛️', roles: ['home_manager','deputy_manager','super_admin','group_admin'] },
+  { path: '/consent-manager', label: 'Consents', icon: '📝', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','super_admin','group_admin'] },
   { path: '/audit-log',  label: 'Audit Log',    icon: '🔍', roles: ['home_manager','super_admin','group_admin'] },
   { path: '/report-builder', label: 'Report Builder', icon: '📑', roles: ['home_manager','deputy_manager','super_admin','group_admin'] },
   { path: '/offline-mode', label: 'Offline Mode', icon: '📴', roles: ['home_manager','deputy_manager','registered_nurse','senior_carer','carer','admin','super_admin','group_admin'] },
@@ -440,6 +456,14 @@ export default function App() {
           <Route path="/intergenerational" element={<IntergenerationalProgramme />} />
           <Route path="/rehab-goals" element={<RehabGoalTracker />} />
           <Route path="/celebrations" element={<CelebrationPlanner />} />
+          <Route path="/ai-care-plans" element={<AiCarePlanWriter />} />
+          <Route path="/admission-matching" element={<AdmissionMatching />} />
+          <Route path="/wellbeing-heatmap" element={<WellbeingHeatmap />} />
+          <Route path="/regulatory" element={<RegulatoryReporting />} />
+          <Route path="/smart-handover" element={<SmartHandover />} />
+          <Route path="/consent-manager" element={<ConsentManager />} />
+          <Route path="/digital-twin" element={<ResidentDigitalTwin />} />
+          <Route path="/environmental" element={<EnvironmentalIntelligence />} />
           <Route path="/audit-log"      element={<AuditLog />} />
           <Route path="/profile"        element={<Profile />} />
           <Route path="*"               element={<Navigate to="/" replace />} />

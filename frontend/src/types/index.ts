@@ -1904,3 +1904,201 @@ export interface CelebrationTask {
   notes?: string;
   created_at: string;
 }
+
+// ── AI Care Plan Writer Types ─────────────────────────────────────────────
+export interface AiCarePlan {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  content: any;
+  status: 'draft' | 'approved' | 'rejected';
+  version: number;
+  generated_by: string;
+  generated_by_name?: string;
+  reviewed_by?: string;
+  reviewed_at?: string;
+  review_notes?: string;
+  created_at: string;
+}
+
+// ── Admission Matching Types ──────────────────────────────────────────────
+export interface AdmissionReferral {
+  id: string;
+  care_home_id: string;
+  name: string;
+  date_of_birth?: string;
+  referral_source?: string;
+  care_needs?: any;
+  medical_history?: string;
+  mobility?: string;
+  behavior?: string;
+  preferences?: any;
+  urgency: 'routine' | 'urgent' | 'emergency';
+  status: 'pending' | 'accepted' | 'declined' | 'waitlist';
+  decision_notes?: string;
+  created_by: string;
+  created_at: string;
+}
+
+export interface AdmissionMatch {
+  id: string;
+  referral_id?: string;
+  overall_score: number;
+  recommendation: 'accept' | 'conditional' | 'decline';
+  reasoning: { area: string; score: number; detail: string }[];
+  home_stats?: any;
+}
+
+// ── Wellbeing Heatmap Types ───────────────────────────────────────────────
+export interface HeatmapRoom {
+  resident_id: string;
+  resident_name: string;
+  room_number: string;
+  status: 'green' | 'amber' | 'red';
+  status_label: string;
+  mood: string;
+  pain_level: number;
+  engagement: string;
+  risk_level: string;
+  wellbeing_score?: number;
+  last_updated?: string;
+}
+
+export interface HeatmapSummary {
+  total: number;
+  green: number;
+  amber: number;
+  red: number;
+  last_updated: string;
+}
+
+// ── Regulatory Reporting Types ────────────────────────────────────────────
+export interface RegulatoryNotification {
+  id: string;
+  care_home_id: string;
+  type: 'cqc' | 'safeguarding' | 'dols' | 'death';
+  resident_id?: string;
+  resident_name?: string;
+  incident_id?: string;
+  form_data: any;
+  status: 'draft' | 'pending' | 'submitted' | 'overdue';
+  deadline: string;
+  submission_ref?: string;
+  submitted_at?: string;
+  created_by: string;
+  created_by_name?: string;
+  created_at: string;
+  is_overdue?: boolean;
+  days_remaining?: number;
+}
+
+// ── Smart Handover Types ──────────────────────────────────────────────────
+export interface SmartHandover {
+  id: string;
+  care_home_id: string;
+  shift_type: string;
+  critical_items: HandoverCriticalItem[];
+  full_summary: any;
+  generated_by: string;
+  generated_by_name?: string;
+  status: 'active' | 'archived';
+  created_at: string;
+}
+
+export interface HandoverCriticalItem {
+  priority: number;
+  category: 'incident' | 'clinical' | 'monitoring';
+  urgency: 'critical' | 'high' | 'medium' | 'low';
+  title: string;
+  detail: string;
+  resident_name: string;
+  action_required: string;
+  source_id: string;
+}
+
+// ── Consent Manager Types ─────────────────────────────────────────────────
+export interface ConsentRecord {
+  id: string;
+  care_home_id: string;
+  resident_id: string;
+  resident_name?: string;
+  category: 'photography' | 'outings' | 'medical' | 'research' | 'dnr' | 'other';
+  description?: string;
+  consent_given_by: string;
+  relationship?: string;
+  review_date?: string;
+  capacity_assessed: boolean;
+  notes?: string;
+  status: 'active' | 'withdrawn' | 'expired';
+  recorded_by: string;
+  recorded_by_name?: string;
+  created_at: string;
+}
+
+// ── Digital Twin Types ────────────────────────────────────────────────────
+export interface DigitalTwin {
+  personal: {
+    id: string;
+    name: string;
+    date_of_birth: string;
+    room_number: string;
+    admission_date: string;
+    care_type: string;
+    nhs_number?: string;
+    photo_url?: string;
+  };
+  medical: {
+    medications: any[];
+    allergies?: string;
+    dietary_requirements?: string;
+    mobility_status?: string;
+    risk_level: string;
+    dnacpr: boolean;
+    gp: { name?: string; phone?: string };
+  };
+  social: {
+    interests: string[];
+    key_worker: any;
+    funding_type?: string;
+  };
+  emotional: {
+    current_wellbeing_score?: number;
+    recent_moods: { mood: string; date: string }[];
+    wellbeing_trend: any[];
+  };
+  risk_indicators: { type: string; level: string; detail: string }[];
+  recent_events: { care_notes: any[]; incidents: any[] };
+  last_updated: string;
+}
+
+export interface TimelineEvent {
+  event_type: 'care_note' | 'incident' | 'wellbeing';
+  id: string;
+  sub_type: string;
+  detail: string;
+  event_date: string;
+}
+
+// ── Environmental Intelligence Types ──────────────────────────────────────
+export interface EnvironmentalReading {
+  id: string;
+  care_home_id: string;
+  zone: string;
+  noise_level?: number;
+  light_level?: number;
+  temperature?: number;
+  humidity?: number;
+  air_quality?: number;
+  recorded_at: string;
+  recorded_by: string;
+}
+
+export interface EnvironmentalRecommendation {
+  zone: string;
+  recommendations: {
+    type: string;
+    priority: 'high' | 'medium' | 'low';
+    message: string;
+  }[];
+}

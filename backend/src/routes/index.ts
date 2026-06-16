@@ -60,6 +60,14 @@ import * as sleepTrackerCtrl from '../controllers/sleepTracker.controller';
 import * as intergenerationalCtrl from '../controllers/intergenerational.controller';
 import * as rehabGoalsCtrl from '../controllers/rehabGoals.controller';
 import * as celebrationsCtrl from '../controllers/celebrations.controller';
+import * as aiCarePlanCtrl from '../controllers/aiCarePlan.controller';
+import * as admissionMatchingCtrl from '../controllers/admissionMatching.controller';
+import * as wellbeingHeatmapCtrl from '../controllers/wellbeingHeatmap.controller';
+import * as regulatoryReportingCtrl from '../controllers/regulatoryReporting.controller';
+import * as smartHandoverCtrl from '../controllers/smartHandover.controller';
+import * as consentManagerCtrl from '../controllers/consentManager.controller';
+import * as digitalTwinCtrl from '../controllers/digitalTwin.controller';
+import * as environmentalIntelCtrl from '../controllers/environmentalIntel.controller';
 import { upload } from '../middleware/upload'; // getBillingSummary added
 import * as aiService from '../services/ai.service';
 import { query } from '../models/db';
@@ -826,6 +834,51 @@ router.get('/ai/audit', isManager, async (req, res, next) => {
     res.json(rows);
   } catch (err) { next(err); }
 });
+
+// ── AI Care Plan Writer ───────────────────────────────────────────────────
+router.post('/ai/care-plan/generate',          isClinical, aiCarePlanCtrl.generateCarePlan);
+router.get('/ai/care-plans',                   isClinical, aiCarePlanCtrl.listCarePlans);
+router.get('/ai/care-plans/:id',               isClinical, aiCarePlanCtrl.getCarePlan);
+router.patch('/ai/care-plans/:id/approve',     isManager, aiCarePlanCtrl.approveCarePlan);
+
+// ── Predictive Admission Matching ─────────────────────────────────────────
+router.post('/admissions/match',               isManager, admissionMatchingCtrl.matchReferral);
+router.get('/admissions/referrals',            isManager, admissionMatchingCtrl.listReferrals);
+router.post('/admissions/referrals',           isManager, admissionMatchingCtrl.createReferral);
+router.patch('/admissions/referrals/:id',      isManager, admissionMatchingCtrl.updateReferralStatus);
+
+// ── Real-time Wellbeing Heatmap ───────────────────────────────────────────
+router.get('/wellbeing/heatmap',               isStaff, wellbeingHeatmapCtrl.getHeatmap);
+router.get('/wellbeing/heatmap/history',       isStaff, wellbeingHeatmapCtrl.getHeatmapHistory);
+router.get('/wellbeing/heatmap/room/:roomNumber', isStaff, wellbeingHeatmapCtrl.getRoomDetail);
+
+// ── Automated Regulatory Reporting ────────────────────────────────────────
+router.post('/regulatory/generate-notification', isManager, regulatoryReportingCtrl.generateNotification);
+router.get('/regulatory/notifications',        isManager, regulatoryReportingCtrl.listNotifications);
+router.patch('/regulatory/notifications/:id',  isManager, regulatoryReportingCtrl.updateNotification);
+router.get('/regulatory/deadlines',            isManager, regulatoryReportingCtrl.getDeadlines);
+
+// ── Smart Handover Intelligence ───────────────────────────────────────────
+router.post('/handover/smart-generate',        isClinical, smartHandoverCtrl.generateSmartHandover);
+router.get('/handover/smart',                  isClinical, smartHandoverCtrl.listSmartHandovers);
+router.post('/handover/smart/:id/action',      isClinical, smartHandoverCtrl.recordAction);
+
+// ── Digital Consent Manager ───────────────────────────────────────────────
+router.post('/consents',                       isStaff, consentManagerCtrl.createConsent);
+router.get('/consents/:residentId',            isStaff, consentManagerCtrl.listConsents);
+router.patch('/consents/:id',                  isStaff, consentManagerCtrl.updateConsent);
+router.get('/consents/expiring/all',           isManager, consentManagerCtrl.getExpiringConsents);
+router.post('/consents/:id/capacity-assessment', isClinical, consentManagerCtrl.recordCapacityAssessment);
+
+// ── Resident Digital Twin ─────────────────────────────────────────────────
+router.get('/digital-twin/:residentId',        isStaff, digitalTwinCtrl.getDigitalTwin);
+router.get('/digital-twin/:residentId/timeline', isStaff, digitalTwinCtrl.getTimeline);
+
+// ── Environmental Intelligence ────────────────────────────────────────────
+router.post('/environment/readings',           isStaff, environmentalIntelCtrl.logReading);
+router.get('/environment/dashboard',           isManager, environmentalIntelCtrl.getDashboard);
+router.get('/environment/correlations',        isManager, environmentalIntelCtrl.getCorrelations);
+router.get('/environment/recommendations',     isManager, environmentalIntelCtrl.getRecommendations);
 
 // ── Audit Log ─────────────────────────────────────────────────────────────
 router.get('/audit-log', isManager, async (req, res, next) => {
