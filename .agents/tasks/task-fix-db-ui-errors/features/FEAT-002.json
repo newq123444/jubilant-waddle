@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "fix",
   "description": "Fix all controller SQL queries that reference wrong column names. Fix route ordering collision where /wellbeing/:residentId catches /wellbeing/heatmap requests. Fix absence controller missing validation. Specific issues: billing.controller.ts getBillingSummary uses 'total_amount' and 'invoice_date' (should be 'total_pence' and 'period_start'). digitalTwin.controller.ts queries 'medication_name' and 'status' from medications (should be 'name' and 'active'). wellbeingHeatmap.controller.ts and smartHandover.controller.ts use 'r.status = active' (should be 'r.active = TRUE'). smartHandover.controller.ts and digitalTwin.controller.ts reference care_notes 'category' column (should be 'note_type'). cqcCompliance.controller.ts references 'resident_life_stories' (should be 'resident_life_story'). Route collision: /wellbeing/heatmap routes are registered at line 851 but /wellbeing/:residentId at line 266 catches the request first.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "In backend/src/controllers/billing.controller.ts getBillingSummary function: change 'total_amount' to 'total_pence' (4 occurrences on lines 104-107), change 'invoice_date' to 'period_start' (2 occurrences on line 107)",
     "In backend/src/controllers/digitalTwin.controller.ts: line 45 change 'SELECT medication_name, dose, route, frequency, status FROM medications' to 'SELECT name AS medication_name, dose, route, frequency, active FROM medications'; line 46 change the WHERE clause filter from 'status = active' to 'active = TRUE'",
@@ -28,5 +28,5 @@
     "Run: cd backend && npm run build (should succeed)"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All SQL column fixes applied and verified. Also fixed note.category -> note.note_type in smartHandover JS logic (line 58) since the SQL query now returns note_type instead of category. Backend compiles cleanly with tsc --noEmit. Route collision fixed by moving heatmap routes before :residentId param route."
 }
