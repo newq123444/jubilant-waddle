@@ -23,14 +23,14 @@ export async function generateSmartHandover(req: Request, res: Response, next: N
       `SELECT cn.*, r.first_name || ' ' || r.last_name AS resident_name
        FROM care_notes cn JOIN residents r ON r.id = cn.resident_id
        WHERE cn.care_home_id = $1 AND cn.created_at > NOW() - INTERVAL '12 hours' AND cn.deleted_at IS NULL
-       AND cn.category IN ('clinical','medication','concern','escalation')
+       AND cn.note_type IN ('clinical','medication','concern','escalation')
        ORDER BY cn.created_at DESC LIMIT 15`,
       [careHomeId]
     );
 
     const { rows: highRiskResidents } = await query(
       `SELECT id, first_name, last_name, room_number, risk_level, mobility_status
-       FROM residents WHERE care_home_id = $1 AND status = 'active' AND risk_level = 'high'`,
+       FROM residents WHERE care_home_id = $1 AND active = TRUE AND risk_level = 'high'`,
       [careHomeId]
     );
 
@@ -55,7 +55,7 @@ export async function generateSmartHandover(req: Request, res: Response, next: N
 
     // Priority 2: Clinical concerns from notes
     recentNotes.forEach((note: any) => {
-      if (criticalItems.length < 3 && note.category === 'escalation') {
+      if (criticalItems.length < 3 && note.note_type === 'escalation') {
         criticalItems.push({
           priority: criticalItems.length + 1,
           category: 'clinical',

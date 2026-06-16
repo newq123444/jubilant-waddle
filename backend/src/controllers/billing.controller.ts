@@ -101,10 +101,10 @@ export async function getBillingSummary(req: Request, res: Response, next: NextF
          COUNT(*) FILTER (WHERE status = 'paid')::int AS paid_count,
          COUNT(*) FILTER (WHERE status = 'overdue')::int AS overdue_count,
          COUNT(*) FILTER (WHERE status = 'draft' OR status = 'sent')::int AS pending_count,
-         COALESCE(SUM(total_amount) FILTER (WHERE status = 'paid'), 0)::numeric AS paid_total,
-         COALESCE(SUM(total_amount) FILTER (WHERE status = 'overdue'), 0)::numeric AS overdue_total,
-         COALESCE(SUM(total_amount) FILTER (WHERE status IN ('draft','sent')), 0)::numeric AS pending_total,
-         COALESCE(SUM(total_amount) FILTER (WHERE date_part('month', invoice_date) = date_part('month', NOW()) AND date_part('year', invoice_date) = date_part('year', NOW())), 0)::numeric AS this_month_revenue
+         COALESCE(SUM(total_pence) FILTER (WHERE status = 'paid'), 0)::numeric AS paid_total,
+         COALESCE(SUM(total_pence) FILTER (WHERE status = 'overdue'), 0)::numeric AS overdue_total,
+         COALESCE(SUM(total_pence) FILTER (WHERE status IN ('draft','sent')), 0)::numeric AS pending_total,
+         COALESCE(SUM(total_pence) FILTER (WHERE date_part('month', period_start) = date_part('month', NOW()) AND date_part('year', period_start) = date_part('year', NOW())), 0)::numeric AS this_month_revenue
        FROM invoices WHERE care_home_id = $1`,
       [careHomeId]
     );

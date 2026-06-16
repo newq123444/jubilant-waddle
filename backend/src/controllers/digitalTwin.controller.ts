@@ -18,7 +18,7 @@ export async function getDigitalTwin(req: Request, res: Response, next: NextFunc
 
     // Recent care notes
     const { rows: recentNotes } = await query(
-      `SELECT id, category, content, created_at FROM care_notes
+      `SELECT id, note_type, content, created_at FROM care_notes
        WHERE resident_id = $1 AND care_home_id = $2 AND deleted_at IS NULL
        ORDER BY created_at DESC LIMIT 10`,
       [residentId, careHomeId]
@@ -42,8 +42,8 @@ export async function getDigitalTwin(req: Request, res: Response, next: NextFunc
 
     // Medications
     const { rows: medications } = await query(
-      `SELECT medication_name, dose, route, frequency, status FROM medications
-       WHERE resident_id = $1 AND care_home_id = $2 AND status = 'active'`,
+      `SELECT name AS medication_name, dose, route, frequency, active FROM medications
+       WHERE resident_id = $1 AND care_home_id = $2 AND active = TRUE`,
       [residentId, careHomeId]
     );
 
@@ -113,7 +113,7 @@ export async function getTimeline(req: Request, res: Response, next: NextFunctio
 
     // Gather events from multiple sources
     const { rows: notes } = await query(
-      `SELECT 'care_note' AS event_type, id, category AS sub_type, content AS detail, created_at AS event_date
+      `SELECT 'care_note' AS event_type, id, note_type AS sub_type, content AS detail, created_at AS event_date
        FROM care_notes WHERE resident_id = $1 AND care_home_id = $2 AND deleted_at IS NULL
        AND created_at > NOW() - ($3 || ' days')::interval`,
       [residentId, careHomeId, lookback.toString()]

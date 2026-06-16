@@ -263,6 +263,10 @@ router.get('/wellbeing/overview',                         isStaff, wellbeingCtrl
 router.get('/wellbeing/isolation-alerts',                 isStaff, wellbeingCtrl.getSocialIsolationAlerts);
 router.patch('/wellbeing/isolation-alerts/:id',           isManager, wellbeingCtrl.acknowledgeSocialAlert);
 router.post('/wellbeing/generate-isolation-alerts',       isManager, wellbeingCtrl.generateIsolationAlerts);
+// ── Real-time Wellbeing Heatmap (must be before :residentId param route) ──
+router.get('/wellbeing/heatmap',               isStaff, wellbeingHeatmapCtrl.getHeatmap);
+router.get('/wellbeing/heatmap/history',       isStaff, wellbeingHeatmapCtrl.getHeatmapHistory);
+router.get('/wellbeing/heatmap/room/:roomNumber', isStaff, wellbeingHeatmapCtrl.getRoomDetail);
 router.get('/wellbeing/:residentId',                      isStaff, wellbeingCtrl.getResidentWellbeing);
 router.get('/residents/:id/life-story',                   isStaff, wellbeingCtrl.getResidentLifeStory);
 router.put('/residents/:id/life-story',                   isStaff, wellbeingCtrl.updateResidentLifeStory);
@@ -846,11 +850,6 @@ router.post('/admissions/match',               isManager, admissionMatchingCtrl.
 router.get('/admissions/referrals',            isManager, admissionMatchingCtrl.listReferrals);
 router.post('/admissions/referrals',           isManager, admissionMatchingCtrl.createReferral);
 router.patch('/admissions/referrals/:id',      isManager, admissionMatchingCtrl.updateReferralStatus);
-
-// ── Real-time Wellbeing Heatmap ───────────────────────────────────────────
-router.get('/wellbeing/heatmap',               isStaff, wellbeingHeatmapCtrl.getHeatmap);
-router.get('/wellbeing/heatmap/history',       isStaff, wellbeingHeatmapCtrl.getHeatmapHistory);
-router.get('/wellbeing/heatmap/room/:roomNumber', isStaff, wellbeingHeatmapCtrl.getRoomDetail);
 
 // ── Automated Regulatory Reporting ────────────────────────────────────────
 router.post('/regulatory/generate-notification', isManager, regulatoryReportingCtrl.generateNotification);

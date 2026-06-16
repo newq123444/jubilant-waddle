@@ -20,7 +20,7 @@ export async function getHeatmap(req: Request, res: Response, next: NextFunction
          WHERE resident_id = r.id AND care_home_id = $1
          ORDER BY logged_at DESC LIMIT 1
        ) wl ON true
-       WHERE r.care_home_id = $1 AND r.status = 'active'
+       WHERE r.care_home_id = $1 AND r.active = TRUE
        ORDER BY r.room_number`,
       [careHomeId]
     );
@@ -131,7 +131,7 @@ export async function getRoomDetail(req: Request, res: Response, next: NextFunct
                FROM (SELECT * FROM wellbeing_logs WHERE resident_id = r.id ORDER BY logged_at DESC LIMIT 10) wl
               ) AS recent_wellbeing
        FROM residents r
-       WHERE r.care_home_id = $1 AND r.room_number = $2 AND r.status = 'active'`,
+       WHERE r.care_home_id = $1 AND r.room_number = $2 AND r.active = TRUE`,
       [careHomeId, roomNumber]
     );
 

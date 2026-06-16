@@ -1,0 +1,7 @@
+{
+  "task_id": "task-fix-db-ui-errors",
+  "task_description": "Deep audit and fix of all database schema mismatches, controller SQL errors, and frontend-backend API path inconsistencies causing runtime DB errors and UI errors",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
+  "blocked_reason": null
+}

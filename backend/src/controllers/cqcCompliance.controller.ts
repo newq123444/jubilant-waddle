@@ -601,7 +601,7 @@ async function calculateCaringDomain(careHomeId: string) {
   // Life story completion rate
   const { rows: [lifeStoryData] } = await query(
     `SELECT
-       (SELECT COUNT(*) FROM resident_life_stories WHERE care_home_id = $1) AS with_story,
+       (SELECT COUNT(*) FROM resident_life_story WHERE care_home_id = $1) AS with_story,
        (SELECT COUNT(*) FROM residents WHERE care_home_id = $1 AND active = TRUE) AS total_residents`,
     [careHomeId]
   );
@@ -666,7 +666,7 @@ async function calculateResponsiveDomain(careHomeId: string) {
   // Person-centred care evidence (life stories + environment preferences)
   const { rows: [personCentredData] } = await query(
     `SELECT
-       (SELECT COUNT(*) FROM resident_life_stories WHERE care_home_id = $1) AS life_stories,
+       (SELECT COUNT(*) FROM resident_life_story WHERE care_home_id = $1) AS life_stories,
        (SELECT COUNT(*) FROM resident_environment_preferences WHERE care_home_id = $1) AS env_prefs`,
     [careHomeId]
   );
@@ -833,7 +833,7 @@ async function collectCaringEvidence(careHomeId: string, startDate: string, endD
   );
 
   const { rows: lifeStories } = await query(
-    `SELECT COUNT(*) AS count FROM resident_life_stories WHERE care_home_id = $1`,
+    `SELECT COUNT(*) AS count FROM resident_life_story WHERE care_home_id = $1`,
     [careHomeId]
   );
 
