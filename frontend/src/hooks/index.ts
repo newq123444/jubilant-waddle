@@ -67,7 +67,7 @@ export function useCreateMedication() {
 }
 export function useDiscontinueMedication() {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => emarApi.discontinue(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['medications'] }); qc.invalidateQueries({ queryKey: ['emar'], exact: false }); toast.success('Medication discontinued'); } });
+  return useMutation({ mutationFn: ({ id }: { id: string; data?: object }) => emarApi.discontinue(id).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['medications'] }); qc.invalidateQueries({ queryKey: ['emar'], exact: false }); toast.success('Medication discontinued'); } });
 }
 export function useRecordAdministration() {
   const qc = useQueryClient();

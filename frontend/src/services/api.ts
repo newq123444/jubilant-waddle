@@ -39,7 +39,7 @@ export const emarApi = {
   listMedications:  (params?: object) => api.get('/medications', { params }),
   getMedication:    (id: string) => api.get(`/medications/${id}`),
   createMedication: (data: object) => api.post('/medications', data),
-  discontinue:      (id: string, data: object) => api.patch(`/medications/${id}/discontinue`, data),
+  discontinue:      (id: string) => api.delete(`/medications/${id}`),
   administer:       (data: object) => api.post('/emar/administer', data),
   missedReport:     (params?: object) => api.get('/emar/missed-report', { params }),
 };
@@ -393,10 +393,10 @@ export const offlineSyncApi = {
 
 // ── Resident Tablet Interface (Batch 3) ───────────────────────────────────
 export const residentTabletApi = {
-  createRequest:      (data: object) => api.post('/resident-tablet/requests', data),
-  listRequests:       (params?: object) => api.get('/resident-tablet/requests', { params }),
-  acknowledgeRequest: (id: string) => api.patch(`/resident-tablet/requests/${id}/acknowledge`),
-  getResidentView:    (residentId: string) => api.get(`/resident-tablet/${residentId}/view`),
+  createRequest:      (data: object) => api.post('/tablet/requests', data),
+  listRequests:       (params?: object) => api.get('/tablet/requests', { params }),
+  acknowledgeRequest: (id: string) => api.patch(`/tablet/requests/${id}`),
+  getResidentView:    (residentId: string) => api.get(`/tablet/residents/${residentId}`),
 };
 
 // ── QR Room Scanning (Batch 3) ────────────────────────────────────────────
@@ -409,9 +409,9 @@ export const qrRoomApi = {
 
 // ── Benchmarking Dashboard (Batch 3) ─────────────────────────────────────
 export const benchmarkingApi = {
-  getDashboard:       () => api.get('/benchmarking'),
+  getDashboard:       () => api.get('/benchmarking/dashboard'),
   calculate:          (data: object) => api.post('/benchmarking/calculate', data),
-  getMetricHistory:   (metricName: string) => api.get(`/benchmarking/metric/${metricName}`),
+  getMetricHistory:   (metricName: string) => api.get(`/benchmarking/metrics/${metricName}`),
   getNationalAverages:() => api.get('/benchmarking/national-averages'),
 };
 
@@ -439,7 +439,7 @@ export const elearningApi = {
   createQuiz:        (moduleId: string, data: object) => api.post(`/elearning/modules/${moduleId}/quiz`, data),
   submitQuiz:        (moduleId: string, data: object) => api.post(`/elearning/modules/${moduleId}/quiz/submit`, data),
   getCompletions:    (params?: object) => api.get('/elearning/completions', { params }),
-  getStaffProgress:  (staffId: string) => api.get(`/elearning/staff/${staffId}`),
+  getStaffProgress:  (staffId: string) => api.get(`/elearning/progress/${staffId}`),
   getMandatoryStatus:() => api.get('/elearning/mandatory-status'),
 };
 
@@ -462,7 +462,7 @@ export const diabetesApi = {
   getHba1cHistory:    (residentId: string) => api.get(`/diabetes/hba1c/${residentId}`),
   getAlerts:          () => api.get('/diabetes/alerts'),
   acknowledgeAlert:   (id: string, data: object) => api.patch(`/diabetes/alerts/${id}`, data),
-  getGlucosePatterns: (residentId: string) => api.get(`/diabetes/glucose/${residentId}/patterns`),
+  getGlucosePatterns: (residentId: string) => api.get(`/diabetes/patterns/${residentId}`),
 };
 
 // ── Palliative Care Pathway (Batch 3) ────────────────────────────────────
@@ -475,7 +475,7 @@ export const palliativeCareApi = {
   getComfortRounds:          (residentId: string) => api.get(`/palliative/comfort-rounds/${residentId}`),
   addAnticipatoryMed:        (data: object) => api.post('/palliative/anticipatory-meds', data),
   getAnticipatoryMeds:       (residentId: string) => api.get(`/palliative/anticipatory-meds/${residentId}`),
-  administerAnticipatoryMed: (id: string, data: object) => api.patch(`/palliative/anticipatory-meds/${id}/administer`, data),
+  administerAnticipatoryMed: (id: string, data: object) => api.patch(`/palliative/anticipatory-meds/${id}`, data),
   logFamilyCommunication:    (data: object) => api.post('/palliative/family-communications', data),
   getFamilyCommunications:   (residentId: string) => api.get(`/palliative/family-communications/${residentId}`),
 };
