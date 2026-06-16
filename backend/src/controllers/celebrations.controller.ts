@@ -26,8 +26,23 @@ export async function getUpcoming(req: Request, res: Response, next: NextFunctio
     const { rows: birthdays } = await query(
       `SELECT id, first_name || ' ' || last_name AS name, date_of_birth,
          CASE
-           WHEN EXTRACT(MONTH FROM date_of_birth) = EXTRACT(MONTH FROM CURRENT_DATE)
-             AND EXTRACT(DAY FROM date_of_birth) >= EXTRACT(DAY FROM CURRENT_DATE)
+           WHEN EXTRACT(MONTH FROM date_of_birth) = 2 AND EXTRACT(DAY FROM date_of_birth) = 29 THEN
+             CASE
+               WHEN EXTRACT(MONTH FROM CURRENT_DATE) <= 2
+               THEN (EXTRACT(YEAR FROM CURRENT_DATE)::INT || '-02-28')::DATE + 
+                    CASE WHEN (EXTRACT(YEAR FROM CURRENT_DATE)::INT % 4 = 0 
+                              AND (EXTRACT(YEAR FROM CURRENT_DATE)::INT % 100 != 0 
+                                   OR EXTRACT(YEAR FROM CURRENT_DATE)::INT % 400 = 0))
+                         THEN 1 ELSE 0 END
+               ELSE ((EXTRACT(YEAR FROM CURRENT_DATE)::INT + 1) || '-02-28')::DATE +
+                    CASE WHEN ((EXTRACT(YEAR FROM CURRENT_DATE)::INT + 1) % 4 = 0 
+                              AND ((EXTRACT(YEAR FROM CURRENT_DATE)::INT + 1) % 100 != 0 
+                                   OR (EXTRACT(YEAR FROM CURRENT_DATE)::INT + 1) % 400 = 0))
+                         THEN 1 ELSE 0 END
+             END
+           WHEN EXTRACT(MONTH FROM date_of_birth) > EXTRACT(MONTH FROM CURRENT_DATE)
+             OR (EXTRACT(MONTH FROM date_of_birth) = EXTRACT(MONTH FROM CURRENT_DATE)
+                 AND EXTRACT(DAY FROM date_of_birth) >= EXTRACT(DAY FROM CURRENT_DATE))
            THEN MAKE_DATE(EXTRACT(YEAR FROM CURRENT_DATE)::INT, EXTRACT(MONTH FROM date_of_birth)::INT, EXTRACT(DAY FROM date_of_birth)::INT)
            ELSE MAKE_DATE((EXTRACT(YEAR FROM CURRENT_DATE) + 1)::INT, EXTRACT(MONTH FROM date_of_birth)::INT, EXTRACT(DAY FROM date_of_birth)::INT)
          END AS next_birthday

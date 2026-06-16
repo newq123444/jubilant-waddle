@@ -7,7 +7,7 @@ export default function PhotoFrameFeed() {
   const [statusFilter, setStatusFilter] = useState('approved');
 
   const { data: residents } = useResidents();
-  const { data: photos = [] } = usePhotoFramePhotos({ status: statusFilter, resident_id: selectedResident || undefined });
+  const { data: photos = [] } = usePhotoFramePhotos(selectedResident, { status: statusFilter });
   const { data: viewHistory = [] } = usePhotoViewingHistory(selectedResident);
 
   const uploadMutation = useUploadPhoto();

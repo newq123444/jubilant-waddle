@@ -17,9 +17,9 @@ export default function SleepQualityTracker() {
     sleep_date: new Date().toISOString().split('T')[0],
     bedtime: '22:00',
     wake_time: '07:00',
-    disturbances_count: '0',
+    disturbances: '0',
     disturbance_types: { pain: false, anxiety: false, toileting: false, noise: false, confusion: false },
-    interventions_used: '',
+    interventions: '',
     quality_rating: '5',
     notes: ''
   });
@@ -37,13 +37,13 @@ export default function SleepQualityTracker() {
       sleep_date: form.sleep_date,
       bedtime: form.bedtime,
       wake_time: form.wake_time,
-      disturbances_count: parseInt(form.disturbances_count),
+      disturbances: parseInt(form.disturbances),
       disturbance_types: distTypes,
-      interventions_used: form.interventions_used ? form.interventions_used.split(',').map(s => s.trim()) : [],
+      interventions: form.interventions ? form.interventions.split(',').map(s => s.trim()) : [],
       quality_rating: parseInt(form.quality_rating),
       notes: form.notes
     }, {
-      onSuccess: () => { setShowForm(false); setForm({ sleep_date: new Date().toISOString().split('T')[0], bedtime: '22:00', wake_time: '07:00', disturbances_count: '0', disturbance_types: { pain: false, anxiety: false, toileting: false, noise: false, confusion: false }, interventions_used: '', quality_rating: '5', notes: '' }); }
+      onSuccess: () => { setShowForm(false); setForm({ sleep_date: new Date().toISOString().split('T')[0], bedtime: '22:00', wake_time: '07:00', disturbances: '0', disturbance_types: { pain: false, anxiety: false, toileting: false, noise: false, confusion: false }, interventions: '', quality_rating: '5', notes: '' }); }
     });
   };
 
@@ -103,7 +103,7 @@ export default function SleepQualityTracker() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 12, marginBottom: 12 }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: 4 }}>Disturbances Count</label>
-                  <input type="number" min="0" value={form.disturbances_count} onChange={e => setForm(f => ({ ...f, disturbances_count: e.target.value }))} style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 6 }} />
+                  <input type="number" min="0" value={form.disturbances} onChange={e => setForm(f => ({ ...f, disturbances: e.target.value }))} style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 6 }} />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: 8 }}>Disturbance Types</label>
@@ -120,7 +120,7 @@ export default function SleepQualityTracker() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: 4 }}>Interventions Used (comma-separated)</label>
-                  <input type="text" value={form.interventions_used} onChange={e => setForm(f => ({ ...f, interventions_used: e.target.value }))} style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 6 }} placeholder="e.g. warm milk, repositioning" />
+                  <input type="text" value={form.interventions} onChange={e => setForm(f => ({ ...f, interventions: e.target.value }))} style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 6 }} placeholder="e.g. warm milk, repositioning" />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: 4 }}>Notes</label>
@@ -157,7 +157,7 @@ export default function SleepQualityTracker() {
                   <span style={{ marginLeft: 12, fontSize: '0.82rem', color: '#6b7280' }}>{h.bedtime} - {h.wake_time}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: '0.82rem', color: '#6b7280' }}>{h.disturbances_count} disturbances</span>
+                  <span style={{ fontSize: '0.82rem', color: '#6b7280' }}>{h.disturbances} disturbances</span>
                   <span style={{ padding: '2px 10px', borderRadius: 12, fontSize: '0.75rem', fontWeight: 600, background: getQualityColor(h.quality_rating) + '20', color: getQualityColor(h.quality_rating) }}>{h.quality_rating}/10</span>
                 </div>
               </div>

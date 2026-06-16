@@ -1525,11 +1525,11 @@ export interface MusicPreference {
   id: string;
   care_home_id: string;
   resident_id: string;
-  genre_id: string;
+  genre_id?: string;
   genre_name?: string;
-  preference_level: 'love' | 'like' | 'neutral' | 'dislike';
-  specific_artists?: string[];
-  specific_songs?: string[];
+  preferred_artists?: string;
+  preferred_era?: string;
+  tempo_preference?: string;
   notes?: string;
   created_at: string;
   updated_at: string;
@@ -1540,13 +1540,12 @@ export interface MusicSession {
   care_home_id: string;
   resident_id: string;
   resident_name?: string;
-  started_by: string;
-  started_by_name?: string;
-  mood_before: 'very_low' | 'low' | 'neutral' | 'good' | 'very_good';
-  mood_after?: 'very_low' | 'low' | 'neutral' | 'good' | 'very_good';
-  duration_minutes?: number;
+  facilitated_by: string;
+  facilitated_by_name?: string;
+  mood_before: number;
+  mood_after?: number;
+  effectiveness?: number;
   notes?: string;
-  status: 'active' | 'completed';
   started_at: string;
   ended_at?: string;
   created_at: string;
@@ -1555,12 +1554,14 @@ export interface MusicSession {
 export interface MusicSessionSong {
   id: string;
   session_id: string;
-  song_title: string;
+  title: string;
   artist?: string;
   genre_id?: string;
   genre_name?: string;
-  resident_response?: 'positive' | 'neutral' | 'negative';
-  notes?: string;
+  duration_secs?: number;
+  resident_response?: string;
+  play_order: number;
+  created_at?: string;
 }
 
 // ── Quality of Life: Menu Choices ────────────────────────────────────────
@@ -1748,11 +1749,11 @@ export interface SleepLog {
   sleep_date: string;
   bedtime: string;
   wake_time: string;
-  disturbances_count: number;
+  disturbances: number;
   disturbance_types?: string[];
-  interventions_used?: string[];
+  interventions?: string[];
   quality_rating: number;
-  total_sleep_hours?: number;
+  total_sleep_hrs?: number;
   logged_by?: string;
   logged_by_name?: string;
   notes?: string;
@@ -1765,12 +1766,13 @@ export interface SleepProfile {
   resident_id: string;
   avg_bedtime?: string;
   avg_wake_time?: string;
-  avg_quality_rating?: number;
+  avg_quality?: number;
   avg_disturbances?: number;
-  common_disturbance_types?: string[];
+  common_disturbances?: string[];
+  effective_interventions?: string[];
+  analysis_period_days?: number;
   trend_direction?: 'improving' | 'stable' | 'declining';
-  suggestions?: string[];
-  last_updated: string;
+  last_updated?: string;
 }
 
 // ── Quality of Life: Intergenerational Programme ─────────────────────────
@@ -1824,40 +1826,44 @@ export interface RehabGoal {
   care_home_id: string;
   resident_id: string;
   resident_name?: string;
-  goal_type: 'mobility' | 'independence' | 'cognitive' | 'social' | 'other';
   title: string;
   description?: string;
+  category?: string;
   target_date?: string;
   status: 'active' | 'achieved' | 'paused' | 'discontinued';
+  priority?: string;
   created_by?: string;
   created_by_name?: string;
-  notify_family: boolean;
   created_at: string;
   updated_at: string;
 }
 
 export interface RehabMilestone {
   id: string;
+  care_home_id: string;
   goal_id: string;
   title: string;
   description?: string;
   target_date?: string;
-  achieved_date?: string;
-  status: 'pending' | 'in_progress' | 'achieved' | 'missed';
-  celebrated: boolean;
-  order_index: number;
+  completed: boolean;
+  completed_at?: string;
+  display_order: number;
+  created_at: string;
 }
 
 export interface RehabProgressLog {
   id: string;
   care_home_id: string;
-  milestone_id: string;
+  goal_id: string;
+  milestone_id?: string;
   resident_id: string;
   resident_name?: string;
   milestone_title?: string;
   goal_title?: string;
-  progress_notes: string;
+  progress_notes?: string;
   score?: number;
+  celebration?: boolean;
+  family_notified?: boolean;
   logged_by?: string;
   logged_by_name?: string;
   logged_at: string;
@@ -1870,28 +1876,30 @@ export interface Celebration {
   care_home_id: string;
   resident_id?: string;
   resident_name?: string;
-  celebration_type: 'birthday' | 'admission_anniversary' | 'religious_festival' | 'achievement' | 'other';
+  celebration_type: 'birthday' | 'admission_anniversary' | 'religious_festival' | 'national_day' | 'personal' | 'other';
   title: string;
   description?: string;
   celebration_date: string;
+  auto_detected: boolean;
   status: 'planned' | 'in_progress' | 'completed' | 'cancelled';
-  notify_family: boolean;
-  family_notified: boolean;
+  budget?: number;
+  notes?: string;
   created_by?: string;
   created_by_name?: string;
   created_at: string;
-  updated_at: string;
 }
 
 export interface CelebrationTask {
   id: string;
+  care_home_id: string;
   celebration_id: string;
   title: string;
   assigned_to?: string;
   assigned_to_name?: string;
-  status: 'pending' | 'in_progress' | 'completed';
   due_date?: string;
+  completed: boolean;
   completed_at?: string;
   completed_by?: string;
   notes?: string;
+  created_at: string;
 }

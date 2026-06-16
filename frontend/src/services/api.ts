@@ -483,21 +483,21 @@ export const palliativeCareApi = {
 // ── Music Therapy (Quality of Life) ──────────────────────────────────────
 export const musicTherapyApi = {
   getGenres:          () => api.get('/music-therapy/genres'),
-  getPreferences:     (residentId: string) => api.get(`/music-therapy/residents/${residentId}/preferences`),
-  updatePreferences:  (residentId: string, data: object) => api.post(`/music-therapy/residents/${residentId}/preferences`, data),
+  getPreferences:     (residentId: string) => api.get(`/music-therapy/preferences/${residentId}`),
+  updatePreferences:  (data: object) => api.post('/music-therapy/preferences', data),
   startSession:       (data: object) => api.post('/music-therapy/sessions', data),
-  endSession:         (id: string, data: object) => api.post(`/music-therapy/sessions/${id}/end`, data),
-  getHistory:         (residentId: string) => api.get(`/music-therapy/residents/${residentId}/sessions`),
-  getEffectiveness:   (residentId: string) => api.get(`/music-therapy/effectiveness/${residentId}`),
+  endSession:         (id: string, data: object) => api.patch(`/music-therapy/sessions/${id}/end`, data),
+  getHistory:         (residentId: string) => api.get(`/music-therapy/sessions/${residentId}`),
+  getEffectiveness:   (residentId?: string) => api.get('/music-therapy/effectiveness', { params: { residentId } }),
 };
 
 // ── Menu Choice System (Quality of Life) ─────────────────────────────────
 export const menuChoiceApi = {
   listOptions:           (params?: object) => api.get('/menu-choices/options', { params }),
   createOption:          (data: object) => api.post('/menu-choices/options', data),
-  getDietaryProfile:     (residentId: string) => api.get(`/menu-choices/dietary-profiles/${residentId}`),
-  updateDietaryProfile:  (residentId: string, data: object) => api.put(`/menu-choices/dietary-profiles/${residentId}`, data),
-  submitChoice:          (data: object) => api.post('/menu-choices/submit', data),
+  getDietaryProfile:     (residentId: string) => api.get(`/menu-choices/dietary-profile/${residentId}`),
+  updateDietaryProfile:  (residentId: string, data: object) => api.put(`/menu-choices/dietary-profile/${residentId}`, data),
+  submitChoice:          (data: object) => api.post('/menu-choices', data),
   getKitchenDashboard:   () => api.get('/menu-choices/kitchen-dashboard'),
   getResidentChoices:    (residentId: string) => api.get(`/menu-choices/residents/${residentId}`),
 };
@@ -505,10 +505,10 @@ export const menuChoiceApi = {
 // ── Friendship Mapper (Quality of Life) ──────────────────────────────────
 export const friendshipMapperApi = {
   recordObservation:   (data: object) => api.post('/friendship-mapper/observations', data),
-  getConnections:      (residentId: string) => api.get(`/friendship-mapper/residents/${residentId}/connections`),
+  getConnections:      (residentId: string) => api.get(`/friendship-mapper/connections/${residentId}`),
   getNetwork:          () => api.get('/friendship-mapper/network'),
   getSeatingSuggestions: () => api.get('/friendship-mapper/seating-suggestions'),
-  getIsolatedResidents:  () => api.get('/friendship-mapper/isolated-residents'),
+  getIsolatedResidents:  () => api.get('/friendship-mapper/isolated'),
 };
 
 // ── Purpose Planner (Quality of Life) ────────────────────────────────────
@@ -526,28 +526,28 @@ export const purposePlannerApi = {
 export const moodEnvironmentApi = {
   getSuggestions:       (residentId: string) => api.get(`/mood-environment/suggestions/${residentId}`),
   recordIntervention:   (data: object) => api.post('/mood-environment/interventions', data),
-  getHistory:           (residentId: string) => api.get(`/mood-environment/residents/${residentId}/history`),
-  getEffectiveness:     (residentId: string) => api.get(`/mood-environment/effectiveness/${residentId}`),
+  getHistory:           (residentId: string) => api.get(`/mood-environment/history/${residentId}`),
+  getEffectiveness:     (residentId?: string) => api.get('/mood-environment/effectiveness', { params: { residentId } }),
 };
 
 // ── Photo Frame Feed (Quality of Life) ───────────────────────────────────
 export const photoFrameApi = {
-  upload:        (formData: FormData) => api.post('/photo-frames/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  listPhotos:    (params?: object) => api.get('/photo-frames/photos', { params }),
-  approve:       (id: string) => api.post(`/photo-frames/photos/${id}/approve`),
-  reject:        (id: string) => api.post(`/photo-frames/photos/${id}/reject`),
-  schedule:      (id: string, data: object) => api.post(`/photo-frames/photos/${id}/schedule`, data),
-  getHistory:    (residentId: string) => api.get(`/photo-frames/residents/${residentId}/history`),
-  getView:       () => api.get('/photo-frames/view'),
+  upload:        (formData: FormData) => api.post('/photo-frame/photos', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  listPhotos:    (residentId: string, params?: object) => api.get(`/photo-frame/photos/${residentId}`, { params }),
+  approve:       (id: string) => api.patch(`/photo-frame/photos/${id}/approve`),
+  reject:        (id: string) => api.patch(`/photo-frame/photos/${id}/reject`),
+  schedule:      (id: string, data: object) => api.patch(`/photo-frame/photos/${id}/schedule`, data),
+  getHistory:    (residentId: string) => api.get(`/photo-frame/viewing-history/${residentId}`),
+  logView:       (data: object) => api.post('/photo-frame/views', data),
 };
 
 // ── Sleep Quality Tracker (Quality of Life) ──────────────────────────────
 export const sleepTrackerApi = {
-  logSleep:        (data: object) => api.post('/sleep-tracker/log', data),
-  getHistory:      (residentId: string) => api.get(`/sleep-tracker/residents/${residentId}/history`),
-  getProfile:      (residentId: string) => api.get(`/sleep-tracker/residents/${residentId}/profile`),
-  getDisturbances: (residentId: string) => api.get(`/sleep-tracker/residents/${residentId}/disturbances`),
-  getSuggestions:  (residentId: string) => api.get(`/sleep-tracker/residents/${residentId}/suggestions`),
+  logSleep:        (data: object) => api.post('/sleep-tracker/logs', data),
+  getHistory:      (residentId: string) => api.get(`/sleep-tracker/history/${residentId}`),
+  getProfile:      (residentId: string) => api.get(`/sleep-tracker/profile/${residentId}`),
+  getDisturbances: (residentId: string) => api.get(`/sleep-tracker/disturbances/${residentId}`),
+  getSuggestions:  (residentId: string) => api.get(`/sleep-tracker/suggestions/${residentId}`),
 };
 
 // ── Intergenerational Programme (Quality of Life) ────────────────────────
@@ -557,28 +557,28 @@ export const intergenerationalApi = {
   createVisit:        (data: object) => api.post('/intergenerational/visits', data),
   listVisits:         (params?: object) => api.get('/intergenerational/visits', { params }),
   addParticipant:     (data: object) => api.post('/intergenerational/participants', data),
-  logOutcome:         (data: object) => api.post('/intergenerational/outcomes', data),
+  logOutcome:         (id: string, data: object) => api.patch(`/intergenerational/visits/${id}/outcome`, data),
   getSafeguarding:    (programmeId: string) => api.get(`/intergenerational/safeguarding/${programmeId}`),
   getWellbeingImpact: () => api.get('/intergenerational/wellbeing-impact'),
 };
 
 // ── Rehab Goal Tracker (Quality of Life) ─────────────────────────────────
 export const rehabGoalsApi = {
-  createGoal:         (data: object) => api.post('/rehab-goals/goals', data),
+  createGoal:         (data: object) => api.post('/rehab-goals', data),
   getResidentGoals:   (residentId: string) => api.get(`/rehab-goals/residents/${residentId}`),
   addMilestone:       (data: object) => api.post('/rehab-goals/milestones', data),
-  updateProgress:     (id: string, data: object) => api.post(`/rehab-goals/milestones/${id}/progress`, data),
+  updateProgress:     (id: string, data: object) => api.patch(`/rehab-goals/milestones/${id}`, data),
   logProgress:        (data: object) => api.post('/rehab-goals/progress', data),
-  celebrate:          (id: string) => api.post(`/rehab-goals/milestones/${id}/celebrate`),
-  getReport:          (residentId: string) => api.get(`/rehab-goals/residents/${residentId}/report`),
+  celebrate:          (id: string) => api.patch(`/rehab-goals/${id}/celebrate`),
+  getReport:          (residentId: string) => api.get(`/rehab-goals/report/${residentId}`),
 };
 
 // ── Celebration Planner (Quality of Life) ────────────────────────────────
 export const celebrationsApi = {
   getUpcoming:        () => api.get('/celebrations/upcoming'),
   create:             (data: object) => api.post('/celebrations', data),
-  getTasks:           (id: string) => api.get(`/celebrations/${id}/tasks`),
-  completeTask:       (id: string) => api.post(`/celebrations/tasks/${id}/complete`),
+  assignTask:         (data: object) => api.post('/celebrations/tasks', data),
+  completeTask:       (id: string) => api.patch(`/celebrations/tasks/${id}/complete`),
   getCalendar:        () => api.get('/celebrations/calendar'),
-  notifyFamily:       (id: string) => api.post(`/celebrations/${id}/notify-family`),
+  notifyFamily:       (id: string, data?: object) => api.post(`/celebrations/${id}/notify-family`, data),
 };

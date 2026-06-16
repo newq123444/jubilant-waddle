@@ -18,7 +18,7 @@ export default function RehabGoalTracker() {
   const logProgressMutation = useLogRehabProgress();
   const celebrateMutation = useCelebrateRehabMilestone();
 
-  const [goalForm, setGoalForm] = useState({ goal_type: 'mobility', title: '', description: '', target_date: '', notify_family: true });
+  const [goalForm, setGoalForm] = useState({ category: 'mobility', title: '', description: '', target_date: '', priority: 'medium' });
   const [milestoneForm, setMilestoneForm] = useState({ goal_id: '', title: '', description: '', target_date: '' });
   const [progressForm, setProgressForm] = useState({ milestone_id: '', progress_notes: '', score: '5' });
 
@@ -28,7 +28,7 @@ export default function RehabGoalTracker() {
   const handleCreateGoal = (e: React.FormEvent) => {
     e.preventDefault();
     createGoalMutation.mutate({ resident_id: selectedResident, ...goalForm }, {
-      onSuccess: () => { setShowGoalForm(false); setGoalForm({ goal_type: 'mobility', title: '', description: '', target_date: '', notify_family: true }); }
+      onSuccess: () => { setShowGoalForm(false); setGoalForm({ category: 'mobility', title: '', description: '', target_date: '', priority: 'medium' }); }
     });
   };
 
@@ -84,8 +84,8 @@ export default function RehabGoalTracker() {
             <form onSubmit={handleCreateGoal} style={{ padding: 16, background: '#fff', borderRadius: 12, border: '1px solid #e5e7eb', marginBottom: 16 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: 4 }}>Goal Type</label>
-                  <select value={goalForm.goal_type} onChange={e => setGoalForm(f => ({ ...f, goal_type: e.target.value }))} style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 6 }}>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: 4 }}>Category</label>
+                  <select value={goalForm.category} onChange={e => setGoalForm(f => ({ ...f, category: e.target.value }))} style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 6 }}>
                     <option value="mobility">Mobility</option>
                     <option value="independence">Independence</option>
                     <option value="cognitive">Cognitive</option>
@@ -102,10 +102,12 @@ export default function RehabGoalTracker() {
                   <input type="date" value={goalForm.target_date} onChange={e => setGoalForm(f => ({ ...f, target_date: e.target.value }))} style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 6 }} />
                 </div>
                 <div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.85rem', fontWeight: 500, marginTop: 24, cursor: 'pointer' }}>
-                    <input type="checkbox" checked={goalForm.notify_family} onChange={e => setGoalForm(f => ({ ...f, notify_family: e.target.checked }))} />
-                    Notify family on achievement
-                  </label>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: 4 }}>Priority</label>
+                  <select value={goalForm.priority} onChange={e => setGoalForm(f => ({ ...f, priority: e.target.value }))} style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 6 }}>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
                 </div>
               </div>
               <div style={{ marginBottom: 12 }}>
@@ -122,7 +124,7 @@ export default function RehabGoalTracker() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <span style={{ fontWeight: 600 }}>{g.title}</span>
-                    <span style={{ marginLeft: 12, padding: '2px 8px', borderRadius: 12, fontSize: '0.72rem', background: '#e0e7ff', color: '#4338ca' }}>{g.goal_type}</span>
+                    <span style={{ marginLeft: 12, padding: '2px 8px', borderRadius: 12, fontSize: '0.72rem', background: '#e0e7ff', color: '#4338ca' }}>{g.category}</span>
                   </div>
                   <span style={{ padding: '2px 8px', borderRadius: 12, fontSize: '0.72rem', background: sc.bg, color: sc.color }}>{g.status}</span>
                 </div>

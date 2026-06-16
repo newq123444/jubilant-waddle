@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useUpcomingCelebrations, useCreateCelebration, useCelebrationTasks, useCompleteCelebrationTask, useCelebrationCalendar, useNotifyCelebrationFamily, useResidents } from '../hooks';
+import { useUpcomingCelebrations, useCreateCelebration, useAssignCelebrationTask, useCompleteCelebrationTask, useCelebrationCalendar, useNotifyCelebrationFamily, useResidents } from '../hooks';
 
 export default function CelebrationPlanner() {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'plan' | 'tasks' | 'calendar'>('upcoming');
@@ -8,24 +8,23 @@ export default function CelebrationPlanner() {
 
   const { data: residents } = useResidents();
   const { data: upcoming = [] } = useUpcomingCelebrations();
-  const { data: tasks = [] } = useCelebrationTasks(selectedCelebration);
   const { data: calendar = [] } = useCelebrationCalendar();
 
   const createMutation = useCreateCelebration();
+  const assignTaskMutation = useAssignCelebrationTask();
   const completeTaskMutation = useCompleteCelebrationTask();
   const notifyFamilyMutation = useNotifyCelebrationFamily();
 
-  const [form, setForm] = useState({ resident_id: '', celebration_type: 'birthday', title: '', description: '', celebration_date: '', notify_family: true });
+  const [form, setForm] = useState({ resident_id: '', celebration_type: 'birthday', title: '', description: '', celebration_date: '', budget: '' });
 
   const residentList = Array.isArray(residents) ? residents : [];
   const upcomingList = Array.isArray(upcoming) ? upcoming : [];
-  const taskList = Array.isArray(tasks) ? tasks : [];
   const calendarList = Array.isArray(calendar) ? calendar : [];
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     createMutation.mutate(form, {
-      onSuccess: () => { setShowForm(false); setForm({ resident_id: '', celebration_type: 'birthday', title: '', description: '', celebration_date: '', notify_family: true }); }
+      onSuccess: () => { setShowForm(false); setForm({ resident_id: '', celebration_type: 'birthday', title: '', description: '', celebration_date: '', budget: '' }); }
     });
   };
 
@@ -75,7 +74,7 @@ export default function CelebrationPlanner() {
                   </div>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <span style={{ padding: '2px 8px', borderRadius: 12, fontSize: '0.72rem', background: tc.bg, color: tc.color }}>{c.celebration_type?.replace('_', ' ')}</span>
-                    {!c.family_notified && (
+                    {(
                       <button onClick={(e) => { e.stopPropagation(); notifyFamilyMutation.mutate(c.id); }} style={{ padding: '4px 10px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 4, fontSize: '0.72rem', cursor: 'pointer' }}>Notify Family</button>
                     )}
                   </div>
@@ -128,10 +127,8 @@ export default function CelebrationPlanner() {
                 <input type="text" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 6 }} />
               </div>
               <div style={{ marginBottom: 12 }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.85rem', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={form.notify_family} onChange={e => setForm(f => ({ ...f, notify_family: e.target.checked }))} />
-                  Notify family
-                </label>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: 4 }}>Budget</label>
+                <input type="text" value={form.budget} onChange={e => setForm(f => ({ ...f, budget: e.target.value }))} style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 6 }} placeholder="e.g. 50.00" />
               </div>
               <button type="submit" style={{ padding: '8px 20px', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 600, cursor: 'pointer' }}>Plan Celebration</button>
             </form>
@@ -143,23 +140,17 @@ export default function CelebrationPlanner() {
         <div>
           <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 16 }}>Celebration Tasks</h2>
           {selectedCelebration ? (
-            taskList.length > 0 ? (
-              taskList.map((t: any) => (
-                <div key={t.id} style={{ padding: 14, background: '#fff', borderRadius: 10, border: '1px solid #e5e7eb', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <span style={{ fontWeight: 500 }}>{t.title}</span>
-                    {t.assigned_to_name && <span style={{ marginLeft: 12, fontSize: '0.82rem', color: '#6b7280' }}>Assigned to: {t.assigned_to_name}</span>}
-                  </div>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <span style={{ padding: '2px 8px', borderRadius: 12, fontSize: '0.72rem', background: t.status === 'completed' ? '#dcfce7' : '#fef3c7', color: t.status === 'completed' ? '#16a34a' : '#d97706' }}>{t.status}</span>
-                    {t.status !== 'completed' && (
-                      <button onClick={() => completeTaskMutation.mutate(t.id)} style={{ padding: '4px 10px', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 4, fontSize: '0.72rem', cursor: 'pointer' }}>Complete</button>
-                    )}
-                  </div>
-                </div>
-              ))
-            ) : <p style={{ color: '#6b7280' }}>No tasks for this celebration yet.</p>
-          ) : <p style={{ color: '#6b7280' }}>Select a celebration from the Upcoming tab to view its tasks.</p>}
+            <div style={{ padding: 16, background: '#fff', borderRadius: 12, border: '1px solid #e5e7eb' }}>
+              <p style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: 12 }}>Assign a new task for the selected celebration.</p>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input type="text" placeholder="Task title..." id="taskTitle" style={{ flex: 1, padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 6 }} />
+                <button onClick={() => {
+                  const input = document.getElementById('taskTitle') as HTMLInputElement;
+                  if (input?.value) { assignTaskMutation.mutate({ celebrationId: selectedCelebration, title: input.value }); input.value = ''; }
+                }} style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 600, cursor: 'pointer' }}>Assign Task</button>
+              </div>
+            </div>
+          ) : <p style={{ color: '#6b7280' }}>Select a celebration from the Upcoming tab to manage tasks.</p>}
         </div>
       )}
 

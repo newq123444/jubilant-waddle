@@ -17,8 +17,8 @@ export default function MusicTherapy() {
   const startSessionMutation = useStartMusicSession();
   const endSessionMutation = useEndMusicSession();
 
-  const [sessionForm, setSessionForm] = useState({ mood_before: 'neutral', notes: '' });
-  const [prefForm, setPrefForm] = useState({ genre_id: '', preference_level: 'like', specific_artists: '', notes: '' });
+  const [sessionForm, setSessionForm] = useState({ mood_before: '5', notes: '' });
+  const [prefForm, setPrefForm] = useState({ genre_id: '', tempo_preference: 'moderate', preferred_artists: '', notes: '' });
 
   const residentList = Array.isArray(residents) ? residents : [];
   const genreList = Array.isArray(genres) ? genres : [];
@@ -28,8 +28,8 @@ export default function MusicTherapy() {
 
   const handleStartSession = (e: React.FormEvent) => {
     e.preventDefault();
-    startSessionMutation.mutate({ resident_id: selectedResident, mood_before: sessionForm.mood_before, notes: sessionForm.notes }, {
-      onSuccess: () => { setShowSessionForm(false); setSessionForm({ mood_before: 'neutral', notes: '' }); }
+    startSessionMutation.mutate({ resident_id: selectedResident, mood_before: parseInt(sessionForm.mood_before), notes: sessionForm.notes }, {
+      onSuccess: () => { setShowSessionForm(false); setSessionForm({ mood_before: '5', notes: '' }); }
     });
   };
 
@@ -39,8 +39,8 @@ export default function MusicTherapy() {
 
   const handleUpdatePreference = (e: React.FormEvent) => {
     e.preventDefault();
-    updatePrefMutation.mutate({ residentId: selectedResident, data: { genre_id: prefForm.genre_id, preference_level: prefForm.preference_level, specific_artists: prefForm.specific_artists ? prefForm.specific_artists.split(',').map(s => s.trim()) : [], notes: prefForm.notes } }, {
-      onSuccess: () => { setShowPrefForm(false); setPrefForm({ genre_id: '', preference_level: 'like', specific_artists: '', notes: '' }); }
+    updatePrefMutation.mutate({ residentId: selectedResident, data: { genreId: prefForm.genre_id, tempoPreference: prefForm.tempo_preference, preferredArtists: prefForm.preferred_artists, notes: prefForm.notes } }, {
+      onSuccess: () => { setShowPrefForm(false); setPrefForm({ genre_id: '', tempo_preference: 'moderate', preferred_artists: '', notes: '' }); }
     });
   };
 
@@ -102,17 +102,17 @@ export default function MusicTherapy() {
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: 4 }}>Preference Level</label>
-                  <select value={prefForm.preference_level} onChange={e => setPrefForm(f => ({ ...f, preference_level: e.target.value }))} style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 6 }}>
-                    <option value="love">Love</option>
-                    <option value="like">Like</option>
-                    <option value="neutral">Neutral</option>
-                    <option value="dislike">Dislike</option>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: 4 }}>Tempo Preference</label>
+                  <select value={prefForm.tempo_preference} onChange={e => setPrefForm(f => ({ ...f, tempo_preference: e.target.value }))} style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 6 }}>
+                    <option value="slow">Slow</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="fast">Fast</option>
+                    <option value="varied">Varied</option>
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: 4 }}>Specific Artists (comma-separated)</label>
-                  <input type="text" value={prefForm.specific_artists} onChange={e => setPrefForm(f => ({ ...f, specific_artists: e.target.value }))} style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 6 }} />
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: 4 }}>Preferred Artists (comma-separated)</label>
+                  <input type="text" value={prefForm.preferred_artists} onChange={e => setPrefForm(f => ({ ...f, preferred_artists: e.target.value }))} style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 6 }} />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: 4 }}>Notes</label>
@@ -126,9 +126,9 @@ export default function MusicTherapy() {
             <div key={p.id} style={{ padding: 14, background: '#fff', borderRadius: 10, border: '1px solid #e5e7eb', marginBottom: 8 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ fontWeight: 600 }}>{p.genre_name || 'Unknown Genre'}</span>
-                <span style={{ padding: '2px 8px', borderRadius: 12, fontSize: '0.75rem', background: p.preference_level === 'love' ? '#dcfce7' : p.preference_level === 'dislike' ? '#fee2e2' : '#f3f4f6', color: p.preference_level === 'love' ? '#16a34a' : p.preference_level === 'dislike' ? '#dc2626' : '#6b7280' }}>{p.preference_level}</span>
+                <span style={{ padding: '2px 8px', borderRadius: 12, fontSize: '0.75rem', background: '#f3f4f6', color: '#6b7280' }}>{p.tempo_preference || 'moderate'}</span>
               </div>
-              {p.specific_artists?.length > 0 && <div style={{ fontSize: '0.82rem', color: '#6b7280', marginTop: 4 }}>Artists: {p.specific_artists.join(', ')}</div>}
+              {p.preferred_artists && <div style={{ fontSize: '0.82rem', color: '#6b7280', marginTop: 4 }}>Artists: {p.preferred_artists}</div>}
             </div>
           ))}
           {prefList.length === 0 && selectedResident && <p style={{ color: '#6b7280' }}>No preferences recorded for this resident.</p>}

@@ -1053,7 +1053,7 @@ export function useMusicPreferences(residentId: string) {
 }
 export function useUpdateMusicPreferences() {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: ({ residentId, data }: { residentId: string; data: object }) => musicTherapyApi.updatePreferences(residentId, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['music-therapy'] }); toast.success('Music preferences updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update preferences') });
+  return useMutation({ mutationFn: ({ residentId, data }: { residentId: string; data: object }) => musicTherapyApi.updatePreferences({ residentId, ...data as Record<string, unknown> }).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['music-therapy'] }); toast.success('Music preferences updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update preferences') });
 }
 export function useStartMusicSession() {
   const qc = useQueryClient();
@@ -1160,8 +1160,8 @@ export function useUploadPhoto() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: (formData: FormData) => photoFrameApi.upload(formData).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['photo-frames'] }); toast.success('Photo uploaded'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to upload photo') });
 }
-export function usePhotoFramePhotos(params?: object) {
-  return useQuery({ queryKey: ['photo-frames', 'photos', params], queryFn: () => photoFrameApi.listPhotos(params).then(r => r.data) });
+export function usePhotoFramePhotos(residentId: string, params?: object) {
+  return useQuery({ queryKey: ['photo-frames', 'photos', residentId, params], queryFn: () => photoFrameApi.listPhotos(residentId, params).then(r => r.data), enabled: !!residentId });
 }
 export function useApprovePhoto() {
   const qc = useQueryClient();
@@ -1218,7 +1218,7 @@ export function useAddIntergenerationalParticipant() {
 }
 export function useLogIntergenerationalOutcome() {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: (data: object) => intergenerationalApi.logOutcome(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['intergenerational'] }); toast.success('Outcome logged'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to log outcome') });
+  return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => intergenerationalApi.logOutcome(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['intergenerational'] }); toast.success('Outcome logged'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to log outcome') });
 }
 export function useIntergenerationalSafeguarding(programmeId: string) {
   return useQuery({ queryKey: ['intergenerational', 'safeguarding', programmeId], queryFn: () => intergenerationalApi.getSafeguarding(programmeId).then(r => r.data), enabled: !!programmeId });
@@ -1263,8 +1263,9 @@ export function useCreateCelebration() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: (data: object) => celebrationsApi.create(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['celebrations'] }); toast.success('Celebration planned'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to plan celebration') });
 }
-export function useCelebrationTasks(id: string) {
-  return useQuery({ queryKey: ['celebrations', 'tasks', id], queryFn: () => celebrationsApi.getTasks(id).then(r => r.data), enabled: !!id });
+export function useAssignCelebrationTask() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (data: object) => celebrationsApi.assignTask(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['celebrations'] }); toast.success('Task assigned'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to assign task') });
 }
 export function useCompleteCelebrationTask() {
   const qc = useQueryClient();
