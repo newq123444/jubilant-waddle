@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "fix",
   "description": "Add NOT NULL field validation to all controller INSERT operations - Batch 1 (confirmed errors + clinical controllers). Add validation checks at the top of each handler function that performs an INSERT, returning HTTP 400 with a descriptive error message listing which fields are required. Follow the pattern already established in sleepTracker.controller.ts and absence.controller.ts.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Fix palliativeCare.controller.ts: createCarePlan needs validation for residentId (confirmed error). scheduleComfortRound needs residentId, scheduledTime. addAnticipatoryMed needs residentId, medicationName. logFamilyCommunication needs residentId, contactName, communicationType.",
     "Fix incidents.controller.ts: createIncident needs residentId, incidentType, severity, description.",
@@ -30,5 +30,5 @@
     "cd /projects/sandbox/jubilant-waddle/backend && npm run build"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All 12 handler functions across 6 controllers now have validation. Build passes cleanly. weight.controller.ts was skipped as instructed (residentId comes from req.params). The user's live error logs showed additional issues (missing tables, column mismatches) that are outside the scope of this validation task."
 }
