@@ -12,6 +12,10 @@ export async function logWellbeing(req: Request, res: Response, next: NextFuncti
     const userId = req.user!.id;
     const { residentId, logDate, mood, painLevel, sleepQuality, socialEngagement, appetite, energyLevel, notes } = req.body;
 
+    if (!residentId || !mood) {
+      return res.status(400).json({ error: 'residentId and mood are required' });
+    }
+
     const { rows: [log] } = await query(
       `INSERT INTO wellbeing_logs (care_home_id, resident_id, logged_by, log_date, mood, pain_level, sleep_quality, social_engagement, appetite, energy_level, notes)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,

@@ -10,6 +10,10 @@ export async function logGlucose(req: Request, res: Response, next: NextFunction
     const userId = req.user!.id;
     const { residentId, readingValue, readingType, notes } = req.body;
 
+    if (!residentId || !readingValue || !readingType) {
+      return res.status(400).json({ error: 'residentId, readingValue, and readingType are required' });
+    }
+
     const { rows: [reading] } = await query(
       `INSERT INTO glucose_readings (care_home_id, resident_id, reading_value, reading_type, recorded_by, recorded_at, notes)
        VALUES ($1, $2, $3, $4, $5, NOW(), $6) RETURNING *`,
@@ -63,6 +67,10 @@ export async function logInsulinDose(req: Request, res: Response, next: NextFunc
     const userId = req.user!.id;
     const { residentId, insulinType, doseUnits, injectionSite, notes } = req.body;
 
+    if (!residentId || !insulinType || !doseUnits) {
+      return res.status(400).json({ error: 'residentId, insulinType, and doseUnits are required' });
+    }
+
     const { rows: [dose] } = await query(
       `INSERT INTO insulin_doses (care_home_id, resident_id, insulin_type, dose_units, injection_site, administered_by, administered_at, notes)
        VALUES ($1, $2, $3, $4, $5, $6, NOW(), $7) RETURNING *`,
@@ -100,6 +108,10 @@ export async function recordHba1c(req: Request, res: Response, next: NextFunctio
     const careHomeId = req.user!.care_home_id;
     const userId = req.user!.id;
     const { residentId, value, testDate } = req.body;
+
+    if (!residentId || !value || !testDate) {
+      return res.status(400).json({ error: 'residentId, value, and testDate are required' });
+    }
 
     const { rows: [record] } = await query(
       `INSERT INTO hba1c_records (care_home_id, resident_id, value, test_date, recorded_by)

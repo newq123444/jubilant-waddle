@@ -103,6 +103,10 @@ export async function recordAdministration(req: Request, res: Response, next: Ne
       omissionReason, witnessedById, isPrn, prnReason, prnEffect
     } = req.body;
 
+    if (!medicationId || !residentId || !administrationDate || !scheduledTime || !status) {
+      return res.status(400).json({ error: 'medicationId, residentId, administrationDate, scheduledTime, and status are required' });
+    }
+
     // Verify medication belongs to this care home and resident
     const { rows: [med] } = await query(
       'SELECT * FROM medications WHERE id = $1 AND care_home_id = $2 AND resident_id = $3',
@@ -174,6 +178,10 @@ export async function createMedication(req: Request, res: Response, next: NextFu
       administrationTimes, startDate, endDate, prescribedBy,
       indication, specialInstructions, isPrn, isControlled
     } = req.body;
+
+    if (!residentId || !name || !dose || !route || !frequency || !administrationTimes || !startDate) {
+      return res.status(400).json({ error: 'residentId, name, dose, route, frequency, administrationTimes, and startDate are required' });
+    }
 
     const { rows: [med] } = await query(
       `INSERT INTO medications (

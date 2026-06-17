@@ -1,0 +1,7 @@
+{
+  "task_id": "task-fix-null-validation",
+  "task_description": "Add server-side validation to ALL controllers in backend/src/controllers/ that have INSERT INTO statements. Validate required (NOT NULL) fields before executing queries. Return HTTP 400 with descriptive error messages listing which fields are required. This prevents PostgreSQL null constraint violation errors.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
+  "blocked_reason": null
+}

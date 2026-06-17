@@ -39,6 +39,10 @@ export async function createIncident(req: Request, res: Response, next: NextFunc
             witnessName, injuries, immediateActions, followUp, cqcReportable,
             familyNotified, gpNotified, incidentDate } = req.body;
 
+    if (!residentId || !incidentType || !severity || !description) {
+      return res.status(400).json({ error: 'residentId, incidentType, severity, and description are required' });
+    }
+
     const { rows: [inc] } = await query(
       `INSERT INTO incidents (
         care_home_id, resident_id, reported_by, incident_type, severity, description,

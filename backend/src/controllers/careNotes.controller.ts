@@ -58,6 +58,10 @@ export async function createNote(req: Request, res: Response, next: NextFunction
       flagged, flagReason,
     } = req.body;
 
+    if (!residentId || !noteType || !content) {
+      return res.status(400).json({ error: 'residentId, noteType, and content are required' });
+    }
+
     // Verify resident belongs to this care home
     const { rows: [resident] } = await query(
       'SELECT id FROM residents WHERE id = $1 AND care_home_id = $2 AND active = TRUE',

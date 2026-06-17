@@ -13,6 +13,10 @@ export async function createCarePlan(req: Request, res: Response, next: NextFunc
       lastingPowerOfAttorney, spiritualNeeds, preferredPriorities, comfortMeasures
     } = req.body;
 
+    if (!residentId) {
+      return res.status(400).json({ error: 'residentId is required' });
+    }
+
     const { rows: [plan] } = await query(
       `INSERT INTO palliative_care_plans
        (care_home_id, resident_id, preferred_place_of_death, dnacpr_in_place, advance_decision,
@@ -86,6 +90,10 @@ export async function scheduleComfortRound(req: Request, res: Response, next: Ne
     const careHomeId = req.user!.care_home_id;
     const { residentId, scheduledTime } = req.body;
 
+    if (!residentId || !scheduledTime) {
+      return res.status(400).json({ error: 'residentId and scheduledTime are required' });
+    }
+
     const { rows: [round] } = await query(
       `INSERT INTO comfort_rounds (care_home_id, resident_id, scheduled_time)
        VALUES ($1, $2, $3) RETURNING *`,
@@ -150,6 +158,10 @@ export async function addAnticipatoryMed(req: Request, res: Response, next: Next
       locationStored, prescribedBy, prescribedDate, notes
     } = req.body;
 
+    if (!residentId || !medicationName) {
+      return res.status(400).json({ error: 'residentId and medicationName are required' });
+    }
+
     const { rows: [med] } = await query(
       `INSERT INTO anticipatory_medications
        (care_home_id, resident_id, medication_name, indication, dose, route, location_stored, prescribed_by, prescribed_date, notes)
@@ -213,6 +225,10 @@ export async function logFamilyCommunication(req: Request, res: Response, next: 
       residentId, contactName, contactRelationship, communicationType,
       summary, communicationDate, followUpNeeded, followUpNotes
     } = req.body;
+
+    if (!residentId || !contactName || !communicationType) {
+      return res.status(400).json({ error: 'residentId, contactName, and communicationType are required' });
+    }
 
     const { rows: [log] } = await query(
       `INSERT INTO family_communication_log
