@@ -8,6 +8,10 @@ export async function createTurnover(req: Request, res: Response, next: NextFunc
     const careHomeId = req.user!.care_home_id;
     const { roomNumber, previousResidentId, vacatedDate, targetReadyDate, assignedTo, notes } = req.body;
 
+    if (!roomNumber || !vacatedDate) {
+      return res.status(400).json({ error: 'roomNumber and vacatedDate are required' });
+    }
+
     const { rows: [turnover] } = await query(
       `INSERT INTO room_turnovers (care_home_id, room_number, previous_resident_id, vacated_date, target_ready_date, assigned_to, notes, status)
        VALUES ($1, $2, $3, $4, $5, $6, $7, 'vacated') RETURNING *`,
@@ -79,6 +83,10 @@ export async function addChecklistItem(req: Request, res: Response, next: NextFu
   try {
     const careHomeId = req.user!.care_home_id;
     const { turnoverId, taskName, category, notes } = req.body;
+
+    if (!taskName) {
+      return res.status(400).json({ error: 'taskName is required' });
+    }
 
     const { rows: [item] } = await query(
       `INSERT INTO turnover_checklist_items (care_home_id, turnover_id, task_name, category, notes)

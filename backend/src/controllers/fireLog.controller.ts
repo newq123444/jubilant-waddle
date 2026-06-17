@@ -10,6 +10,10 @@ export async function recordFireTest(req: Request, res: Response, next: NextFunc
     const careHomeId = req.user!.care_home_id;
     const { testType, testDate, timeTakenSeconds, allClear, issuesFound, witnesses, notes } = req.body;
 
+    if (!testType || !testDate) {
+      return res.status(400).json({ error: 'testType and testDate are required' });
+    }
+
     const { rows: [test] } = await query(
       `INSERT INTO fire_tests (care_home_id, test_type, test_date, time_taken_seconds, all_clear, issues_found, conducted_by, witnesses, notes)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
@@ -53,6 +57,10 @@ export async function recordEquipmentCheck(req: Request, res: Response, next: Ne
   try {
     const careHomeId = req.user!.care_home_id;
     const { equipmentType, location, checkDate, status, nextCheckDate, notes } = req.body;
+
+    if (!equipmentType || !location || !checkDate) {
+      return res.status(400).json({ error: 'equipmentType, location, and checkDate are required' });
+    }
 
     const { rows: [check] } = await query(
       `INSERT INTO fire_equipment_checks (care_home_id, equipment_type, location, check_date, status, next_check_date, checked_by, notes)
@@ -114,6 +122,10 @@ export async function createPeep(req: Request, res: Response, next: NextFunction
   try {
     const careHomeId = req.user!.care_home_id;
     const { residentId, mobilityStatus, evacuationMethod, assistanceRequired, equipmentNeeded, primaryHelper, secondaryHelper, reviewDate } = req.body;
+
+    if (!residentId || !mobilityStatus || !evacuationMethod) {
+      return res.status(400).json({ error: 'residentId, mobilityStatus, and evacuationMethod are required' });
+    }
 
     const { rows: [peep] } = await query(
       `INSERT INTO peeps (care_home_id, resident_id, mobility_status, evacuation_method, assistance_required, equipment_needed, primary_helper, secondary_helper, review_date, status)

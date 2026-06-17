@@ -59,6 +59,10 @@ export async function upsertShift(req: Request, res: Response, next: NextFunctio
     const careHomeId = req.user!.care_home_id;
     const { staffId, shiftDate, shiftType, startTime, endTime, notes } = req.body;
 
+    if (!staffId || !shiftDate || !shiftType) {
+      return res.status(400).json({ error: 'staffId, shiftDate, and shiftType are required' });
+    }
+
     const { rows: [shift] } = await query(
       `INSERT INTO shifts (care_home_id, staff_id, shift_date, shift_type, start_time, end_time, notes, created_by)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)

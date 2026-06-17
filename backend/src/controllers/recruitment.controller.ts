@@ -10,6 +10,10 @@ export async function createJobPosting(req: Request, res: Response, next: NextFu
     const careHomeId = req.user!.care_home_id;
     const { title, department, contractType, hoursPerWeek, salaryRange, description, requirements, status } = req.body;
 
+    if (!title || !department || !contractType) {
+      return res.status(400).json({ error: 'title, department, and contractType are required' });
+    }
+
     const { rows: [posting] } = await query(
       `INSERT INTO job_postings (care_home_id, title, department, contract_type, hours_per_week, salary_range, description, requirements, status, created_by, posted_at)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
@@ -71,6 +75,10 @@ export async function createApplication(req: Request, res: Response, next: NextF
   try {
     const careHomeId = req.user!.care_home_id;
     const { jobPostingId, applicantName, applicantEmail, applicantPhone, cvUrl, coverLetter, notes } = req.body;
+
+    if (!jobPostingId || !applicantName || !applicantEmail) {
+      return res.status(400).json({ error: 'jobPostingId, applicantName, and applicantEmail are required' });
+    }
 
     const { rows: [app] } = await query(
       `INSERT INTO job_applications (care_home_id, job_posting_id, applicant_name, applicant_email, applicant_phone, cv_url, cover_letter, notes, stage)
@@ -134,6 +142,10 @@ export async function scheduleInterview(req: Request, res: Response, next: NextF
     const careHomeId = req.user!.care_home_id;
     const { applicationId, scheduledAt, durationMinutes, interviewers, location, notes } = req.body;
 
+    if (!applicationId || !scheduledAt) {
+      return res.status(400).json({ error: 'applicationId and scheduledAt are required' });
+    }
+
     const { rows: [interview] } = await query(
       `INSERT INTO interviews (care_home_id, application_id, scheduled_at, duration_minutes, interviewers, location, notes)
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
@@ -188,6 +200,10 @@ export async function createDbsCheck(req: Request, res: Response, next: NextFunc
   try {
     const careHomeId = req.user!.care_home_id;
     const { applicationId, staffId, personName, dbsType, certificateNumber, issueDate, notes } = req.body;
+
+    if (!personName || !dbsType) {
+      return res.status(400).json({ error: 'personName and dbsType are required' });
+    }
 
     const { rows: [check] } = await query(
       `INSERT INTO dbs_checks (care_home_id, application_id, staff_id, person_name, dbs_type, certificate_number, issue_date, status, notes)

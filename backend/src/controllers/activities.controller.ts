@@ -82,6 +82,11 @@ export async function createActivity(req: Request, res: Response, next: NextFunc
     const { name, description, activity_type, required_mobility_level, duration_minutes,
             max_participants, location, facilitator, recurring, recurrence_pattern,
             category, sensory_friendly, cognitive_level, notes } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ error: 'name is required' });
+    }
+
     const { rows: [activity] } = await query(
       `INSERT INTO activities (
         care_home_id, name, description, activity_type, required_mobility_level,
@@ -184,6 +189,11 @@ export async function createSession(req: Request, res: Response, next: NextFunct
   try {
     const careHomeId = req.user!.care_home_id;
     const { activity_id, session_date, start_time, end_time, facilitator_id, notes } = req.body;
+
+    if (!activity_id || !session_date || !start_time) {
+      return res.status(400).json({ error: 'activity_id, session_date, and start_time are required' });
+    }
+
     // Verify activity exists
     const { rows: [activity] } = await query(
       `SELECT id FROM activities WHERE id = $1 AND care_home_id = $2`,
@@ -223,6 +233,10 @@ export async function addParticipant(req: Request, res: Response, next: NextFunc
     const careHomeId = req.user!.care_home_id;
     const { id: sessionId } = req.params;
     const { resident_id } = req.body;
+
+    if (!resident_id) {
+      return res.status(400).json({ error: 'resident_id is required' });
+    }
 
     // Get session with activity details
     const { rows: [session] } = await query(

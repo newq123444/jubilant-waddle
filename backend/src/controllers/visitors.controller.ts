@@ -8,6 +8,10 @@ export async function signInVisitor(req: Request, res: Response, next: NextFunct
     const careHomeId = req.user!.care_home_id;
     const { visitorName, visitorType, company, visitingResidentId, purpose, badgeNumber, carRegistration, dbsVerified, notes } = req.body;
 
+    if (!visitorName || !visitorType || !purpose) {
+      return res.status(400).json({ error: 'visitorName, visitorType, and purpose are required' });
+    }
+
     // Check for safeguarding flags
     const { rows: flags } = await query(
       `SELECT * FROM visitor_safeguarding WHERE care_home_id = $1 AND visitor_name ILIKE $2 AND active = true`,
@@ -94,6 +98,10 @@ export async function addSafeguardingFlag(req: Request, res: Response, next: Nex
   try {
     const careHomeId = req.user!.care_home_id;
     const { visitorName, visitorType, restrictionType, reason, restrictedResidents } = req.body;
+
+    if (!visitorName || !restrictionType || !reason) {
+      return res.status(400).json({ error: 'visitorName, restrictionType, and reason are required' });
+    }
 
     const { rows: [flag] } = await query(
       `INSERT INTO visitor_safeguarding (care_home_id, visitor_name, visitor_type, restriction_type, reason, restricted_residents, active, created_by)

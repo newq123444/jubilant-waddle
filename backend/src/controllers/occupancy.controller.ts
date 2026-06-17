@@ -8,6 +8,10 @@ export async function recordOccupancy(req: Request, res: Response, next: NextFun
     const careHomeId = req.user!.care_home_id;
     const { recordDate, totalBeds, occupiedBeds, revenuePerBedPence, notes } = req.body;
 
+    if (!recordDate || !totalBeds || !occupiedBeds) {
+      return res.status(400).json({ error: 'recordDate, totalBeds, and occupiedBeds are required' });
+    }
+
     const occupancyPct = totalBeds > 0 ? ((occupiedBeds / totalBeds) * 100).toFixed(2) : '0';
 
     const { rows: [record] } = await query(
@@ -48,6 +52,10 @@ export async function generateForecast(req: Request, res: Response, next: NextFu
   try {
     const careHomeId = req.user!.care_home_id;
     const { forecastDate, predictedOccupancyPct, predictedVacancies, revenueImpactPence, confidenceLevel, suggestedActions } = req.body;
+
+    if (!forecastDate || !predictedOccupancyPct) {
+      return res.status(400).json({ error: 'forecastDate and predictedOccupancyPct are required' });
+    }
 
     const { rows: [forecast] } = await query(
       `INSERT INTO occupancy_forecasts (care_home_id, forecast_date, predicted_occupancy_pct, predicted_vacancies, revenue_impact_pence, confidence_level, suggested_actions)

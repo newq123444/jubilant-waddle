@@ -8,6 +8,10 @@ export async function recordStaffCost(req: Request, res: Response, next: NextFun
     const careHomeId = req.user!.care_home_id;
     const { staffId, periodStart, periodEnd, basicHours, overtimeHours, basicCostPence, overtimeCostPence, agencyCostPence, isAgency } = req.body;
 
+    if (!staffId || !periodStart || !periodEnd || !basicHours || !basicCostPence) {
+      return res.status(400).json({ error: 'staffId, periodStart, periodEnd, basicHours, and basicCostPence are required' });
+    }
+
     const { rows: [cost] } = await query(
       `INSERT INTO staff_costs (care_home_id, staff_id, period_start, period_end, basic_hours, overtime_hours, basic_cost_pence, overtime_cost_pence, agency_cost_pence, is_agency)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
@@ -106,6 +110,10 @@ export async function createBudget(req: Request, res: Response, next: NextFuncti
   try {
     const careHomeId = req.user!.care_home_id;
     const { budgetMonth, budgetPence, category, notes } = req.body;
+
+    if (!budgetMonth || !budgetPence) {
+      return res.status(400).json({ error: 'budgetMonth and budgetPence are required' });
+    }
 
     const { rows: [budget] } = await query(
       `INSERT INTO cost_budgets (care_home_id, budget_month, budget_pence, category, notes)
