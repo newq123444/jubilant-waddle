@@ -74,10 +74,6 @@ export async function updateResidentDietaryProfile(req: Request, res: Response, 
     const { residentId } = req.params;
     const careHomeId = req.user!.care_home_id;
 
-    if (!residentId) {
-      return res.status(400).json({ error: 'residentId is required' });
-    }
-
     const { allergies, intolerances, textureRequirement, culturalNeeds, religiousNeeds, preferences, caloriesTarget, fluidTargetMl } = req.body;
 
     const { rows: [profile] } = await query(

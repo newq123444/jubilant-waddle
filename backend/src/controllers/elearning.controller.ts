@@ -78,8 +78,8 @@ export async function createQuiz(req: Request, res: Response, next: NextFunction
     const { moduleId } = req.params;
     const { title, questions, passMarkPct } = req.body;
 
-    if (!moduleId || !title || !questions) {
-      return res.status(400).json({ error: 'moduleId, title, and questions are required' });
+    if (!title || !questions) {
+      return res.status(400).json({ error: 'title and questions are required' });
     }
 
     const { rows: [quiz] } = await query(

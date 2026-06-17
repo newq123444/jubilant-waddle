@@ -59,6 +59,10 @@ export async function calculateBradfordScore(req: Request, res: Response, next: 
     const careHomeId = req.user!.care_home_id;
     const { staffId, periodStart, periodEnd } = req.body;
 
+    if (!staffId || !periodStart || !periodEnd) {
+      return res.status(400).json({ error: 'staffId, periodStart, and periodEnd are required' });
+    }
+
     // Bradford Factor = S x S x D (S = number of spells, D = total days)
     const { rows: [result] } = await query(
       `SELECT COUNT(*)::int AS spells, COALESCE(SUM(total_days), 0)::int AS total_days

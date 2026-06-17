@@ -10,7 +10,7 @@ export async function logGlucose(req: Request, res: Response, next: NextFunction
     const userId = req.user!.id;
     const { residentId, readingValue, readingType, notes } = req.body;
 
-    if (!residentId || !readingValue || !readingType) {
+    if (!residentId || readingValue == null || !readingType) {
       return res.status(400).json({ error: 'residentId, readingValue, and readingType are required' });
     }
 
@@ -67,7 +67,7 @@ export async function logInsulinDose(req: Request, res: Response, next: NextFunc
     const userId = req.user!.id;
     const { residentId, insulinType, doseUnits, injectionSite, notes } = req.body;
 
-    if (!residentId || !insulinType || !doseUnits) {
+    if (!residentId || !insulinType || doseUnits == null) {
       return res.status(400).json({ error: 'residentId, insulinType, and doseUnits are required' });
     }
 
@@ -109,7 +109,7 @@ export async function recordHba1c(req: Request, res: Response, next: NextFunctio
     const userId = req.user!.id;
     const { residentId, value, testDate } = req.body;
 
-    if (!residentId || !value || !testDate) {
+    if (!residentId || value == null || !testDate) {
       return res.status(400).json({ error: 'residentId, value, and testDate are required' });
     }
 

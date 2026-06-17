@@ -8,7 +8,7 @@ export async function recordStaffCost(req: Request, res: Response, next: NextFun
     const careHomeId = req.user!.care_home_id;
     const { staffId, periodStart, periodEnd, basicHours, overtimeHours, basicCostPence, overtimeCostPence, agencyCostPence, isAgency } = req.body;
 
-    if (!staffId || !periodStart || !periodEnd || !basicHours || !basicCostPence) {
+    if (!staffId || !periodStart || !periodEnd || basicHours == null || !basicCostPence) {
       return res.status(400).json({ error: 'staffId, periodStart, periodEnd, basicHours, and basicCostPence are required' });
     }
 
@@ -111,7 +111,7 @@ export async function createBudget(req: Request, res: Response, next: NextFuncti
     const careHomeId = req.user!.care_home_id;
     const { budgetMonth, budgetPence, category, notes } = req.body;
 
-    if (!budgetMonth || !budgetPence) {
+    if (!budgetMonth || budgetPence == null) {
       return res.status(400).json({ error: 'budgetMonth and budgetPence are required' });
     }
 

@@ -8,7 +8,7 @@ export async function recordOccupancy(req: Request, res: Response, next: NextFun
     const careHomeId = req.user!.care_home_id;
     const { recordDate, totalBeds, occupiedBeds, revenuePerBedPence, notes } = req.body;
 
-    if (!recordDate || !totalBeds || !occupiedBeds) {
+    if (!recordDate || totalBeds == null || occupiedBeds == null) {
       return res.status(400).json({ error: 'recordDate, totalBeds, and occupiedBeds are required' });
     }
 

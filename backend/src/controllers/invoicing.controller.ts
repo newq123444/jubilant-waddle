@@ -32,7 +32,7 @@ export async function createRateUplift(req: Request, res: Response, next: NextFu
     const careHomeId = req.user!.care_home_id;
     const { residentId, previousRatePence, newRatePence, effectiveDate, reason } = req.body;
 
-    if (!residentId || !previousRatePence || !newRatePence || !effectiveDate) {
+    if (!residentId || previousRatePence == null || newRatePence == null || !effectiveDate) {
       return res.status(400).json({ error: 'residentId, previousRatePence, newRatePence, and effectiveDate are required' });
     }
 

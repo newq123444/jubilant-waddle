@@ -41,7 +41,7 @@ export async function createInvoice(req: Request, res: Response, next: NextFunct
     const { residentId, periodStart, periodEnd, periodLabel, amountPence, vatPence,
             payerName, payerType, payerReference, dueDate, notes } = req.body;
 
-    if (!residentId || !periodStart || !periodEnd || !amountPence || !payerName) {
+    if (!residentId || !periodStart || !periodEnd || amountPence == null || !payerName) {
       return res.status(400).json({ error: 'residentId, periodStart, periodEnd, amountPence, and payerName are required' });
     }
 
