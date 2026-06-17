@@ -33,6 +33,10 @@ export async function createModule(req: Request, res: Response, next: NextFuncti
     const userId = req.user!.id;
     const { title, description, category, contentType, contentUrl, durationMinutes, mandatory } = req.body;
 
+    if (!title || !category || !contentType) {
+      return res.status(400).json({ error: 'title, category, and contentType are required' });
+    }
+
     const { rows: [module] } = await query(
       `INSERT INTO elearning_modules (care_home_id, title, description, category, content_type, content_url, duration_minutes, mandatory, created_by)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
@@ -73,6 +77,10 @@ export async function createQuiz(req: Request, res: Response, next: NextFunction
   try {
     const { moduleId } = req.params;
     const { title, questions, passMarkPct } = req.body;
+
+    if (!moduleId || !title || !questions) {
+      return res.status(400).json({ error: 'moduleId, title, and questions are required' });
+    }
 
     const { rows: [quiz] } = await query(
       `INSERT INTO elearning_quizzes (module_id, title, questions, pass_mark_pct)

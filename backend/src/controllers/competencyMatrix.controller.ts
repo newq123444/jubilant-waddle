@@ -27,6 +27,10 @@ export async function createCompetency(req: Request, res: Response, next: NextFu
     const careHomeId = req.user!.care_home_id;
     const { name, category, description, requiresRenewal, renewalMonths } = req.body;
 
+    if (!name || !category) {
+      return res.status(400).json({ error: 'name and category are required' });
+    }
+
     const { rows: [competency] } = await query(
       `INSERT INTO competencies (care_home_id, name, category, description, requires_renewal, renewal_months)
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
@@ -102,6 +106,10 @@ export async function assignStaffCompetency(req: Request, res: Response, next: N
   try {
     const careHomeId = req.user!.care_home_id;
     const { staffId, competencyId, status, expiryDate, evidenceNotes } = req.body;
+
+    if (!staffId || !competencyId) {
+      return res.status(400).json({ error: 'staffId and competencyId are required' });
+    }
 
     const { rows: [sc] } = await query(
       `INSERT INTO staff_competencies (care_home_id, staff_id, competency_id, status, expiry_date, evidence_notes)

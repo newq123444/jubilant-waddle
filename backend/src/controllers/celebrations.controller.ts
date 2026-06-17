@@ -77,6 +77,10 @@ export async function createCelebration(req: Request, res: Response, next: NextF
     const userId = req.user!.id;
     const { residentId, celebrationType, title, description, celebrationDate, autoDetected, budget, notes } = req.body;
 
+    if (!celebrationType || !title || !celebrationDate) {
+      return res.status(400).json({ error: 'celebrationType, title, and celebrationDate are required' });
+    }
+
     const { rows: [celebration] } = await query(
       `INSERT INTO celebrations (care_home_id, resident_id, celebration_type, title, description, celebration_date, auto_detected, budget, notes, created_by)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
@@ -93,6 +97,10 @@ export async function assignTask(req: Request, res: Response, next: NextFunction
   try {
     const careHomeId = req.user!.care_home_id;
     const { celebrationId, title, assignedTo, dueDate, notes } = req.body;
+
+    if (!celebrationId || !title) {
+      return res.status(400).json({ error: 'celebrationId and title are required' });
+    }
 
     const { rows: [task] } = await query(
       `INSERT INTO celebration_tasks (care_home_id, celebration_id, title, assigned_to, due_date, notes)

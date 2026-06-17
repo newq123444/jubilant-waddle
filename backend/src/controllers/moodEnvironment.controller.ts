@@ -51,6 +51,10 @@ export async function recordIntervention(req: Request, res: Response, next: Next
     const userId = req.user!.id;
     const { residentId, interventionId, moodBefore, moodAfter, effectiveness, notes } = req.body;
 
+    if (!residentId || !interventionId) {
+      return res.status(400).json({ error: 'residentId and interventionId are required' });
+    }
+
     const { rows: [record] } = await query(
       `INSERT INTO mood_intervention_history (care_home_id, resident_id, intervention_id, mood_before, mood_after, effectiveness, notes, administered_by)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,

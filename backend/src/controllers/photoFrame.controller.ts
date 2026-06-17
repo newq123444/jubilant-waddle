@@ -9,6 +9,10 @@ export async function uploadPhoto(req: Request, res: Response, next: NextFunctio
     const careHomeId = req.user!.care_home_id;
     const { residentId, photoUrl, caption, uploadedByName, uploadedByEmail, showOnDate } = req.body;
 
+    if (!residentId || !photoUrl) {
+      return res.status(400).json({ error: 'residentId and photoUrl are required' });
+    }
+
     const { rows: [photo] } = await query(
       `INSERT INTO photo_frame_photos (care_home_id, resident_id, photo_url, caption, uploaded_by_name, uploaded_by_email, show_on_date)
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
@@ -138,6 +142,10 @@ export async function logView(req: Request, res: Response, next: NextFunction) {
   try {
     const careHomeId = req.user!.care_home_id;
     const { photoId, residentId, reaction, notes } = req.body;
+
+    if (!photoId || !residentId) {
+      return res.status(400).json({ error: 'photoId and residentId are required' });
+    }
 
     const { rows: [view] } = await query(
       `INSERT INTO photo_frame_viewing_history (care_home_id, photo_id, resident_id, reaction, notes)

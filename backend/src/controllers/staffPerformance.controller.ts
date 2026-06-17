@@ -62,6 +62,10 @@ export async function calculateMetrics(req: Request, res: Response, next: NextFu
     const careHomeId = req.user!.care_home_id;
     const { periodStart, periodEnd } = req.body;
 
+    if (!periodStart || !periodEnd) {
+      return res.status(400).json({ error: 'periodStart and periodEnd are required' });
+    }
+
     // Get all active staff
     const { rows: staff } = await query(
       `SELECT sp.user_id AS staff_id

@@ -10,6 +10,10 @@ export async function createGoal(req: Request, res: Response, next: NextFunction
     const userId = req.user!.id;
     const { residentId, title, description, category, targetDate, priority } = req.body;
 
+    if (!residentId || !title) {
+      return res.status(400).json({ error: 'residentId and title are required' });
+    }
+
     const { rows: [goal] } = await query(
       `INSERT INTO rehab_goals (care_home_id, resident_id, title, description, category, target_date, priority, created_by)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
@@ -52,6 +56,10 @@ export async function addMilestone(req: Request, res: Response, next: NextFuncti
     const careHomeId = req.user!.care_home_id;
     const { goalId, title, description, targetDate, displayOrder } = req.body;
 
+    if (!goalId || !title) {
+      return res.status(400).json({ error: 'goalId and title are required' });
+    }
+
     const { rows: [milestone] } = await query(
       `INSERT INTO rehab_milestones (care_home_id, goal_id, title, description, target_date, display_order)
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
@@ -90,6 +98,10 @@ export async function logProgress(req: Request, res: Response, next: NextFunctio
     const careHomeId = req.user!.care_home_id;
     const userId = req.user!.id;
     const { goalId, milestoneId, residentId, progressNotes, score, celebration, familyNotified } = req.body;
+
+    if (!goalId || !residentId || !progressNotes) {
+      return res.status(400).json({ error: 'goalId, residentId, and progressNotes are required' });
+    }
 
     const { rows: [log] } = await query(
       `INSERT INTO rehab_progress_logs (care_home_id, goal_id, milestone_id, resident_id, progress_notes, score, celebration, family_notified, logged_by)

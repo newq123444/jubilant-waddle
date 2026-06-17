@@ -37,6 +37,10 @@ export async function createMenuOption(req: Request, res: Response, next: NextFu
     const careHomeId = req.user!.care_home_id;
     const { mealType, name, description, photoUrl, texture, allergens, nutritionalInfo, availableDate } = req.body;
 
+    if (!mealType || !name) {
+      return res.status(400).json({ error: 'mealType and name are required' });
+    }
+
     const { rows: [option] } = await query(
       `INSERT INTO menu_options (care_home_id, meal_type, name, description, photo_url, texture, allergens, nutritional_info, available_date)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
@@ -69,6 +73,11 @@ export async function updateResidentDietaryProfile(req: Request, res: Response, 
   try {
     const { residentId } = req.params;
     const careHomeId = req.user!.care_home_id;
+
+    if (!residentId) {
+      return res.status(400).json({ error: 'residentId is required' });
+    }
+
     const { allergies, intolerances, textureRequirement, culturalNeeds, religiousNeeds, preferences, caloriesTarget, fluidTargetMl } = req.body;
 
     const { rows: [profile] } = await query(
@@ -99,6 +108,10 @@ export async function submitMenuChoice(req: Request, res: Response, next: NextFu
     const careHomeId = req.user!.care_home_id;
     const userId = req.user!.id;
     const { residentId, menuOptionId, mealDate, mealType, portionSize, specialRequest } = req.body;
+
+    if (!residentId || !menuOptionId || !mealDate || !mealType) {
+      return res.status(400).json({ error: 'residentId, menuOptionId, mealDate, and mealType are required' });
+    }
 
     const { rows: [choice] } = await query(
       `INSERT INTO menu_choices (care_home_id, resident_id, menu_option_id, meal_date, meal_type, portion_size, special_request, submitted_by)

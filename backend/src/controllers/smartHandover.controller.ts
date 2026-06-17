@@ -124,6 +124,13 @@ export async function recordAction(req: Request, res: Response, next: NextFuncti
     const { id } = req.params;
     const { itemIndex, actionTaken, outcome } = req.body;
 
+    if (!itemIndex && itemIndex !== 0) {
+      return res.status(400).json({ error: 'itemIndex is required' });
+    }
+    if (!actionTaken) {
+      return res.status(400).json({ error: 'actionTaken is required' });
+    }
+
     const { rows: [handover] } = await query(
       `SELECT * FROM smart_handovers WHERE id = $1 AND care_home_id = $2`,
       [id, careHomeId]

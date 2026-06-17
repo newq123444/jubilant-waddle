@@ -10,6 +10,10 @@ export async function queueOfflineAction(req: Request, res: Response, next: Next
     const userId = req.user!.id;
     const { entityType, entityId, action, payload } = req.body;
 
+    if (!entityType || !action || !payload) {
+      return res.status(400).json({ error: 'entityType, action, and payload are required' });
+    }
+
     const { rows: [item] } = await query(
       `INSERT INTO offline_sync_queue (care_home_id, user_id, entity_type, entity_id, action, payload, status)
        VALUES ($1, $2, $3, $4, $5, $6, 'pending') RETURNING *`,

@@ -10,6 +10,10 @@ export async function createSignoff(req: Request, res: Response, next: NextFunct
     const assessorId = req.user!.id;
     const { staffId, competencyId, observationDate, outcome, evidenceNotes, furtherTrainingNeeded } = req.body;
 
+    if (!staffId || !competencyId) {
+      return res.status(400).json({ error: 'staffId and competencyId are required' });
+    }
+
     const { rows: [signoff] } = await query(
       `INSERT INTO competency_signoffs
        (care_home_id, staff_id, competency_id, assessor_id, observation_date, outcome, evidence_notes, further_training_needed)

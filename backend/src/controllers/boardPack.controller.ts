@@ -10,6 +10,10 @@ export async function generateBoardPack(req: Request, res: Response, next: NextF
     const userId = req.user!.id;
     const { reportMonth, title } = req.body;
 
+    if (!reportMonth) {
+      return res.status(400).json({ error: 'reportMonth is required' });
+    }
+
     // Gather data for the board pack sections
     const { rows: [kpiSummary] } = await query(
       `SELECT json_agg(row_to_json(bk)) AS kpis

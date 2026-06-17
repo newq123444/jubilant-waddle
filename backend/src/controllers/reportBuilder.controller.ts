@@ -10,6 +10,10 @@ export async function createReportTemplate(req: Request, res: Response, next: Ne
     const careHomeId = req.user!.care_home_id;
     const { name, description, dataSource, fields, filters, groupBy, sortBy, scheduleCron, format } = req.body;
 
+    if (!name || !dataSource) {
+      return res.status(400).json({ error: 'name and dataSource are required' });
+    }
+
     const { rows: [template] } = await query(
       `INSERT INTO report_templates (care_home_id, name, description, data_source, fields, filters, group_by, sort_by, schedule_cron, format, created_by)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
@@ -107,6 +111,10 @@ export async function runReport(req: Request, res: Response, next: NextFunction)
   try {
     const careHomeId = req.user!.care_home_id;
     const { templateId, parameters } = req.body;
+
+    if (!templateId) {
+      return res.status(400).json({ error: 'templateId is required' });
+    }
 
     // Verify template exists
     const { rows: [template] } = await query(

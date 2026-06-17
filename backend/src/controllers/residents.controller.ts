@@ -132,6 +132,10 @@ export async function createResident(req: Request, res: Response, next: NextFunc
       conditions, contacts, notes, careNeedsSummary, religion, language
     } = req.body;
 
+    if (!firstName || !lastName || !dateOfBirth || !roomNumber) {
+      return res.status(400).json({ error: 'firstName, lastName, dateOfBirth, and roomNumber are required' });
+    }
+
     await withTransaction(async (client) => {
       const { rows: [resident] } = await client.query(
         `INSERT INTO residents (

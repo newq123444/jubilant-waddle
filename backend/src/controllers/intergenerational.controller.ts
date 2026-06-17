@@ -10,6 +10,10 @@ export async function createProgramme(req: Request, res: Response, next: NextFun
     const userId = req.user!.id;
     const { name, description, partnerOrganisation, ageGroup, frequency, safeguardingRequirements, dbsRequired, riskAssessment } = req.body;
 
+    if (!name || !partnerOrganisation) {
+      return res.status(400).json({ error: 'name and partnerOrganisation are required' });
+    }
+
     const { rows: [programme] } = await query(
       `INSERT INTO intergenerational_programmes (care_home_id, name, description, partner_organisation, age_group, frequency, safeguarding_requirements, dbs_required, risk_assessment, created_by)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
@@ -59,6 +63,10 @@ export async function createVisit(req: Request, res: Response, next: NextFunctio
     const userId = req.user!.id;
     const { programmeId, visitDate, startTime, endTime, visitorCount, activityDescription, notes } = req.body;
 
+    if (!programmeId || !visitDate) {
+      return res.status(400).json({ error: 'programmeId and visitDate are required' });
+    }
+
     const { rows: [visit] } = await query(
       `INSERT INTO intergenerational_visits (care_home_id, programme_id, visit_date, start_time, end_time, visitor_count, activity_description, notes, created_by)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
@@ -106,6 +114,10 @@ export async function addParticipant(req: Request, res: Response, next: NextFunc
   try {
     const careHomeId = req.user!.care_home_id;
     const { visitId, residentId, engagementScore, wellbeingScore, notes } = req.body;
+
+    if (!visitId || !residentId) {
+      return res.status(400).json({ error: 'visitId and residentId are required' });
+    }
 
     const { rows: [participant] } = await query(
       `INSERT INTO intergenerational_participants (care_home_id, visit_id, resident_id, engagement_score, wellbeing_score, notes)

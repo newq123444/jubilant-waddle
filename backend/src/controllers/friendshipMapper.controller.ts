@@ -10,6 +10,10 @@ export async function recordObservation(req: Request, res: Response, next: NextF
     const userId = req.user!.id;
     const { residentId, observedWith, interactionType, context, qualityScore } = req.body;
 
+    if (!residentId || !observedWith || !interactionType) {
+      return res.status(400).json({ error: 'residentId, observedWith, and interactionType are required' });
+    }
+
     const { rows: [obs] } = await query(
       `INSERT INTO friendship_observations (care_home_id, resident_id, observed_with, interaction_type, context, quality_score, observed_by)
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,

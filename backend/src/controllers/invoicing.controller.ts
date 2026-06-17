@@ -32,6 +32,10 @@ export async function createRateUplift(req: Request, res: Response, next: NextFu
     const careHomeId = req.user!.care_home_id;
     const { residentId, previousRatePence, newRatePence, effectiveDate, reason } = req.body;
 
+    if (!residentId || !previousRatePence || !newRatePence || !effectiveDate) {
+      return res.status(400).json({ error: 'residentId, previousRatePence, newRatePence, and effectiveDate are required' });
+    }
+
     const { rows: [uplift] } = await query(
       `INSERT INTO rate_uplifts (care_home_id, resident_id, previous_rate_pence, new_rate_pence, effective_date, reason, status)
        VALUES ($1, $2, $3, $4, $5, $6, 'pending') RETURNING *`,
@@ -81,6 +85,10 @@ export async function sendPaymentReminder(req: Request, res: Response, next: Nex
   try {
     const careHomeId = req.user!.care_home_id;
     const { invoiceId, reminderType, channel } = req.body;
+
+    if (!invoiceId || !reminderType) {
+      return res.status(400).json({ error: 'invoiceId and reminderType are required' });
+    }
 
     const { rows: [reminder] } = await query(
       `INSERT INTO payment_reminders (care_home_id, invoice_id, reminder_type, channel, status, sent_at)

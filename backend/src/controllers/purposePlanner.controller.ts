@@ -28,6 +28,10 @@ export async function createRole(req: Request, res: Response, next: NextFunction
     const careHomeId = req.user!.care_home_id;
     const { name, description, category, skillsRequired } = req.body;
 
+    if (!name) {
+      return res.status(400).json({ error: 'name is required' });
+    }
+
     const { rows: [role] } = await query(
       `INSERT INTO purpose_roles (care_home_id, name, description, category, skills_required)
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
@@ -44,6 +48,10 @@ export async function assignRole(req: Request, res: Response, next: NextFunction
   try {
     const careHomeId = req.user!.care_home_id;
     const { residentId, roleId, notes } = req.body;
+
+    if (!residentId || !roleId) {
+      return res.status(400).json({ error: 'residentId and roleId are required' });
+    }
 
     const { rows: [assignment] } = await query(
       `INSERT INTO purpose_role_assignments (care_home_id, resident_id, role_id, notes)
@@ -82,6 +90,10 @@ export async function logEngagement(req: Request, res: Response, next: NextFunct
     const careHomeId = req.user!.care_home_id;
     const userId = req.user!.id;
     const { assignmentId, residentId, engagementDate, durationMins, satisfaction, notes } = req.body;
+
+    if (!assignmentId || !residentId) {
+      return res.status(400).json({ error: 'assignmentId and residentId are required' });
+    }
 
     const { rows: [log] } = await query(
       `INSERT INTO purpose_engagement_logs (care_home_id, assignment_id, resident_id, engagement_date, duration_mins, satisfaction, notes, logged_by)

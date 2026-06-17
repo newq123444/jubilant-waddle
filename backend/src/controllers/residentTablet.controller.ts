@@ -9,6 +9,10 @@ export async function createRequest(req: Request, res: Response, next: NextFunct
     const careHomeId = req.user!.care_home_id;
     const { residentId, requestType, payload } = req.body;
 
+    if (!residentId || !requestType) {
+      return res.status(400).json({ error: 'residentId and requestType are required' });
+    }
+
     const { rows: [request] } = await query(
       `INSERT INTO resident_tablet_requests (care_home_id, resident_id, request_type, payload, status)
        VALUES ($1, $2, $3, $4, 'pending') RETURNING *`,

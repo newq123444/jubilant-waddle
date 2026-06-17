@@ -9,6 +9,10 @@ export async function generateQrCode(req: Request, res: Response, next: NextFunc
     const careHomeId = req.user!.care_home_id;
     const { residentId, roomNumber } = req.body;
 
+    if (!residentId || !roomNumber) {
+      return res.status(400).json({ error: 'residentId and roomNumber are required' });
+    }
+
     // Generate a unique QR code data string
     const qrCodeData = `carevista:room:${careHomeId}:${roomNumber}:${Date.now()}`;
 

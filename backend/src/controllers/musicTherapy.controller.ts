@@ -40,6 +40,10 @@ export async function updateResidentPreferences(req: Request, res: Response, nex
     const careHomeId = req.user!.care_home_id;
     const { residentId, genreId, preferredArtists, preferredEra, tempoPreference, notes } = req.body;
 
+    if (!residentId) {
+      return res.status(400).json({ error: 'residentId is required' });
+    }
+
     const { rows: [pref] } = await query(
       `INSERT INTO music_preferences (care_home_id, resident_id, genre_id, preferred_artists, preferred_era, tempo_preference, notes)
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
@@ -57,6 +61,10 @@ export async function startSession(req: Request, res: Response, next: NextFuncti
     const careHomeId = req.user!.care_home_id;
     const userId = req.user!.id;
     const { residentId, moodBefore, notes } = req.body;
+
+    if (!residentId) {
+      return res.status(400).json({ error: 'residentId is required' });
+    }
 
     const { rows: [session] } = await query(
       `INSERT INTO music_sessions (care_home_id, resident_id, mood_before, notes, facilitated_by)
