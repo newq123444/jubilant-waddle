@@ -2,7 +2,7 @@
   "id": "FEAT-003",
   "type": "fix",
   "description": "Add NOT NULL field validation to all controller INSERT operations - Batch 3 (remaining controllers: portal, AI, reporting, misc). Add validation checks at the top of each handler function that performs an INSERT, returning HTTP 400 with a descriptive error message listing which fields are required.",
-  "status": "pending",
+  "status": "completed",
   "steps": [
     "Fix celebrations.controller.ts: createCelebration needs residentId, celebrationType, title, celebrationDate. addCelebrationTask needs celebrationId, title.",
     "Fix competencyMatrix.controller.ts: createCompetency needs name, category. assignCompetency needs staffId, competencyId.",
@@ -40,5 +40,5 @@
     "cd /projects/sandbox/jubilant-waddle/backend && npm run build"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Added validation to 21 controller files covering all INSERT operations in batch 3. environmentalIntel.controller.ts already had zone validation so was skipped per instructions. familyPortal generateDailySummary uses req.params.residentId (enforced by routing) and checks resident existence already. tasks.controller.ts template seeding uses hardcoded DEFAULT_TEMPLATES array not user input so no validation needed. regulatoryReporting already validates type and formData is internally constructed. The smartHandover recordAction validation handles itemIndex=0 case (falsy but valid) with explicit check."
 }
