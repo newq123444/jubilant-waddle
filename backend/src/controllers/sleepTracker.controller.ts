@@ -10,6 +10,10 @@ export async function logSleep(req: Request, res: Response, next: NextFunction) 
     const userId = req.user!.id;
     const { residentId, sleepDate, bedtime, wakeTime, disturbances, disturbanceTypes, interventions, qualityRating, totalSleepHrs, notes } = req.body;
 
+    if (!residentId || !sleepDate) {
+      return res.status(400).json({ error: 'residentId and sleepDate are required' });
+    }
+
     const { rows: [log] } = await query(
       `INSERT INTO sleep_logs (care_home_id, resident_id, sleep_date, bedtime, wake_time, disturbances, disturbance_types, interventions, quality_rating, total_sleep_hrs, notes, logged_by)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,

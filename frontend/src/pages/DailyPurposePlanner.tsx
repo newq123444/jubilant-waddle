@@ -186,8 +186,17 @@ export default function DailyPurposePlanner() {
           )}
           {report ? (
             <div style={{ padding: 16, background: '#fff', borderRadius: 12, border: '1px solid #e5e7eb' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 8 }}>Engagement Report</h3>
-              <pre style={{ fontSize: '0.8rem', background: '#f9fafb', padding: 12, borderRadius: 8, overflow: 'auto' }}>{JSON.stringify(report, null, 2)}</pre>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 12 }}>Engagement Report</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
+                {Object.entries(report as Record<string, any>).filter(([k]) => k !== 'id' && k !== 'care_home_id').map(([key, value]) => (
+                  <div key={key} style={{ padding: 12, background: '#f0f9ff', borderRadius: 8, border: '1px solid #bae6fd', textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#1e293b' }}>
+                      {value == null ? '-' : typeof value === 'number' ? (Number.isInteger(value) ? value : value.toFixed(1)) : typeof value === 'object' ? (Array.isArray(value) ? value.length : Object.keys(value).length) : String(value)}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#6b7280', fontWeight: 500, textTransform: 'capitalize', marginTop: 4 }}>{key.replace(/_/g, ' ')}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : <p style={{ color: '#6b7280' }}>Log some engagement data to see the report.</p>}
         </div>

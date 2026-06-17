@@ -185,7 +185,16 @@ export default function IntergenerationalProgramme() {
           {selectedProgramme ? (
             safeguarding ? (
               <div style={{ padding: 16, background: '#fff', borderRadius: 12, border: '1px solid #e5e7eb' }}>
-                <pre style={{ fontSize: '0.8rem', background: '#f9fafb', padding: 12, borderRadius: 8, overflow: 'auto' }}>{JSON.stringify(safeguarding, null, 2)}</pre>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
+                  {Object.entries(safeguarding as Record<string, any>).filter(([k]) => k !== 'id' && k !== 'care_home_id' && k !== 'programme_id').map(([key, value]) => (
+                    <div key={key} style={{ padding: 12, background: '#f8fafc', borderRadius: 8, border: '1px solid #e5e7eb' }}>
+                      <div style={{ fontSize: '0.72rem', color: '#6b7280', fontWeight: 500, textTransform: 'capitalize', marginBottom: 4 }}>{key.replace(/_/g, ' ')}</div>
+                      <div style={{ fontSize: '0.9rem', color: '#1e293b', fontWeight: 600 }}>
+                        {value == null ? '-' : typeof value === 'boolean' ? (value ? 'Yes' : 'No') : typeof value === 'object' ? (Array.isArray(value) ? value.join(', ') : JSON.stringify(value)) : String(value)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : <p style={{ color: '#6b7280' }}>Loading safeguarding data...</p>
           ) : <p style={{ color: '#6b7280' }}>Select a programme from the Programmes tab to view safeguarding requirements.</p>}
@@ -197,7 +206,16 @@ export default function IntergenerationalProgramme() {
           <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 16 }}>Wellbeing Impact</h2>
           {wellbeingImpact ? (
             <div style={{ padding: 16, background: '#fff', borderRadius: 12, border: '1px solid #e5e7eb' }}>
-              <pre style={{ fontSize: '0.8rem', background: '#f9fafb', padding: 12, borderRadius: 8, overflow: 'auto' }}>{JSON.stringify(wellbeingImpact, null, 2)}</pre>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
+                {Object.entries(wellbeingImpact as Record<string, any>).filter(([k]) => k !== 'id' && k !== 'care_home_id').map(([key, value]) => (
+                  <div key={key} style={{ padding: 12, background: '#f0fdf4', borderRadius: 8, border: '1px solid #bbf7d0', textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#1e293b' }}>
+                      {value == null ? '-' : typeof value === 'number' ? value.toLocaleString() : typeof value === 'object' ? (Array.isArray(value) ? value.length : Object.keys(value).length) : String(value)}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#6b7280', fontWeight: 500, textTransform: 'capitalize', marginTop: 4 }}>{key.replace(/_/g, ' ')}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : <p style={{ color: '#6b7280' }}>No outcome data available yet. Log participant outcomes after visits.</p>}
         </div>

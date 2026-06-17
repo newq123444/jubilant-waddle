@@ -32,15 +32,21 @@ export default function NaturalLanguageSearch() {
   };
 
   const renderResultCard = (item: any, idx: number) => {
-    // Try to identify the type of result
-    if (item.first_name || item.last_name) {
+    // Primary detection: resident_id indicates a resident record
+    if (item.resident_id || item.first_name || item.last_name) {
+      const displayName = (item.first_name || item.last_name)
+        ? `${item.first_name || ''} ${item.last_name || ''}`.trim()
+        : 'Unknown Resident';
+      const initials = displayName === 'Unknown Resident'
+        ? '?'
+        : `${(item.first_name?.[0] || '')}${(item.last_name?.[0] || '')}`;
       return (
         <div key={idx} style={{ padding: 16, borderRadius: 8, border: '1px solid #e2e8f0', background: '#fff', display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#e0e7ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 600, color: '#4338ca', flexShrink: 0 }}>
-            {(item.first_name?.[0] || '')}{(item.last_name?.[0] || '')}
+            {initials}
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#1e293b' }}>{item.first_name} {item.last_name}</div>
+            <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#1e293b' }}>{displayName}</div>
             <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
               {item.room_number && <span>Room {item.room_number}</span>}
               {item.risk_level && (
@@ -49,6 +55,13 @@ export default function NaturalLanguageSearch() {
                 </span>
               )}
             </div>
+            {item.medications && Array.isArray(item.medications) && item.medications.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
+                {item.medications.map((med: string, mi: number) => (
+                  <span key={mi} style={{ padding: '1px 8px', borderRadius: 12, fontSize: '0.7rem', background: '#f0f9ff', color: '#0369a1', border: '1px solid #bae6fd' }}>{med}</span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       );
@@ -82,10 +95,19 @@ export default function NaturalLanguageSearch() {
         </div>
       );
     }
-    // Generic
+    // Generic fallback: render key-value pairs as a formatted card
     return (
       <div key={idx} style={{ padding: 16, borderRadius: 8, border: '1px solid #e2e8f0', background: '#fff' }}>
-        <pre style={{ margin: 0, fontSize: '0.8rem', color: '#475569', whiteSpace: 'pre-wrap' }}>{JSON.stringify(item, null, 2)}</pre>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8 }}>
+          {Object.entries(item).filter(([k]) => k !== 'id' && k !== 'care_home_id').map(([key, value]) => (
+            <div key={key} style={{ padding: 8, background: '#f8fafc', borderRadius: 6 }}>
+              <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 500, textTransform: 'capitalize', marginBottom: 2 }}>{key.replace(/_/g, ' ')}</div>
+              <div style={{ fontSize: '0.82rem', color: '#1e293b', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {value == null ? '-' : typeof value === 'object' ? (Array.isArray(value) ? value.join(', ') : Object.values(value).join(', ')) : String(value)}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   };
@@ -158,7 +180,7 @@ export default function NaturalLanguageSearch() {
         {/* History Sidebar */}
         <div style={{ width: showHistory ? 280 : 40, flexShrink: 0, transition: 'width 200ms' }}>
           <button onClick={() => setShowHistory(!showHistory)} style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#fff', cursor: 'pointer', fontSize: '0.8rem', color: '#475569', marginBottom: 8 }}>
-            {showHistory ? 'Hide History' : '&#128337;'}
+            {showHistory ? 'Hide History' : '\ud83d\udd51'}
           </button>
           {showHistory && (
             <div style={{ background: '#fff', borderRadius: 12, padding: 16, border: '1px solid #e2e8f0' }}>
