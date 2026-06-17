@@ -237,7 +237,7 @@ ALTER TABLE family_messages ADD COLUMN IF NOT EXISTS recipient_email VARCHAR(200
 ALTER TABLE family_messages ADD COLUMN IF NOT EXISTS direction VARCHAR(20) DEFAULT 'outbound';
 
 -- ── Wellbeing Logs: add missing columns ───────────────────────────────────
-ALTER TABLE wellbeing_logs ADD COLUMN IF NOT EXISTS logged_at TIMESTAMPTZ;
+ALTER TABLE wellbeing_logs ADD COLUMN IF NOT EXISTS logged_at TIMESTAMPTZ DEFAULT NOW();
 ALTER TABLE wellbeing_logs ADD COLUMN IF NOT EXISTS engagement_level VARCHAR(20);
 
 -- Backfill logged_at from created_at where it is NULL

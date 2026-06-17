@@ -39,7 +39,7 @@ export const emarApi = {
   listMedications:  (params?: object) => api.get('/medications', { params }),
   getMedication:    (id: string) => api.get(`/medications/${id}`),
   createMedication: (data: object) => api.post('/medications', data),
-  discontinue:      (id: string) => api.delete(`/medications/${id}`),
+  discontinue:      (id: string, data?: object) => api.delete(`/medications/${id}`, { data }),
   administer:       (data: object) => api.post('/emar/administer', data),
   missedReport:     (params?: object) => api.get('/emar/missed-report', { params }),
 };

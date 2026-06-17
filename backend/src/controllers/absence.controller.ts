@@ -8,14 +8,18 @@ export async function recordAbsence(req: Request, res: Response, next: NextFunct
     const careHomeId = req.user!.care_home_id;
     const { staffId, absenceType, startDate, endDate, totalDays, reason, selfCertified, fitNoteReceived } = req.body;
 
-    if (!staffId || !absenceType || !startDate) {
+    const trimmedStaffId = typeof staffId === 'string' ? staffId.trim() : staffId;
+    const trimmedAbsenceType = typeof absenceType === 'string' ? absenceType.trim() : absenceType;
+    const trimmedStartDate = typeof startDate === 'string' ? startDate.trim() : startDate;
+
+    if (!trimmedStaffId || !trimmedAbsenceType || !trimmedStartDate) {
       return res.status(400).json({ error: 'staffId, absenceType and startDate are required' });
     }
 
     const { rows: [absence] } = await query(
       `INSERT INTO absence_records (care_home_id, staff_id, absence_type, start_date, end_date, total_days, reason, self_certified, fit_note_received, created_by)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
-      [careHomeId, staffId, absenceType, startDate, endDate, totalDays, reason, selfCertified || false, fitNoteReceived || false, req.user!.id]
+      [careHomeId, trimmedStaffId, trimmedAbsenceType, trimmedStartDate, endDate, totalDays, reason, selfCertified || false, fitNoteReceived || false, req.user!.id]
     );
 
     await auditLog({
