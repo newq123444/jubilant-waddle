@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "fix",
   "description": "Fix sleep tracker DB validation, SmartRota raw JSON rendering for staff constraints, NaturalLanguageSearch blank result cards, emoji HTML entity rendering, and audit/fix all other pages dumping raw JSON via JSON.stringify in pre tags.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "In backend/src/controllers/sleepTracker.controller.ts logSleep function: Add validation at the top of the try block (after extracting body fields) - if (!residentId || !sleepDate) return res.status(400).json({ error: 'residentId and sleepDate are required' }); This prevents the NOT NULL constraint violation on resident_id.",
     "In frontend/src/pages/SmartRota.tsx: Replace the Staff Constraints panel section (around lines 236-250) that currently renders {c.message || c.description || JSON.stringify(c)} with properly formatted staff constraint cards. The backend returns objects with: user_id, staff_name, role, contract_hours, hourly_rate, hours_this_week, hoursThisWeek, contractHours, maxWeeklyHours, remainingHours, violations (string array), hasViolation (boolean). Render each as a card showing: staff_name, role (as a badge), contractHours + 'h contracted', hoursThisWeek + 'h this week', remainingHours + 'h remaining', and violations as red badges. Use green background for no violations, red/warning for violations.",
@@ -30,5 +30,5 @@
     "Run: cd /projects/sandbox/jubilant-waddle/backend && npm run build"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All 10 steps completed successfully. Both backend and frontend compile cleanly with tsc --noEmit and full builds pass. The clock emoji was fixed using a Unicode escape sequence. All JSON.stringify/pre blocks replaced with formatted card displays using Object.entries iteration and inline styles matching existing patterns."
 }
