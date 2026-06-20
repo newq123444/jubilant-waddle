@@ -1,5 +1,5 @@
 // src/App.tsx — Fully responsive: desktop sidebar, tablet drawer, phone bottom nav
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Routes, Route, NavLink, Link, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from './store/auth.store';
 import { useDashboard } from './hooks';
@@ -231,6 +231,25 @@ export default function App() {
   const sidebarW = isDesktop ? (collapsed ? 60 : 240) : 240;
   const mainML   = isDesktop ? sidebarW : 0;
 
+  // ── Scroll position preservation ────────────────────────────────────────
+  const navScrollRef = useRef<HTMLDivElement>(null);
+  const scrollKey = 'carevista_sidebar_scroll';
+
+  // Save scroll position before navigation
+  const handleNavClick = useCallback(() => {
+    if (navScrollRef.current) {
+      sessionStorage.setItem(scrollKey, String(navScrollRef.current.scrollTop));
+    }
+  }, []);
+
+  // Restore scroll position after render
+  useEffect(() => {
+    const saved = sessionStorage.getItem(scrollKey);
+    if (saved && navScrollRef.current) {
+      navScrollRef.current.scrollTop = parseInt(saved, 10);
+    }
+  }, [location.pathname]);
+
   // ── Sidebar content (shared between desktop + mobile drawer) ────────────
   const SidebarContent = () => (
     <>
@@ -243,15 +262,44 @@ export default function App() {
             <div style={{ fontSize: '0.65rem', color: '#5a6a7f', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.careHomeName}</div>
           </div>
         )}
-        {isDesktop && (
-          <button onClick={() => setCollapsed(c => !c)} style={{ background: 'none', border: 'none', color: '#5a6a7f', cursor: 'pointer', padding: 4, borderRadius: 4, flexShrink: 0, fontSize: 14 }}>
-            {collapsed ? '→' : '←'}
+        {isDesktop && !collapsed && (
+          <button onClick={() => setCollapsed(true)} title="Collapse menu" style={{ background: 'none', border: 'none', color: '#5a6a7f', cursor: 'pointer', padding: 4, borderRadius: 4, flexShrink: 0, fontSize: 14 }}>
+            {'←'}
           </button>
         )}
         {!isDesktop && (
-          <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', color: '#5a6a7f', cursor: 'pointer', padding: 4, borderRadius: 4, marginLeft: 'auto', fontSize: 18 }}>✕</button>
+          <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', color: '#5a6a7f', cursor: 'pointer', padding: 4, borderRadius: 4, marginLeft: 'auto', fontSize: 18 }}>&#10005;</button>
         )}
       </div>
+
+      {/* Expand toggle - prominent button when collapsed */}
+      {isDesktop && collapsed && (
+        <button
+          onClick={() => setCollapsed(false)}
+          title="Expand menu"
+          aria-label="Expand sidebar menu"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 36,
+            height: 36,
+            margin: '10px auto',
+            background: 'rgba(255,255,255,.08)',
+            border: '1px solid rgba(255,255,255,.15)',
+            borderRadius: 8,
+            color: '#9aa5b4',
+            cursor: 'pointer',
+            fontSize: 16,
+            transition: 'all 150ms',
+            flexShrink: 0,
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,.15)'; e.currentTarget.style.color = '#fff'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,.08)'; e.currentTarget.style.color = '#9aa5b4'; }}
+        >
+          &#9776;
+        </button>
+      )}
 
       {/* Role badge */}
       {!(isDesktop && collapsed) && (
@@ -264,7 +312,7 @@ export default function App() {
       )}
 
       {/* Nav items */}
-      <div style={{ flex: 1, padding: '8px 0', overflowY: 'auto' }}>
+      <div ref={navScrollRef} style={{ flex: 1, padding: '8px 0', overflowY: 'auto' }}>
         {NAV_ALL.map((item, i) => {
           if ('section' in item && !('path' in item)) {
             if (item.roles && !item.roles.includes(role)) return null;
@@ -277,6 +325,7 @@ export default function App() {
           const isActive   = navItem.path === '/' ? location.pathname === '/' : location.pathname.startsWith(navItem.path);
           return (
             <NavLink key={navItem.path} to={navItem.path} end={navItem.path === '/'}
+              onClick={handleNavClick}
               style={{
                 display: 'flex', alignItems: 'center',
                 gap: (isDesktop && collapsed) ? 0 : 10,
@@ -322,7 +371,7 @@ export default function App() {
         {!(isDesktop && collapsed) && (
           <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
             <button onClick={() => setDarkMode(d => !d)} style={{ flex: 1, padding: '7px 10px', background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 6, color: '#6b7280', fontSize: '0.78rem', cursor: 'pointer', textAlign: 'left' }}>
-              {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
+              {darkMode ? '\u2600\uFE0F Light Mode' : '\uD83C\uDF19 Dark Mode'}
             </button>
           </div>
         )}
@@ -343,9 +392,44 @@ export default function App() {
 
       {/* ── Desktop Sidebar ─────────────────────────────────────── */}
       {isDesktop && (
-        <nav className={`sidebar${collapsed ? ' collapsed' : ''}`} style={{ width: sidebarW }}>
-          <SidebarContent />
-        </nav>
+        <div style={{ position: 'relative' }}>
+          <nav className={`sidebar${collapsed ? ' collapsed' : ''}`} style={{ width: sidebarW }}>
+            <SidebarContent />
+          </nav>
+          {/* Floating expand button on sidebar edge - always visible when collapsed */}
+          {collapsed && (
+            <button
+              onClick={() => setCollapsed(false)}
+              title="Expand sidebar"
+              aria-label="Expand sidebar menu"
+              style={{
+                position: 'fixed',
+                top: '50%',
+                left: sidebarW - 1,
+                transform: 'translateY(-50%)',
+                width: 24,
+                height: 48,
+                background: '#1f2937',
+                border: '1px solid rgba(255,255,255,.12)',
+                borderLeft: 'none',
+                borderRadius: '0 8px 8px 0',
+                color: '#9aa5b4',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 14,
+                zIndex: 201,
+                transition: 'all 150ms',
+                boxShadow: '2px 0 8px rgba(0,0,0,.15)',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#374151'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.width = '28px'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#1f2937'; e.currentTarget.style.color = '#9aa5b4'; e.currentTarget.style.width = '24px'; }}
+            >
+              &#9654;
+            </button>
+          )}
+        </div>
       )}
 
       {/* ── Mobile/Tablet: Slide-over drawer + overlay ─────────── */}
