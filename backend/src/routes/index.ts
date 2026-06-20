@@ -692,9 +692,9 @@ router.patch('/board-packs/:id/approve',        isManager, boardPackCtrl.approve
 
 // ── Staff Performance Metrics ─────────────────────────────────────────────
 router.get('/staff-performance/team',           isManager, staffPerformanceCtrl.getTeamMetrics);
-router.get('/staff-performance/:staffId',       isManager, staffPerformanceCtrl.getIndividualMetrics);
-router.post('/staff-performance/calculate',     isManager, staffPerformanceCtrl.calculateMetrics);
 router.get('/staff-performance/response-times', isManager, staffPerformanceCtrl.getResponseTimes);
+router.post('/staff-performance/calculate',     isManager, staffPerformanceCtrl.calculateMetrics);
+router.get('/staff-performance/:staffId',       isManager, staffPerformanceCtrl.getIndividualMetrics);
 
 // ── E-Learning ────────────────────────────────────────────────────────────
 router.get('/elearning/modules',                isStaff, elearningCtrl.listModules);
