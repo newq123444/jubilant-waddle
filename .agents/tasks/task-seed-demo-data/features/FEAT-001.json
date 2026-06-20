@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "feat",
   "description": "Create backend/src/utils/seed-demo.ts - a comprehensive demo data seed file that populates all tables from migrations 005-014 with 30 days of realistic data. Also add seed:demo script to package.json.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Create backend/src/utils/seed-demo.ts with the same pattern as seed.ts (pg Pool, dotenv, helper functions daysAgo/daysFromNow/dateStr/rand/randInt, BEGIN/COMMIT transaction)",
     "At the start of the seed function, look up existing IDs: query care_homes for homeId by email 'admin@willowbrook.carevista.co.uk', query users table to get all user IDs by email, query residents table to get all resident IDs by room_number, query medications table to get medication IDs",
@@ -71,5 +71,5 @@
     "Verify the file structure follows the same pattern as seed.ts"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "File compiles cleanly with npx tsc --noEmit. All tables from migrations 005-014 are seeded. The file is 2047 lines and generates thousands of realistic records across all feature tables. User errors about resident_belongings and resident_weights are due to migration 014 not being run on their DB - the seed file seeds these tables normally as they will exist once the migration runs."
 }
