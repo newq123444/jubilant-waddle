@@ -66,12 +66,14 @@ export default function Activities() {
   const { data: sessions = [] } = useSessions({ start_date: startDate, end_date: endDate });
   const { data: wellbeing } = useWellbeingDashboard() as { data: WellbeingStats | undefined };
 
-  // Group sessions by date
+  // Group sessions by date (normalize ISO timestamps to plain date strings)
   const sessionsByDate = useMemo(() => {
     const map: Record<string, ActivitySession[]> = {};
     (sessions as ActivitySession[]).forEach(s => {
-      if (!map[s.session_date]) map[s.session_date] = [];
-      map[s.session_date].push(s);
+      const key = s.session_date ? s.session_date.slice(0, 10) : '';
+      if (!key) return;
+      if (!map[key]) map[key] = [];
+      map[key].push(s);
     });
     return map;
   }, [sessions]);

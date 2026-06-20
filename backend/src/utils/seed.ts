@@ -902,8 +902,8 @@ async function seed() {
       activityIds.push(act.id);
     }
 
-    // ── Seed 30 days of sessions ──────────────────────────────────────────
-    console.log('  ▶  Activity sessions (30 days)…');
+    // ── Seed 30 days of sessions + 7 future days ─────────────────────────
+    console.log('  ▶  Activity sessions (30 past + 7 future days)…');
     const activitiesCoordId = userIds['activities@demo.carevista.co.uk'];
     const sessionTimes = [
       { start: '09:30', end: '10:15' },
@@ -912,14 +912,22 @@ async function seed() {
       { start: '15:30', end: '16:15' },
     ];
     const sessionIds: string[] = [];
+    // Past 30 days (daysBack 0..29) + future 7 days (daysAhead 1..7)
+    const allSessionDays: { date: string; isPast: boolean }[] = [];
     for (let daysBack = 0; daysBack <= 29; daysBack++) {
-      const sessionDate = dateStr(daysAgo(daysBack));
+      allSessionDays.push({ date: dateStr(daysAgo(daysBack)), isPast: daysBack > 0 });
+    }
+    for (let daysAhead = 1; daysAhead <= 7; daysAhead++) {
+      allSessionDays.push({ date: dateStr(daysFromNow(daysAhead)), isPast: false });
+    }
+    for (let dayIdx = 0; dayIdx < allSessionDays.length; dayIdx++) {
+      const { date: sessionDate, isPast } = allSessionDays[dayIdx];
       // 3-4 activities per day
       const numSessions = randInt(3, 4);
       for (let s = 0; s < numSessions; s++) {
-        const actIdx = (daysBack * 4 + s) % activitiesData.length;
+        const actIdx = (dayIdx * 4 + s) % activitiesData.length;
         const timeSlot = sessionTimes[s % sessionTimes.length];
-        const status = daysBack > 0 ? 'completed' : (s < 2 ? 'completed' : 'scheduled');
+        const status = isPast ? 'completed' : 'scheduled';
         const { rows: [sess] } = await client.query(
           `INSERT INTO activity_sessions (care_home_id, activity_id, session_date, start_time, end_time, status, facilitator_id)
            VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
