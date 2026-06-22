@@ -55,8 +55,6 @@ async function seedDemo() {
     );
     if (existingQr.length > 0) {
       console.log('⚠️  Demo data already seeded — skipping. Drop & recreate DB to re-seed.');
-      client.release();
-      await pool.end();
       return;
     }
 
