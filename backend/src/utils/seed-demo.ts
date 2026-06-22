@@ -48,6 +48,18 @@ async function seedDemo() {
     }
     const homeId = homeRow.id;
 
+    // -- Idempotency guard: skip if demo data already seeded -----------------
+    const { rows: existingQr } = await client.query(
+      `SELECT id FROM qr_room_codes WHERE care_home_id = $1 LIMIT 1`,
+      [homeId]
+    );
+    if (existingQr.length > 0) {
+      console.log('⚠️  Demo data already seeded — skipping. Drop & recreate DB to re-seed.');
+      client.release();
+      await pool.end();
+      return;
+    }
+
     // Users
     const userEmails = [
       'manager@demo.carevista.co.uk', 'deputy@demo.carevista.co.uk',
@@ -881,7 +893,8 @@ async function seedDemo() {
       const resId = residentIds[String(room)];
       await client.query(
         `INSERT INTO qr_room_codes (care_home_id, resident_id, room_number, qr_code_data, active, created_at)
-         VALUES ($1,$2,$3,$4,$5,$6)`,
+         VALUES ($1,$2,$3,$4,$5,$6)
+         ON CONFLICT DO NOTHING`,
         [homeId, resId || null, String(room),
          `https://app.carevista.co.uk/qr/room/${room}?h=${homeId.slice(0, 8)}`,
          true, timeStr(daysAgo(30))]
