@@ -2,6 +2,7 @@
 
 Deploy CareVista for free using **Neon** (PostgreSQL), **Render** (backend), and **Vercel** (frontend).
 
+
 ---
 
 ## 1. Database - Neon (Free Tier PostgreSQL)
