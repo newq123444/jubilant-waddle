@@ -42,7 +42,7 @@ export default function Residents() {
             const rb = r.risk_level === 'high' ? '#fef2f2' : r.risk_level === 'medium' ? '#fffbeb' : '#f0fdf4';
             return (
               <div key={r.id} className="card" style={{ borderLeft: `4px solid ${rc}` }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', flexWrap: 'wrap' }}>
                   <div style={{ width: 44, height: 44, borderRadius: '50%', background: rb, border: `2px solid ${rc}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 800, color: rc, flexShrink: 0 }}>{r.first_name?.[0] ?? '?'}{r.last_name?.[0] ?? ''}</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 700, fontSize: 15 }}>{r.first_name} {r.last_name}</div>
@@ -52,7 +52,7 @@ export default function Residents() {
                       {r.dnacpr && <><span>·</span><span style={{ color: '#dc2626', fontWeight: 700 }}>🔴 DNACPR</span></>}
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, background: rb, color: rc, fontWeight: 700, border: `1px solid ${rc}30` }}>{r.risk_level?.toUpperCase() ?? ''}</span>
 
                     <Link to={`/residents/${r.id}`} className="btn btn-primary btn-sm">View →</Link>

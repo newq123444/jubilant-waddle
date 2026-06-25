@@ -261,7 +261,7 @@ input, select, textarea { font-family: inherit; font-size: 1rem; }
 
 /* -- Mobile Grid Override: force inline grids to single column on phone -- */
 @media (max-width: 639px) {
-  [style*="gridTemplateColumns"] {
+  [style*="grid-template-columns"] {
     grid-template-columns: 1fr !important;
   }
 }
@@ -302,6 +302,13 @@ input, select, textarea { font-family: inherit; font-size: 1rem; }
 }
 @media (max-width: 400px) {
   .login-demo-grid { grid-template-columns: 1fr !important; }
+}
+
+/* -- Carer Dashboard responsive -- */
+@media (max-width: 1023px) {
+  .carer-main-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 /* -- Responsive grid helpers ------------------------------ */

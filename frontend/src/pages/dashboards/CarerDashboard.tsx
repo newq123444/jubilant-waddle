@@ -995,7 +995,7 @@ export default function CarerDashboard() {
       <WellbeingAlertWidget residents={residents} />
 
       {/* ── Main split layout ───────────────────────────────── */}
-      <div style={{ display:'grid', gridTemplateColumns: showForm || showTypePicker ? '1fr 1fr' : '1fr', gap:16, alignItems:'start' }}>
+      <div className="carer-main-grid" style={{ display:'grid', gridTemplateColumns: showForm || showTypePicker ? '1fr 1fr' : '1fr', gap:16, alignItems:'start' }}>
 
         {/* ── LEFT: Task Board ─────────────────────────────── */}
         <div>
