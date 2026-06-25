@@ -1,7 +1,7 @@
 // src/pages/ResidentDetail.tsx — Full resident profile with timeline
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useResident, useCareNotes, useResidentMedications, useIncidents, useResidentActivityHistory, useResidentWellbeing } from '../hooks';
+import { useResident, useCareNotes, useResidentMedications, useIncidents, useResidentActivityHistory, useResidentWellbeing, useUpdateMobility } from '../hooks';
 import { WeightChart } from '../components/WeightChart';
 import { BodyMap, type BodyMapMark } from '../components/BodyMap';
 import { LifeStoryBoard } from '../components/LifeStoryBoard';
@@ -212,6 +212,63 @@ function BelongingsTab({ residentId }: { residentId: string }) {
   );
 }
 
+
+// ── Mobility Status Card ──────────────────────────────────────────────────
+const MOBILITY_OPTIONS = [
+  { value: 'independent', label: 'Independent' },
+  { value: 'walking_aid', label: 'Walking Aid' },
+  { value: 'wheelchair', label: 'Wheelchair' },
+  { value: 'bed_bound', label: 'Bed-bound' },
+];
+
+function MobilityStatusCard({ residentId, currentStatus }: { residentId: string; currentStatus?: string }) {
+  const [selected, setSelected] = React.useState(currentStatus || 'independent');
+  const mobilityMutation = useUpdateMobility();
+  const isDirty = selected !== (currentStatus || 'independent');
+
+  React.useEffect(() => {
+    setSelected(currentStatus || 'independent');
+  }, [currentStatus]);
+
+  const handleSave = () => {
+    mobilityMutation.mutate({ id: residentId, mobilityStatus: selected });
+  };
+
+  return (
+    <div className="card" style={{ border: '2px solid #2563eb30', background: '#eff6ff08' }}>
+      <div className="card-header" style={{ borderBottom: '1px solid var(--border)' }}>
+        <span className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 20 }}>{'\u267F'}</span> Mobility Status
+        </span>
+      </div>
+      <div className="card-body" style={{ padding: '14px 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <select
+            className="form-input"
+            value={selected}
+            onChange={e => setSelected(e.target.value)}
+            style={{ flex: 1, minWidth: 160, maxWidth: 220 }}
+          >
+            {MOBILITY_OPTIONS.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          <button
+            className="btn btn-primary btn-sm"
+            onClick={handleSave}
+            disabled={!isDirty || mobilityMutation.isPending}
+            style={{ opacity: isDirty ? 1 : 0.5 }}
+          >
+            {mobilityMutation.isPending ? '\u23F3 Saving...' : '\u2705 Save'}
+          </button>
+        </div>
+        <p style={{ margin: '10px 0 0', fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+          Tasks and activities will automatically adjust based on mobility level
+        </p>
+      </div>
+    </div>
+  );
+}
 
 // ── Edit Resident Modal ───────────────────────────────────────────────────
 function EditResidentModal({ resident: r, onClose, onSaved }: { resident: any; onClose: () => void; onSaved: () => void }) {
@@ -473,6 +530,9 @@ export default function ResidentDetail() {
                 <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--text-primary)', margin: 0 }}>{r.care_needs_summary || 'No care needs summary recorded.'}</p>
               </div>
             </div>
+
+            {/* Mobility Status */}
+            <MobilityStatusCard residentId={r.id} currentStatus={r.mobility_status} />
 
             {/* Quick stats */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>

@@ -87,6 +87,7 @@ router.use(authenticate, tenantGuard);
 
 // ── Residents ─────────────────────────────────────────────────────────────
 router.get('/residents',            isStaff, residentsCtrl.listResidents);
+router.patch('/residents/:id/mobility', isStaff, residentsCtrl.updateMobilityStatus);
 router.get('/residents/:id',        isStaff, residentsCtrl.getResident);
 router.post('/residents',           isManager, residentsCtrl.createResident);
 router.patch('/residents/:id',      isManager, residentsCtrl.updateResident);

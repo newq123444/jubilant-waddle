@@ -249,6 +249,59 @@ export async function updateResident(req: Request, res: Response, next: NextFunc
   }
 }
 
+// ── Update Mobility Status ────────────────────────────────────────────────
+export async function updateMobilityStatus(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { id } = req.params;
+    const careHomeId = req.user!.care_home_id;
+    const { mobilityStatus } = req.body;
+
+    const VALID_STATUSES = ['independent', 'walking_aid', 'wheelchair', 'bed_bound'];
+    if (!mobilityStatus || !VALID_STATUSES.includes(mobilityStatus)) {
+      return res.status(400).json({ error: `mobilityStatus must be one of: ${VALID_STATUSES.join(', ')}` });
+    }
+
+    // Verify resident exists and belongs to this care home
+    const { rows: [existing] } = await query(
+      'SELECT * FROM residents WHERE id = $1 AND care_home_id = $2',
+      [id, careHomeId]
+    );
+    if (!existing) throw new AppError(404, 'Resident not found');
+
+    // Update mobility_status
+    const { rows: [updated] } = await query(
+      `UPDATE residents SET mobility_status = $1 WHERE id = $2 AND care_home_id = $3 RETURNING *`,
+      [mobilityStatus, id, careHomeId]
+    );
+
+    // Delete future pending tasks so they can be regenerated with correct mobility-based tasks
+    await query(
+      `DELETE FROM care_tasks WHERE resident_id = $1 AND task_date >= CURRENT_DATE AND status = 'pending'`,
+      [id]
+    );
+
+    // Log to audit trail
+    await auditLog({
+      careHomeId,
+      actorId: req.user!.id,
+      actorName: `${req.user!.first_name} ${req.user!.last_name}`,
+      action: 'MOBILITY_STATUS_UPDATED',
+      entityType: 'resident',
+      entityId: id,
+      beforeData: { mobility_status: existing.mobility_status },
+      afterData: { mobility_status: mobilityStatus },
+      ip: req.ip,
+    });
+
+    // Invalidate cache
+    await cache.delPattern(`residents:${careHomeId}:*`);
+
+    res.json(updated);
+  } catch (err) {
+    next(err);
+  }
+}
+
 // ── Discharge resident ────────────────────────────────────────────────────
 export async function dischargeResident(req: Request, res: Response, next: NextFunction) {
   try {

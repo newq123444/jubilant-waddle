@@ -37,6 +37,14 @@ export function useDischargeResident() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => residentsApi.discharge(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['residents'] }); qc.invalidateQueries({ queryKey: ['dashboard'] }); toast.success('Resident discharged'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to discharge') });
 }
+export function useUpdateMobility() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, mobilityStatus }: { id: string; mobilityStatus: string }) => residentsApi.updateMobility(id, mobilityStatus).then(r => r.data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['residents'] }); qc.invalidateQueries({ queryKey: ['tasks'] }); toast.success('Mobility updated \u2014 tasks will adjust'); },
+    onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update mobility')
+  });
+}
 export function useCareNotes(params?: object) {
   return useQuery({ queryKey: ['care-notes', params], queryFn: () => notesApi.list(params).then(r => Array.isArray(r.data) ? r.data : (r.data?.notes ?? r.data)) });
 }

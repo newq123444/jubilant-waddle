@@ -22,6 +22,7 @@ export const residentsApi = {
   create:    (data: object) => api.post('/residents', data),
   update:    (id: string, data: object) => api.patch(`/residents/${id}`, data),
   discharge: (id: string, data: object) => api.post(`/residents/${id}/discharge`, data),
+  updateMobility: (id: string, mobilityStatus: string) => api.patch(`/residents/${id}/mobility`, { mobilityStatus }),
 };
 
 // ── Care Notes ─────────────────────────────────────────────────────────────
