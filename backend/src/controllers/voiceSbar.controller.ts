@@ -248,6 +248,7 @@ Be concise, professional, and actionable. Use UK care home terminology.`;
 Write clearly, concisely, and professionally. Include specific resident names and room numbers.
 This is a clinical communication tool - be accurate and factual.
 Structure your response with exactly 4 labeled sections: SITUATION, BACKGROUND, ASSESSMENT, RECOMMENDATION.`,
+      max_tokens: 1000,
     });
 
     // Parse the AI output into 4 sections
@@ -360,6 +361,17 @@ export async function approveSbarHandover(req: Request, res: Response, next: Nex
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*/g, '')            // Remove bold markers (**)
+    .replace(/#{1,6}\s*/g, '')       // Remove heading markers (##, #, etc.)
+    .replace(/---+/g, '')            // Remove horizontal rules (---)
+    .replace(/--/g, '')              // Remove double dashes
+    .replace(/^\s*[-*]\s+/gm, '')    // Remove bullet point markers at start of lines
+    .replace(/\n{3,}/g, '\n\n')      // Collapse multiple blank lines
+    .trim();
+}
+
 function parseSbarSections(text: string): {
   situation: string;
   background: string;
@@ -379,10 +391,10 @@ function parseSbarSections(text: string): {
   const assessmentMatch = text.match(/ASSESSMENT[:\s]*\n?([\s\S]*?)(?=RECOMMENDATION[:\s]*\n?|$)/i);
   const recommendationMatch = text.match(/RECOMMENDATION[:\s]*\n?([\s\S]*?)$/i);
 
-  sections.situation = situationMatch?.[1]?.trim() || text.slice(0, Math.floor(text.length / 4));
-  sections.background = backgroundMatch?.[1]?.trim() || '';
-  sections.assessment = assessmentMatch?.[1]?.trim() || '';
-  sections.recommendation = recommendationMatch?.[1]?.trim() || '';
+  sections.situation = stripMarkdown(situationMatch?.[1]?.trim() || text.slice(0, Math.floor(text.length / 4)));
+  sections.background = stripMarkdown(backgroundMatch?.[1]?.trim() || '');
+  sections.assessment = stripMarkdown(assessmentMatch?.[1]?.trim() || '');
+  sections.recommendation = stripMarkdown(recommendationMatch?.[1]?.trim() || '');
 
   return sections;
 }

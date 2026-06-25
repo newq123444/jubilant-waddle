@@ -189,10 +189,10 @@ export const voiceApi = {
 
 // ── SBAR Handover ──────────────────────────────────────────────────────────
 export const sbarApi = {
-  generate: (data: object) => api.post('/handover/smart-generate', data),
-  list: () => api.get('/handover/smart'),
-  get: (id: string) => api.get(`/handover/smart`),
-  approve: (id: string) => api.post(`/handover/smart/${id}/action`, { action_taken: 'Approved', outcome: 'approved' }),
+  generate: (data: object) => api.post('/sbar/generate', data),
+  list: () => api.get('/sbar/handovers'),
+  get: (id: string) => api.get(`/sbar/handovers/${id}`),
+  approve: (id: string) => api.patch(`/sbar/handovers/${id}/approve`),
 };
 
 // -- NEWS2 Auto-Calculator --

@@ -17,10 +17,11 @@ export interface AiRequest {
   context: object;
   prompt: string;
   systemPrompt?: string;
+  max_tokens?: number;
 }
 
 export async function runAiOperation(req: AiRequest): Promise<string> {
-  const { careHomeId, requestedBy, operation, context, prompt, systemPrompt } = req;
+  const { careHomeId, requestedBy, operation, context, prompt, systemPrompt, max_tokens } = req;
 
   // If no API key is configured, return a sentinel value so callers can handle the fallback
   if (!anthropic || !process.env.ANTHROPIC_API_KEY) {
@@ -61,7 +62,7 @@ IMPORTANT GUIDELINES:
   try {
     const message = await anthropic.messages.create({
       model: 'claude-opus-4-6',
-      max_tokens: 1500,
+      max_tokens: max_tokens || 1500,
       system,
       messages: [{ role: 'user', content: prompt }],
     });
