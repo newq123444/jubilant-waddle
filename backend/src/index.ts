@@ -27,8 +27,13 @@ app.options('*', cors());
 
 // ── CORS middleware (must come before helmet) ──────────────────────────────
 app.use(cors({
-  origin: process.env.CORS_ORIGIN === '*' || !process.env.CORS_ORIGIN ? true : process.env.CORS_ORIGIN,
+  origin: function(origin, callback) {
+    // Allow all origins for demo - reflects requesting origin back
+    callback(null, true);
+  },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 // ── Security middleware ────────────────────────────────────────────────────
