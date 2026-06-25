@@ -24,13 +24,29 @@ export async function getDigitalTwin(req: Request, res: Response, next: NextFunc
       [residentId, careHomeId]
     );
 
-    // Wellbeing trend (last 7 days)
-    const { rows: wellbeingTrend } = await query(
-      `SELECT mood, pain_level, engagement_level, logged_at
-       FROM wellbeing_logs WHERE resident_id = $1 AND care_home_id = $2
-       AND logged_at > NOW() - INTERVAL '7 days' ORDER BY logged_at DESC`,
-      [residentId, careHomeId]
-    );
+    // Wellbeing trend (last 7 days) - wrapped in try/catch for resilience
+    // engagement_level and logged_at may not exist if migration 014 hasn't been applied
+    let wellbeingTrend: any[] = [];
+    try {
+      const { rows } = await query(
+        `SELECT mood, pain_level, engagement_level, logged_at
+         FROM wellbeing_logs WHERE resident_id = $1 AND care_home_id = $2
+         AND logged_at > NOW() - INTERVAL '7 days' ORDER BY logged_at DESC`,
+        [residentId, careHomeId]
+      );
+      wellbeingTrend = rows;
+    } catch (e: any) {
+      // Fallback: try without engagement_level/logged_at columns
+      try {
+        const { rows } = await query(
+          `SELECT mood, pain_level, created_at AS logged_at
+           FROM wellbeing_logs WHERE resident_id = $1 AND care_home_id = $2
+           AND created_at > NOW() - INTERVAL '7 days' ORDER BY created_at DESC`,
+          [residentId, careHomeId]
+        );
+        wellbeingTrend = rows;
+      } catch { /* return empty if table also missing */ }
+    }
 
     // Incidents
     const { rows: recentIncidents } = await query(
@@ -126,13 +142,29 @@ export async function getTimeline(req: Request, res: Response, next: NextFunctio
       [residentId, careHomeId, lookback.toString()]
     );
 
-    const { rows: wellbeingLogs } = await query(
-      `SELECT 'wellbeing' AS event_type, id, mood AS sub_type, 
-              'Pain: ' || pain_level || ', Engagement: ' || engagement_level AS detail, logged_at AS event_date
-       FROM wellbeing_logs WHERE resident_id = $1 AND care_home_id = $2
-       AND logged_at > NOW() - ($3 || ' days')::interval`,
-      [residentId, careHomeId, lookback.toString()]
-    );
+    let wellbeingLogs: any[] = [];
+    try {
+      const { rows } = await query(
+        `SELECT 'wellbeing' AS event_type, id, mood AS sub_type, 
+                'Pain: ' || pain_level || ', Engagement: ' || engagement_level AS detail, logged_at AS event_date
+         FROM wellbeing_logs WHERE resident_id = $1 AND care_home_id = $2
+         AND logged_at > NOW() - ($3 || ' days')::interval`,
+        [residentId, careHomeId, lookback.toString()]
+      );
+      wellbeingLogs = rows;
+    } catch (e: any) {
+      // Fallback: try without engagement_level column
+      try {
+        const { rows } = await query(
+          `SELECT 'wellbeing' AS event_type, id, mood AS sub_type,
+                  'Pain: ' || pain_level AS detail, created_at AS event_date
+           FROM wellbeing_logs WHERE resident_id = $1 AND care_home_id = $2
+           AND created_at > NOW() - ($3 || ' days')::interval`,
+          [residentId, careHomeId, lookback.toString()]
+        );
+        wellbeingLogs = rows;
+      } catch { /* return empty if table also missing */ }
+    }
 
     // Merge and sort chronologically
     const timeline = [...notes, ...incidents, ...wellbeingLogs]

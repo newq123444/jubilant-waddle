@@ -74,6 +74,7 @@ import SmartHandover from './pages/SmartHandover';
 import ConsentManager from './pages/ConsentManager';
 import ResidentDigitalTwin from './pages/ResidentDigitalTwin';
 import EnvironmentalIntelligence from './pages/EnvironmentalIntelligence';
+import ErrorBoundary from './components/ErrorBoundary';
 import { ROLE_LABELS } from './utils/formatters';
 
 // ── Nav config ────────────────────────────────────────────────────────────
@@ -480,6 +481,7 @@ export default function App() {
         className={`main-content${isDesktop && collapsed ? ' collapsed' : ''}`}
         style={{ marginLeft: mainML, width: `calc(100% - ${mainML}px)` }}
       >
+        <ErrorBoundary>
         <Routes>
           <Route path="/"               element={<Dashboard />} />
           <Route path="/tasks"          element={<TaskBoard />} />
@@ -552,6 +554,7 @@ export default function App() {
           <Route path="/profile"        element={<Profile />} />
           <Route path="*"               element={<Navigate to="/" replace />} />
         </Routes>
+        </ErrorBoundary>
       </main>
 
       {/* ── Phone Bottom Nav ─────────────────────────────────────── */}

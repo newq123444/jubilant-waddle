@@ -10,7 +10,7 @@ export default function AiCarePlanWriter() {
   const queryClient = useQueryClient();
 
   const { data: residents } = useQuery({ queryKey: ['residents'], queryFn: () => api.get('/residents').then(r => r.data) });
-  const { data: plans, isLoading: plansLoading } = useQuery({ queryKey: ['ai-care-plans'], queryFn: () => api.get('/ai/care-plans').then(r => r.data) });
+  const { data: plans, isLoading: plansLoading, isError: isPlansError } = useQuery({ queryKey: ['ai-care-plans'], queryFn: () => api.get('/ai/care-plans').then(r => r.data) });
 
   const generateMutation = useMutation({
     mutationFn: (data: any) => api.post('/ai/care-plan/generate', data).then(r => r.data),
@@ -28,6 +28,13 @@ export default function AiCarePlanWriter() {
   };
 
   const cqcDomainColors: Record<string, string> = { safe: '#dc2626', effective: '#2563eb', caring: '#ec4899', responsive: '#d97706', well_led: '#7c3aed' };
+
+  // Safe content parser - handles both pre-parsed objects and JSON strings
+  const getContent = (plan: any): any => {
+    if (!plan?.content) return null;
+    if (typeof plan.content === 'object') return plan.content;
+    try { return JSON.parse(plan.content); } catch { return null; }
+  };
 
   return (
     <div>
@@ -83,9 +90,9 @@ export default function AiCarePlanWriter() {
                 </div>
               </div>
 
-              {selectedPlan.content && typeof selectedPlan.content === 'object' && selectedPlan.content.cqc_domains && (
+              {(() => { const content = getContent(selectedPlan); return content?.cqc_domains ? (
                 <div style={{ display: 'grid', gap: 16 }}>
-                  {Object.entries(selectedPlan.content.cqc_domains).map(([key, domain]: [string, any]) => (
+                  {Object.entries(content.cqc_domains).map(([key, domain]: [string, any]) => (
                     <div key={key} style={{ padding: 16, borderRadius: 10, border: `2px solid ${cqcDomainColors[key] || '#e5e7eb'}20`, background: `${cqcDomainColors[key] || '#6b7280'}08` }}>
                       <h4 style={{ margin: '0 0 8px', color: cqcDomainColors[key] || '#374151', fontSize: 15 }}>{domain.title}</h4>
                       <div style={{ fontSize: 13 }}>
@@ -97,12 +104,18 @@ export default function AiCarePlanWriter() {
                     </div>
                   ))}
                 </div>
-              )}
+              ) : null; })()}
             </div>
           )}
 
           {plansLoading && <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>Loading care plans...</div>}
-          {!plansLoading && (
+          {isPlansError && !plansLoading && (
+            <div className="card" style={{ padding: 20, borderLeft: '4px solid #dc2626', marginBottom: 16 }}>
+              <div style={{ fontWeight: 600, fontSize: 14, color: '#dc2626' }}>⚠️ Unable to load care plans</div>
+              <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>An error occurred while loading AI care plans. Please try again later.</div>
+            </div>
+          )}
+          {!plansLoading && !isPlansError && (
             <div style={{ display: 'grid', gap: 12 }}>
               {plans?.map((plan: any) => (
                 <div key={plan.id} className="card" onClick={() => setSelectedPlan(plan)} style={{ padding: 16, cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

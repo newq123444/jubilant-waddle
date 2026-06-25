@@ -13,8 +13,8 @@ export default function ConsentManager() {
   const queryClient = useQueryClient();
 
   const { data: residents } = useQuery({ queryKey: ['residents'], queryFn: () => api.get('/residents').then(r => r.data) });
-  const { data: consents, isLoading } = useQuery({ queryKey: ['consents', selectedResident], queryFn: () => selectedResident ? api.get(`/consents/${selectedResident}`).then(r => r.data) : Promise.resolve([]), enabled: !!selectedResident });
-  const { data: expiring } = useQuery({ queryKey: ['consents-expiring'], queryFn: () => api.get('/consents/expiring/all').then(r => r.data) });
+  const { data: consents, isLoading, isError: isConsentsError } = useQuery({ queryKey: ['consents', selectedResident], queryFn: () => selectedResident ? api.get(`/consents/${selectedResident}`).then(r => r.data) : Promise.resolve([]), enabled: !!selectedResident });
+  const { data: expiring, isError: isExpiringError } = useQuery({ queryKey: ['consents-expiring'], queryFn: () => api.get('/consents/expiring/all').then(r => r.data) });
 
   const createMutation = useMutation({
     mutationFn: (data: any) => api.post('/consents', data).then(r => r.data),
@@ -53,6 +53,13 @@ export default function ConsentManager() {
           </div>
 
           {selectedResident && isLoading && <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>Loading consents...</div>}
+          
+          {selectedResident && isConsentsError && (
+            <div className="card" style={{ padding: 20, borderLeft: '4px solid #dc2626', marginBottom: 16 }}>
+              <div style={{ fontWeight: 600, fontSize: 14, color: '#dc2626' }}>⚠️ Unable to load consents</div>
+              <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>An error occurred while loading consent records. Please try again later.</div>
+            </div>
+          )}
           
           {selectedResident && !isLoading && (
             <div>
@@ -98,7 +105,13 @@ export default function ConsentManager() {
 
       {tab === 'expiring' && (
         <div style={{ display: 'grid', gap: 12 }}>
-          {expiring?.map((c: any) => (
+          {isExpiringError && (
+            <div className="card" style={{ padding: 20, borderLeft: '4px solid #dc2626' }}>
+              <div style={{ fontWeight: 600, fontSize: 14, color: '#dc2626' }}>⚠️ Unable to load expiring consents</div>
+              <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>An error occurred while loading expiring consent data. Please try again later.</div>
+            </div>
+          )}
+          {!isExpiringError && expiring?.map((c: any) => (
             <div key={c.id} className="card" style={{ padding: 14, borderLeft: '4px solid #d97706' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
@@ -109,7 +122,7 @@ export default function ConsentManager() {
               </div>
             </div>
           ))}
-          {expiring?.length === 0 && <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>No consents due for review in the next 30 days.</div>}
+          {!isExpiringError && expiring?.length === 0 && <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>No consents due for review in the next 30 days.</div>}
         </div>
       )}
 

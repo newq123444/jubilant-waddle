@@ -1,0 +1,7 @@
+{
+  "task_id": "task-fix-black-screens",
+  "task_description": "Fix three pages going black when selected (/ai-care-plans, /consent-manager, /digital-twin), add error handling to prevent crashes, add global React error boundary, and ensure seed-demo.ts generates 30 days of demo data for all innovative feature tables.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002"],
+  "blocked_reason": null
+}

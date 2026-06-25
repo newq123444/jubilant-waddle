@@ -1877,7 +1877,7 @@ async function seedDemo() {
     // =========================================================================
     console.log('  >  Smart handovers...');
     const shiftTypes = ['morning', 'evening'];
-    for (let day = 0; day < 7; day++) {
+    for (let day = 0; day < 30; day++) {
       for (const shiftType of shiftTypes) {
         const { rows: [handover] } = await client.query(
           `INSERT INTO smart_handovers (care_home_id, shift_type, critical_items,
@@ -1920,8 +1920,10 @@ async function seedDemo() {
     // =========================================================================
     console.log('  >  Environmental readings...');
     const zones = ['Main Lounge', 'Dining Room', 'Corridor A', 'Garden Room', 'Bedroom Wing'];
-    for (let day = 0; day < 7; day++) {
-      for (let hour = 0; hour < 24; hour++) {
+    for (let day = 0; day < 30; day++) {
+      // Every hour for recent 7 days, every 4 hours for older data to keep volume reasonable
+      const hourStep = day < 7 ? 1 : 4;
+      for (let hour = 0; hour < 24; hour += hourStep) {
         for (const zone of zones) {
           const recordedAt = new Date(daysAgo(day));
           recordedAt.setHours(hour, 0, 0, 0);
