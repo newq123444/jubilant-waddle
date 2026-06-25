@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "fix",
   "description": "Fix the three black-screen pages (/ai-care-plans, /consent-manager, /digital-twin) and add a global React error boundary to prevent any future black screens.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Step 1: Fix frontend/src/pages/ResidentDigitalTwin.tsx - The backend controller (digitalTwin.controller.ts) queries 'engagement_level' and 'logged_at' columns from wellbeing_logs. If migration 014 hasn't been applied, these queries fail with 500 errors. The frontend page has NO error handling for failed queries - if the initial residents query fails, `residents?.map(...)` is fine (undefined), but when a resident is selected and the twin/timeline queries fail, the component may try to render `twin.personal.name` etc. on undefined data. Fix: Add error state handling to the useQuery calls. Show user-friendly error messages when API calls fail. Add null safety for all data access (twin?.personal?.name etc.).",
     "Step 2: Fix frontend/src/pages/ConsentManager.tsx - This page has NO error state handling. If the API call to `/consents/expiring/all` or `/consents/:residentId` fails (500 error from missing table or column), the unhandled error could crash the component. Fix: Add error state handling for all useQuery calls. Show user-friendly error messages. Ensure the expiring tab shows a graceful message when API fails.",
@@ -26,5 +26,5 @@
     "cd /projects/sandbox/jubilant-waddle/backend && npm run build"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All changes build successfully. ErrorBoundary uses class component as React 18 requires. Backend digitalTwin controller uses nested try/catch fallback pattern for missing columns. Environmental readings use every-4-hours sampling for days 8-30 to keep row count reasonable (840+690=1530 rows vs 3600 if every hour for 30 days)."
 }
