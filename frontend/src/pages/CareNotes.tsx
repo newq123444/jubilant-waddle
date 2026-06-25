@@ -41,8 +41,8 @@ const DRINK_OPTIONS = ['Water','Tea','Coffee','Juice','Squash','Milk','Soup','Th
 function NoteCard({ note: n, staff }: { note: any; staff: any[] }) {
   const [expanded, setExpanded] = useState(false);
   const borderColor = n.flagged ? 'var(--danger)' : n.is_significant ? 'var(--warning)' : 'transparent';
-  const meal = n.meal_context ? JSON.parse(n.meal_context) : null;
-  const coAuthors: string[] = n.co_author_names ? JSON.parse(n.co_author_names) : [];
+  const meal = n.meal_context ? (typeof n.meal_context === 'string' ? JSON.parse(n.meal_context) : n.meal_context) : null;
+  const coAuthors: string[] = n.co_author_names ? (typeof n.co_author_names === 'string' ? JSON.parse(n.co_author_names) : n.co_author_names) : [];
 
   return (
     <div
