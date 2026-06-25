@@ -56,6 +56,7 @@ IMPORTANT GUIDELINES:
   let outputText = '';
   let inputTokens = 0;
   let outputTokens = 0;
+  let auditStatus = 'success';
 
   try {
     const message = await anthropic.messages.create({
@@ -75,6 +76,7 @@ IMPORTANT GUIDELINES:
   } catch (err: any) {
     logger.error('AI operation failed:', err.message);
     outputText = `AI service temporarily unavailable: ${err.message}`;
+    auditStatus = 'error';
   }
 
   // Always audit AI operations
@@ -86,7 +88,7 @@ IMPORTANT GUIDELINES:
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [careHomeId, requestedBy, operation, JSON.stringify(context),
        inputTokens, outputTokens, outputText.slice(0, 500),
-       'claude-opus-4-6', 'success']
+       'claude-opus-4-6', auditStatus]
     );
   } catch (auditErr: any) {
     logger.error('Failed to audit AI operation:', auditErr.message);

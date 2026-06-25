@@ -177,7 +177,7 @@ export default function SmartRota() {
 
       {/* Upload Excel/CSV Rota */}
       <div style={{ background: '#fff', borderRadius: 12, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,.1)', marginBottom: 24, border: '1px solid #e2e8f0' }}>
-        <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 8, color: '#1e293b' }}>Upload Excel Rota</h2>
+        <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 8, color: '#1e293b' }}>Upload CSV Rota</h2>
         <p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: 16 }}>
           Upload a CSV file with columns: <strong>staff_name</strong>, <strong>date</strong> (YYYY-MM-DD), <strong>shift_type</strong> (day/evening/night/off/annual_leave/sick)
         </p>
@@ -185,7 +185,7 @@ export default function SmartRota() {
           <input
             ref={fileInputRef}
             type="file"
-            accept=".csv,.xlsx"
+            accept=".csv"
             onChange={e => setCsvFile(e.target.files?.[0] || null)}
             style={{ fontSize: '0.85rem' }}
           />
@@ -194,7 +194,7 @@ export default function SmartRota() {
             disabled={!csvFile || uploadCsv.isPending}
             style={{ padding: '8px 20px', borderRadius: 8, background: '#2563eb', color: '#fff', border: 'none', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', opacity: (!csvFile || uploadCsv.isPending) ? 0.6 : 1 }}
           >
-            {uploadCsv.isPending ? 'Uploading...' : 'Upload Excel Rota'}
+            {uploadCsv.isPending ? 'Uploading...' : 'Upload CSV Rota'}
           </button>
         </div>
         {uploadCsv.isError && (

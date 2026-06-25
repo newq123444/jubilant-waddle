@@ -215,6 +215,8 @@ export default function App() {
   useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
   // Close drawer on desktop resize
   useEffect(() => { if (isDesktop) setSidebarOpen(false); }, [isDesktop]);
+  // Clear search when sidebar collapses
+  useEffect(() => { if (collapsed) setSearchQuery(''); }, [collapsed]);
 
   const role      = user?.role || '';
   const roleColor = ROLE_COLORS[role] || '#2563eb';
