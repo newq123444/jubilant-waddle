@@ -17,6 +17,7 @@ import { testRedis } from './models/redis';
 import { logger } from './utils/logger';
 
 const app = express();
+app.set('trust proxy', 1);
 
 // ── Static file serving (before helmet so images load cross-origin) ────────
 // Serve uploaded files — try multiple path strategies
