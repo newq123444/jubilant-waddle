@@ -197,14 +197,14 @@ export default function KitchenDashboard() {
             <span style={{ padding: '3px 8px', borderRadius: 12, background: '#16a34a15', color: '#16a34a', fontSize: 11, fontWeight: 600 }}>All Compliant</span>
           </div>
           <div className="card-body" style={{ padding: 0, maxHeight: 340, overflowY: 'auto' }}>
-            <div style={{ padding: '8px 16px', background: 'var(--border)', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 8 }}>
+            <div className="no-mobile-collapse" style={{ padding: '8px 16px', background: 'var(--border)', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 8 }}>
               <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>Item</span>
               <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>Time</span>
               <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>Temp</span>
               <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>Status</span>
             </div>
             {tempLogs.map((log, i) => (
-              <div key={i} style={{ padding: '10px 16px', borderBottom: '1px solid var(--border)', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 8, alignItems: 'center' }}>
+              <div key={i} className="no-mobile-collapse" style={{ padding: '10px 16px', borderBottom: '1px solid var(--border)', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 8, alignItems: 'center' }}>
                 <span style={{ fontSize: 12, fontWeight: 500 }}>{log.item}</span>
                 <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{log.time}</span>
                 <span style={{ fontSize: 12, fontWeight: 700, color: log.status === 'pass' ? '#16a34a' : '#dc2626' }}>{log.temp}&deg;C</span>

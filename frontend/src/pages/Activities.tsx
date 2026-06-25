@@ -167,7 +167,7 @@ function CalendarView({ dates, weekLabel, weekOffset, setWeekOffset, sessionsByD
       </div>
 
       {/* Calendar grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8, minHeight: 400 }}>
+      <div className="no-mobile-collapse" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8, minHeight: 400 }}>
         {dates.map((date, i) => {
           const dateStr = toDateStr(date);
           const daySessions = sessionsByDate[dateStr] || [];
@@ -221,7 +221,7 @@ function ActivityLibrary({ activities }: { activities: Activity[] }) {
       </div>
 
       {/* Activity cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 14 }}>
+      <div className="no-mobile-collapse" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 14 }}>
         {filtered.map(activity => (
           <div key={activity.id} style={{ background: 'var(--bg-card, white)', border: '1px solid var(--border, #e2e8f0)', borderRadius: 12, padding: 16, borderLeft: `4px solid ${CATEGORY_COLORS[activity.category] || '#64748b'}` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>

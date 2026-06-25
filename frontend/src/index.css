@@ -259,18 +259,18 @@ input, select, textarea { font-family: inherit; font-size: 1rem; }
   .main-content { padding: calc(var(--topbar-height) + 20px) 20px 28px; }
 }
 
-/* -- Mobile Grid Override: force inline grids to single column on phone -- */
+/* Force inline grids to single column on phone, unless opted out with .no-mobile-collapse */
 @media (max-width: 639px) {
-  [style*="grid-template-columns"] {
+  [style*="grid-template-columns"]:not(.no-mobile-collapse) {
     grid-template-columns: 1fr !important;
   }
 }
 /* -- Tablet Grid Override: force large inline grids to 2 columns -- */
 @media (min-width: 640px) and (max-width: 1023px) {
-  [style*="repeat(4"] {
+  [style*="repeat(4"]:not(.no-mobile-collapse) {
     grid-template-columns: repeat(2, 1fr) !important;
   }
-  [style*="repeat(5"] {
+  [style*="repeat(5"]:not(.no-mobile-collapse) {
     grid-template-columns: repeat(2, 1fr) !important;
   }
 }
@@ -283,6 +283,9 @@ input, select, textarea { font-family: inherit; font-size: 1rem; }
 }
 
 /* -- Login Page Mobile -- */
+/* These classes have no desktop styles but serve as hooks for
+   the media-query overrides below. Keeping them here prevents
+   the browser from discarding the selectors. */
 .login-left { }
 .login-right { }
 .login-mobile-header { display: none; }
