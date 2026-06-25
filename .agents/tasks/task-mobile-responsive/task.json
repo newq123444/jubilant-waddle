@@ -6,9 +6,9 @@
   "blocked_reason": null,
   "verification": {
     "build": "pass",
-    "tests": "pass",
+    "tests": "skipped",
     "test_quality": "skipped",
     "docker_build": "skipped",
-    "summary": "TypeScript compilation and Vite build succeed. No test suite exists in this project. Global grid override now excludes .no-mobile-collapse elements. Calendar grids, data tables, and auto-fill activity grids retain their columns on mobile."
+    "summary": "TypeScript compilation and Vite build succeed cleanly. No test suite exists in this project. Post-review fix added .no-mobile-collapse opt-out class to prevent calendar and data-table grids from incorrectly collapsing on mobile. All 4 commits verified building successfully."
   }
 }
