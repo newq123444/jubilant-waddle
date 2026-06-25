@@ -1004,8 +1004,8 @@ export default function CarerDashboard() {
 
       {/* ── Mobile overlay for form/picker ─────────────────── */}
       {isMobile && (showForm || showTypePicker) && (
-        <div style={{ position:'fixed', inset:0, zIndex:1000, background:'var(--bg-primary, #fff)', overflowY:'auto', padding:'16px' }}>
-          <button onClick={closeForm} style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', cursor:'pointer', fontSize:14, fontWeight:600, color:'var(--text-primary)', marginBottom:12, padding:'4px 0' }}>
+        <div style={{ position:'fixed', inset:0, zIndex:10000, background:'var(--bg-primary, #1a1d27)', color:'var(--text-primary, #e2e8f0)', overflowY:'auto', padding:'16px', WebkitOverflowScrolling:'touch' }}>
+          <button onClick={closeForm} style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', cursor:'pointer', fontSize:14, fontWeight:600, color:'var(--text-primary, #e2e8f0)', marginBottom:12, padding:'4px 0' }}>
             ← Back
           </button>
 
