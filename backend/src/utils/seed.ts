@@ -781,20 +781,28 @@ async function seed() {
       { name: 'Breakfast',              icon: '🌅', category: 'nutrition',      shift: 'day',     due_time: '08:00', window_mins: 60,  sort_order: 2,  applies_to: 'all' },
       { name: 'Morning Medications',    icon: '💊', category: 'medication',     shift: 'day',     due_time: '08:00', window_mins: 60,  sort_order: 3,  applies_to: 'all' },
       { name: 'Oral Hygiene',           icon: '🦷', category: 'personal_care',  shift: 'day',     due_time: '09:00', window_mins: 120, sort_order: 4,  applies_to: 'all' },
-      { name: 'Repositioning Check',    icon: '🔄', category: 'repositioning',  shift: 'all',     due_time: '10:00', window_mins: 60,  sort_order: 5,  applies_to: 'all' },
+      { name: 'Repositioning Check',    icon: '🔄', category: 'repositioning',  shift: 'all',     due_time: '10:00', window_mins: 60,  sort_order: 5,  applies_to: 'bed_bound,wheelchair' },
       { name: 'Fluid & Snack Check',    icon: '💧', category: 'nutrition',      shift: 'day',     due_time: '10:30', window_mins: 60,  sort_order: 6,  applies_to: 'all' },
       { name: 'Lunch',                  icon: '🍽', category: 'nutrition',      shift: 'day',     due_time: '12:00', window_mins: 60,  sort_order: 7,  applies_to: 'all' },
       { name: 'Afternoon Medications',  icon: '💊', category: 'medication',     shift: 'day',     due_time: '12:00', window_mins: 60,  sort_order: 8,  applies_to: 'all' },
-      { name: 'Repositioning Check',    icon: '🔄', category: 'repositioning',  shift: 'all',     due_time: '14:00', window_mins: 60,  sort_order: 9,  applies_to: 'all' },
+      { name: 'Repositioning Check',    icon: '🔄', category: 'repositioning',  shift: 'all',     due_time: '14:00', window_mins: 60,  sort_order: 9,  applies_to: 'bed_bound,wheelchair' },
       { name: 'Afternoon Tea & Snack',  icon: '☕', category: 'nutrition',      shift: 'day',     due_time: '15:00', window_mins: 60,  sort_order: 10, applies_to: 'all' },
       { name: 'Evening Wash & Freshen', icon: '🚿', category: 'personal_care',  shift: 'evening', due_time: '17:00', window_mins: 90,  sort_order: 11, applies_to: 'all' },
       { name: 'Supper',                 icon: '🌙', category: 'nutrition',      shift: 'evening', due_time: '18:00', window_mins: 60,  sort_order: 12, applies_to: 'all' },
       { name: 'Evening Medications',    icon: '💊', category: 'medication',     shift: 'evening', due_time: '18:00', window_mins: 60,  sort_order: 13, applies_to: 'all' },
-      { name: 'Repositioning Check',    icon: '🔄', category: 'repositioning',  shift: 'all',     due_time: '20:00', window_mins: 60,  sort_order: 14, applies_to: 'all' },
+      { name: 'Repositioning Check',    icon: '🔄', category: 'repositioning',  shift: 'all',     due_time: '20:00', window_mins: 60,  sort_order: 14, applies_to: 'bed_bound,wheelchair' },
       { name: 'Night Settle & Check',   icon: '😴', category: 'personal_care',  shift: 'evening', due_time: '21:00', window_mins: 90,  sort_order: 15, applies_to: 'all' },
       { name: 'Night Medications',      icon: '💊', category: 'medication',     shift: 'night',   due_time: '22:00', window_mins: 60,  sort_order: 16, applies_to: 'all' },
       { name: 'Night Observation',      icon: '🌛', category: 'observation',    shift: 'night',   due_time: '02:00', window_mins: 120, sort_order: 17, applies_to: 'all' },
       { name: 'Skin & Pressure Check',  icon: '🩺', category: 'observation',    shift: 'day',     due_time: '08:30', window_mins: 120, sort_order: 18, applies_to: 'high_risk' },
+      // Mobility-specific templates
+      { name: 'Walking Exercise',              icon: '🚶', category: 'physical',         shift: 'day',     due_time: '11:00', window_mins: 60,  sort_order: 19, applies_to: 'independent,walking_aid' },
+      { name: 'Bed Bath',                      icon: '🛁', category: 'personal_care',    shift: 'day',     due_time: '09:30', window_mins: 90,  sort_order: 20, applies_to: 'bed_bound' },
+      { name: 'Wheelchair Transfer & Comfort', icon: '♿', category: 'personal_care',    shift: 'day',     due_time: '09:00', window_mins: 60,  sort_order: 21, applies_to: 'wheelchair' },
+      { name: 'Seated Exercise',               icon: '💪', category: 'physical',         shift: 'day',     due_time: '11:00', window_mins: 60,  sort_order: 22, applies_to: 'wheelchair,bed_bound' },
+      { name: 'Skin Inspection (Bed-bound)',   icon: '🔍', category: 'observation',      shift: 'day',     due_time: '10:00', window_mins: 60,  sort_order: 23, applies_to: 'bed_bound' },
+      { name: 'Outdoor Garden Visit',          icon: '🌿', category: 'social_wellbeing', shift: 'day',     due_time: '14:30', window_mins: 60,  sort_order: 24, applies_to: 'independent,walking_aid' },
+      { name: 'In-Room Sensory Activity',      icon: '🎵', category: 'social_wellbeing', shift: 'day',     due_time: '14:30', window_mins: 60,  sort_order: 25, applies_to: 'bed_bound' },
     ];
 
     // Insert templates
@@ -808,13 +816,22 @@ async function seed() {
       tmplIds.push(tmpl.id);
     }
 
-    // Generate today's tasks for every resident
+    // Generate today's tasks for every resident (mobility-aware filtering)
     const today = new Date().toISOString().slice(0, 10);
     for (const [room, resId] of Object.entries(residentIds)) {
-      const { rows: [res] } = await client.query('SELECT risk_level FROM residents WHERE id=$1', [resId]);
+      const { rows: [res] } = await client.query('SELECT risk_level, mobility_status FROM residents WHERE id=$1', [resId]);
+      const resMobility = res?.mobility_status || 'independent';
       for (let i = 0; i < TASK_TEMPLATES.length; i++) {
         const t = TASK_TEMPLATES[i];
+        // Mobility-aware filtering logic:
+        // 'all' -> include for everyone
+        // 'high_risk' -> only for residents with risk_level = 'high'
+        // Otherwise -> comma-separated mobility values, check if resident's mobility_status is in the list
         if (t.applies_to === 'high_risk' && res?.risk_level !== 'high') continue;
+        if (t.applies_to !== 'all' && t.applies_to !== 'high_risk') {
+          const allowedMobilities = t.applies_to.split(',');
+          if (!allowedMobilities.includes(resMobility)) continue;
+        }
         await client.query(
           `INSERT INTO care_tasks (care_home_id, resident_id, template_id, task_date, task_name, icon, category, due_time, window_mins)
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT DO NOTHING`,

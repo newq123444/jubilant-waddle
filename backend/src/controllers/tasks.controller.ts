@@ -7,25 +7,35 @@ let sseManager: any = { broadcast: () => {}, addClient: () => {}, removeClient: 
 try { sseManager = require('../utils/sse').sseManager; } catch { /* SSE not available */ }
 
 // Default task templates — seeded once per care home
+// applies_to values: 'all' = everyone, 'high_risk' = high risk_level only,
+// or comma-separated mobility_status values (e.g. 'bed_bound,wheelchair')
 const DEFAULT_TEMPLATES = [
-  { name: 'Morning Wash & Dress',    icon: '🛁', category: 'personal_care',  shift: 'day',     due_time: '07:30', window_mins: 90,  sort_order: 1 },
-  { name: 'Breakfast',               icon: '🌅', category: 'nutrition',      shift: 'day',     due_time: '08:00', window_mins: 60,  sort_order: 2 },
-  { name: 'Morning Medications',     icon: '💊', category: 'medication',     shift: 'day',     due_time: '08:00', window_mins: 60,  sort_order: 3 },
-  { name: 'Oral Hygiene',            icon: '🦷', category: 'personal_care',  shift: 'day',     due_time: '09:00', window_mins: 120, sort_order: 4 },
-  { name: 'Repositioning Check',     icon: '🔄', category: 'repositioning',  shift: 'all',     due_time: '10:00', window_mins: 60,  sort_order: 5 },
-  { name: 'Fluid & Snack Check',     icon: '💧', category: 'nutrition',      shift: 'day',     due_time: '10:30', window_mins: 60,  sort_order: 6 },
-  { name: 'Lunch',                   icon: '🍽', category: 'nutrition',      shift: 'day',     due_time: '12:00', window_mins: 60,  sort_order: 7 },
-  { name: 'Afternoon Medications',   icon: '💊', category: 'medication',     shift: 'day',     due_time: '12:00', window_mins: 60,  sort_order: 8 },
-  { name: 'Repositioning Check',     icon: '🔄', category: 'repositioning',  shift: 'all',     due_time: '14:00', window_mins: 60,  sort_order: 9 },
-  { name: 'Afternoon Tea & Snack',   icon: '☕', category: 'nutrition',      shift: 'day',     due_time: '15:00', window_mins: 60,  sort_order: 10 },
-  { name: 'Evening Wash & Freshen',  icon: '🚿', category: 'personal_care',  shift: 'evening', due_time: '17:00', window_mins: 90,  sort_order: 11 },
-  { name: 'Supper',                  icon: '🌙', category: 'nutrition',      shift: 'evening', due_time: '18:00', window_mins: 60,  sort_order: 12 },
-  { name: 'Evening Medications',     icon: '💊', category: 'medication',     shift: 'evening', due_time: '18:00', window_mins: 60,  sort_order: 13 },
-  { name: 'Repositioning Check',     icon: '🔄', category: 'repositioning',  shift: 'all',     due_time: '20:00', window_mins: 60,  sort_order: 14 },
-  { name: 'Night Settle & Check',    icon: '😴', category: 'personal_care',  shift: 'evening', due_time: '21:00', window_mins: 90,  sort_order: 15 },
-  { name: 'Night Medications',       icon: '💊', category: 'medication',     shift: 'night',   due_time: '22:00', window_mins: 60,  sort_order: 16 },
-  { name: 'Night Observation',       icon: '🌛', category: 'observation',    shift: 'night',   due_time: '02:00', window_mins: 120, sort_order: 17 },
+  { name: 'Morning Wash & Dress',    icon: '🛁', category: 'personal_care',  shift: 'day',     due_time: '07:30', window_mins: 90,  sort_order: 1,  applies_to: 'all' },
+  { name: 'Breakfast',               icon: '🌅', category: 'nutrition',      shift: 'day',     due_time: '08:00', window_mins: 60,  sort_order: 2,  applies_to: 'all' },
+  { name: 'Morning Medications',     icon: '💊', category: 'medication',     shift: 'day',     due_time: '08:00', window_mins: 60,  sort_order: 3,  applies_to: 'all' },
+  { name: 'Oral Hygiene',            icon: '🦷', category: 'personal_care',  shift: 'day',     due_time: '09:00', window_mins: 120, sort_order: 4,  applies_to: 'all' },
+  { name: 'Repositioning Check',     icon: '🔄', category: 'repositioning',  shift: 'all',     due_time: '10:00', window_mins: 60,  sort_order: 5,  applies_to: 'bed_bound,wheelchair' },
+  { name: 'Fluid & Snack Check',     icon: '💧', category: 'nutrition',      shift: 'day',     due_time: '10:30', window_mins: 60,  sort_order: 6,  applies_to: 'all' },
+  { name: 'Lunch',                   icon: '🍽', category: 'nutrition',      shift: 'day',     due_time: '12:00', window_mins: 60,  sort_order: 7,  applies_to: 'all' },
+  { name: 'Afternoon Medications',   icon: '💊', category: 'medication',     shift: 'day',     due_time: '12:00', window_mins: 60,  sort_order: 8,  applies_to: 'all' },
+  { name: 'Repositioning Check',     icon: '🔄', category: 'repositioning',  shift: 'all',     due_time: '14:00', window_mins: 60,  sort_order: 9,  applies_to: 'bed_bound,wheelchair' },
+  { name: 'Afternoon Tea & Snack',   icon: '☕', category: 'nutrition',      shift: 'day',     due_time: '15:00', window_mins: 60,  sort_order: 10, applies_to: 'all' },
+  { name: 'Evening Wash & Freshen',  icon: '🚿', category: 'personal_care',  shift: 'evening', due_time: '17:00', window_mins: 90,  sort_order: 11, applies_to: 'all' },
+  { name: 'Supper',                  icon: '🌙', category: 'nutrition',      shift: 'evening', due_time: '18:00', window_mins: 60,  sort_order: 12, applies_to: 'all' },
+  { name: 'Evening Medications',     icon: '💊', category: 'medication',     shift: 'evening', due_time: '18:00', window_mins: 60,  sort_order: 13, applies_to: 'all' },
+  { name: 'Repositioning Check',     icon: '🔄', category: 'repositioning',  shift: 'all',     due_time: '20:00', window_mins: 60,  sort_order: 14, applies_to: 'bed_bound,wheelchair' },
+  { name: 'Night Settle & Check',    icon: '😴', category: 'personal_care',  shift: 'evening', due_time: '21:00', window_mins: 90,  sort_order: 15, applies_to: 'all' },
+  { name: 'Night Medications',       icon: '💊', category: 'medication',     shift: 'night',   due_time: '22:00', window_mins: 60,  sort_order: 16, applies_to: 'all' },
+  { name: 'Night Observation',       icon: '🌛', category: 'observation',    shift: 'night',   due_time: '02:00', window_mins: 120, sort_order: 17, applies_to: 'all' },
   { name: 'Skin & Pressure Check',   icon: '🩺', category: 'observation',    shift: 'day',     due_time: '08:30', window_mins: 120, sort_order: 18, applies_to: 'high_risk' },
+  // Mobility-specific templates
+  { name: 'Walking Exercise',                icon: '🚶', category: 'physical',        shift: 'day',     due_time: '11:00', window_mins: 60,  sort_order: 19, applies_to: 'independent,walking_aid' },
+  { name: 'Bed Bath',                        icon: '🛁', category: 'personal_care',   shift: 'day',     due_time: '09:30', window_mins: 90,  sort_order: 20, applies_to: 'bed_bound' },
+  { name: 'Wheelchair Transfer & Comfort',   icon: '♿', category: 'personal_care',   shift: 'day',     due_time: '09:00', window_mins: 60,  sort_order: 21, applies_to: 'wheelchair' },
+  { name: 'Seated Exercise',                 icon: '💪', category: 'physical',        shift: 'day',     due_time: '11:00', window_mins: 60,  sort_order: 22, applies_to: 'wheelchair,bed_bound' },
+  { name: 'Skin Inspection (Bed-bound)',     icon: '🔍', category: 'observation',     shift: 'day',     due_time: '10:00', window_mins: 60,  sort_order: 23, applies_to: 'bed_bound' },
+  { name: 'Outdoor Garden Visit',            icon: '🌿', category: 'social_wellbeing', shift: 'day',    due_time: '14:30', window_mins: 60,  sort_order: 24, applies_to: 'independent,walking_aid' },
+  { name: 'In-Room Sensory Activity',        icon: '🎵', category: 'social_wellbeing', shift: 'day',    due_time: '14:30', window_mins: 60,  sort_order: 25, applies_to: 'bed_bound' },
 ];
 
 // ── Generate today's tasks for all active residents ────────────────────────
@@ -48,7 +58,7 @@ export async function generateDailyTasks(req: Request, res: Response, next: Next
         await query(
           `INSERT INTO care_task_templates (care_home_id, name, icon, category, shift, due_time, window_mins, sort_order, applies_to)
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-          [careHomeId, t.name, t.icon, t.category, t.shift, t.due_time, t.window_mins, t.sort_order, (t as any).applies_to || 'all']
+          [careHomeId, t.name, t.icon, t.category, t.shift, t.due_time, t.window_mins, t.sort_order, t.applies_to]
         );
       }
     }
@@ -61,11 +71,12 @@ export async function generateDailyTasks(req: Request, res: Response, next: Next
 
     // Get active residents
     const { rows: residents } = await query(
-      `SELECT id, risk_level FROM residents WHERE care_home_id = $1 AND active = TRUE`,
+      `SELECT id, risk_level, mobility_status FROM residents WHERE care_home_id = $1 AND active = TRUE`,
       [careHomeId]
     );
 
     // Bulk INSERT with NOT EXISTS guard (works without unique index)
+    // Mobility-aware filtering: applies_to can be 'all', 'high_risk', or comma-separated mobility values
     const { rowCount } = await query(
       `INSERT INTO care_tasks
          (care_home_id, resident_id, template_id, task_date, task_name, icon, category, due_time, window_mins)
@@ -77,7 +88,12 @@ export async function generateDailyTasks(req: Request, res: Response, next: Next
        WHERE r.care_home_id = $2
          AND r.active = TRUE
          AND ctt.active = TRUE
-         AND (ctt.applies_to = 'all' OR (ctt.applies_to = 'high_risk' AND r.risk_level = 'high'))
+         AND (
+           ctt.applies_to = 'all'
+           OR (ctt.applies_to = 'high_risk' AND r.risk_level = 'high')
+           OR (ctt.applies_to != 'all' AND ctt.applies_to != 'high_risk'
+               AND COALESCE(r.mobility_status, 'independent') = ANY(string_to_array(ctt.applies_to, ',')))
+         )
          AND NOT EXISTS (
            SELECT 1 FROM care_tasks ct2
            WHERE ct2.resident_id = r.id
@@ -106,7 +122,7 @@ export async function seedTemplates(req: Request, res: Response, next: NextFunct
       await query(
         `INSERT INTO care_task_templates (care_home_id, name, icon, category, shift, due_time, window_mins, sort_order, applies_to)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-        [careHomeId, t.name, t.icon, t.category, t.shift, t.due_time, t.window_mins, t.sort_order, (t as any).applies_to || 'all']
+        [careHomeId, t.name, t.icon, t.category, t.shift, t.due_time, t.window_mins, t.sort_order, t.applies_to]
       );
     }
     res.json({ seeded: DEFAULT_TEMPLATES.length });
