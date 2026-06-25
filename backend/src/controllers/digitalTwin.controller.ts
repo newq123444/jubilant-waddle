@@ -36,16 +36,23 @@ export async function getDigitalTwin(req: Request, res: Response, next: NextFunc
       );
       wellbeingTrend = rows;
     } catch (e: any) {
-      // Fallback: try without engagement_level/logged_at columns
-      try {
-        const { rows } = await query(
-          `SELECT mood, pain_level, created_at AS logged_at
-           FROM wellbeing_logs WHERE resident_id = $1 AND care_home_id = $2
-           AND created_at > NOW() - INTERVAL '7 days' ORDER BY created_at DESC`,
-          [residentId, careHomeId]
-        );
-        wellbeingTrend = rows;
-      } catch { /* return empty if table also missing */ }
+      // Only fall back if the error is about a missing column/relation
+      if (e?.message?.includes('does not exist')) {
+        try {
+          const { rows } = await query(
+            `SELECT mood, pain_level, created_at AS logged_at
+             FROM wellbeing_logs WHERE resident_id = $1 AND care_home_id = $2
+             AND created_at > NOW() - INTERVAL '7 days' ORDER BY created_at DESC`,
+            [residentId, careHomeId]
+          );
+          wellbeingTrend = rows;
+        } catch (fallbackErr: any) {
+          // Only swallow "does not exist" errors; re-throw others
+          if (!fallbackErr?.message?.includes('does not exist')) throw fallbackErr;
+        }
+      } else {
+        throw e;
+      }
     }
 
     // Incidents
@@ -153,17 +160,24 @@ export async function getTimeline(req: Request, res: Response, next: NextFunctio
       );
       wellbeingLogs = rows;
     } catch (e: any) {
-      // Fallback: try without engagement_level column
-      try {
-        const { rows } = await query(
-          `SELECT 'wellbeing' AS event_type, id, mood AS sub_type,
-                  'Pain: ' || pain_level AS detail, created_at AS event_date
-           FROM wellbeing_logs WHERE resident_id = $1 AND care_home_id = $2
-           AND created_at > NOW() - ($3 || ' days')::interval`,
-          [residentId, careHomeId, lookback.toString()]
-        );
-        wellbeingLogs = rows;
-      } catch { /* return empty if table also missing */ }
+      // Only fall back if the error is about a missing column/relation
+      if (e?.message?.includes('does not exist')) {
+        try {
+          const { rows } = await query(
+            `SELECT 'wellbeing' AS event_type, id, mood AS sub_type,
+                    'Pain: ' || pain_level AS detail, created_at AS event_date
+             FROM wellbeing_logs WHERE resident_id = $1 AND care_home_id = $2
+             AND created_at > NOW() - ($3 || ' days')::interval`,
+            [residentId, careHomeId, lookback.toString()]
+          );
+          wellbeingLogs = rows;
+        } catch (fallbackErr: any) {
+          // Only swallow "does not exist" errors; re-throw others
+          if (!fallbackErr?.message?.includes('does not exist')) throw fallbackErr;
+        }
+      } else {
+        throw e;
+      }
     }
 
     // Merge and sort chronologically

@@ -36,6 +36,8 @@ export default function AiCarePlanWriter() {
     try { return JSON.parse(plan.content); } catch { return null; }
   };
 
+  const selectedPlanContent = getContent(selectedPlan);
+
   return (
     <div>
       <div className="page-header">
@@ -90,9 +92,9 @@ export default function AiCarePlanWriter() {
                 </div>
               </div>
 
-              {(() => { const content = getContent(selectedPlan); return content?.cqc_domains ? (
+              {selectedPlanContent?.cqc_domains && (
                 <div style={{ display: 'grid', gap: 16 }}>
-                  {Object.entries(content.cqc_domains).map(([key, domain]: [string, any]) => (
+                  {Object.entries(selectedPlanContent.cqc_domains).map(([key, domain]: [string, any]) => (
                     <div key={key} style={{ padding: 16, borderRadius: 10, border: `2px solid ${cqcDomainColors[key] || '#e5e7eb'}20`, background: `${cqcDomainColors[key] || '#6b7280'}08` }}>
                       <h4 style={{ margin: '0 0 8px', color: cqcDomainColors[key] || '#374151', fontSize: 15 }}>{domain.title}</h4>
                       <div style={{ fontSize: 13 }}>
@@ -104,7 +106,7 @@ export default function AiCarePlanWriter() {
                     </div>
                   ))}
                 </div>
-              ) : null; })()}
+              )}
             </div>
           )}
 
