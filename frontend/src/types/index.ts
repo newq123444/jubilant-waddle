@@ -595,23 +595,33 @@ export interface VoiceTranscription {
 }
 
 // ── SBAR Handover ─────────────────────────────────────────────────────────
+export interface SbarHandoverCriticalItem {
+  priority: number;
+  category: string;
+  urgency: string;
+  title: string;
+  detail: string;
+  resident_name: string;
+  action_required: string;
+  source_id: string;
+}
+
+export interface SbarHandoverSummary {
+  incidents_count: number;
+  clinical_notes_count: number;
+  high_risk_residents: number;
+  outgoing_shift?: string | null;
+}
+
 export interface SbarHandover {
   id: string;
   care_home_id: string;
   generated_by: string;
   generated_by_name?: string;
-  shift_date: string;
   shift_type: string;
-  situation: string;
-  background: string;
-  assessment: string;
-  recommendation: string;
-  residents_covered: string[];
-  key_concerns: any[];
-  status: 'draft' | 'approved' | 'rejected';
-  approved_by?: string;
-  approved_by_name?: string;
-  approved_at?: string;
+  critical_items: SbarHandoverCriticalItem[] | string;
+  full_summary: SbarHandoverSummary | string;
+  status: 'active' | 'draft' | 'approved' | 'rejected';
   created_at: string;
 }
 

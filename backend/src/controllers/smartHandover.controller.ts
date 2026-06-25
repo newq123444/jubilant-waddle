@@ -23,7 +23,7 @@ export async function generateSmartHandover(req: Request, res: Response, next: N
       `SELECT cn.*, r.first_name || ' ' || r.last_name AS resident_name
        FROM care_notes cn JOIN residents r ON r.id = cn.resident_id
        WHERE cn.care_home_id = $1 AND cn.created_at > NOW() - INTERVAL '12 hours' AND cn.deleted_at IS NULL
-       AND cn.note_type IN ('clinical','medication','concern','escalation')
+       AND cn.note_type IN ('nursing_observation','medication_note','incident_note','hospital_visit')
        ORDER BY cn.created_at DESC LIMIT 15`,
       [careHomeId]
     );
