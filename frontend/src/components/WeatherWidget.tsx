@@ -1,5 +1,5 @@
 // src/components/WeatherWidget.tsx - Beautiful weather widget with care-relevant alerts
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 
 interface WeatherDay {
   day: string;
@@ -18,45 +18,148 @@ interface CareAlert {
   icon: string;
 }
 
+interface CurrentWeather {
+  temp: number;
+  feelsLike: number;
+  humidity: number;
+  wind: number;
+  condition: 'sunny' | 'partly-cloudy' | 'cloudy' | 'rainy' | 'stormy';
+  pressure: number;
+  visibility: string;
+  uvIndex: number;
+}
+
+interface OpenMeteoResponse {
+  current: {
+    temperature_2m: number;
+    apparent_temperature: number;
+    relative_humidity_2m: number;
+    wind_speed_10m: number;
+    weather_code: number;
+  };
+  daily: {
+    weather_code: number[];
+    temperature_2m_max: number[];
+    temperature_2m_min: number[];
+    uv_index_max: number[];
+  };
+}
+
+const OPEN_METEO_URL =
+  'https://api.open-meteo.com/v1/forecast?latitude=53.49&longitude=-2.29&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&timezone=Europe/London&forecast_days=3';
+
+function mapWeatherCode(code: number): { condition: 'sunny' | 'partly-cloudy' | 'cloudy' | 'rainy' | 'stormy'; icon: string } {
+  if (code === 0) return { condition: 'sunny', icon: '☀️' };
+  if (code >= 1 && code <= 3) return { condition: 'partly-cloudy', icon: '⛅' };
+  if (code >= 45 && code <= 48) return { condition: 'cloudy', icon: '🌫️' };
+  if (code >= 51 && code <= 67) return { condition: 'rainy', icon: '🌧️' };
+  if (code >= 71 && code <= 77) return { condition: 'cloudy', icon: '🌨️' };
+  if (code >= 80 && code <= 99) return { condition: 'stormy', icon: '⛈️' };
+  return { condition: 'partly-cloudy', icon: '⛅' };
+}
+
+function getSimulatedWeather(now: Date): { current: CurrentWeather; forecast: WeatherDay[] } {
+  const month = now.getMonth();
+  const baseTemps: Record<number, number> = {
+    0: 5, 1: 6, 2: 8, 3: 11, 4: 14, 5: 17,
+    6: 19, 7: 19, 8: 16, 9: 12, 10: 8, 11: 6
+  };
+  const conditions: Array<'sunny' | 'partly-cloudy' | 'cloudy' | 'rainy' | 'stormy'> = ['cloudy', 'partly-cloudy', 'rainy', 'sunny', 'stormy'];
+  const conditionIndex = month >= 10 || month <= 2 ? 0 : month >= 5 && month <= 8 ? 1 : 2;
+  const temp = baseTemps[month] + Math.round((Math.sin(now.getHours() / 3.8) * 3));
+  const condition = conditions[conditionIndex];
+  const humidity = 72 + Math.round(Math.sin(now.getDate()) * 10);
+  const wind = 8 + Math.round(Math.cos(now.getDate()) * 5);
+
+  const current: CurrentWeather = {
+    temp,
+    feelsLike: temp - 2,
+    humidity,
+    wind,
+    condition,
+    pressure: 1013 + Math.round(Math.sin(now.getDate() / 3) * 8),
+    visibility: 'Good',
+    uvIndex: month >= 5 && month <= 8 ? 5 : 1,
+  };
+
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const today = now.getDay();
+  const forecast: WeatherDay[] = [
+    { day: 'Today', temp: current.temp, low: current.temp - 4, condition: current.condition, humidity: current.humidity, wind: current.wind, icon: current.condition === 'sunny' ? '☀️' : current.condition === 'partly-cloudy' ? '⛅' : current.condition === 'rainy' ? '🌧️' : '☁️' },
+    { day: days[(today + 1) % 7], temp: current.temp + 1, low: current.temp - 3, condition: 'partly-cloudy', humidity: 68, wind: 12, icon: '⛅' },
+    { day: days[(today + 2) % 7], temp: current.temp - 1, low: current.temp - 5, condition: 'rainy', humidity: 82, wind: 15, icon: '🌧️' },
+  ];
+
+  return { current, forecast };
+}
+
 export default function WeatherWidget() {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [liveWeather, setLiveWeather] = useState<CurrentWeather | null>(null);
+  const [liveForecast, setLiveForecast] = useState<WeatherDay[] | null>(null);
+  const [isLive, setIsLive] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(timer);
   }, []);
 
-  // Simulated Salford, UK weather data
-  const currentWeather = useMemo(() => {
-    const month = currentTime.getMonth();
-    // Seasonal temperature simulation for Salford
-    const baseTemps: Record<number, number> = {
-      0: 5, 1: 6, 2: 8, 3: 11, 4: 14, 5: 17,
-      6: 19, 7: 19, 8: 16, 9: 12, 10: 8, 11: 6
-    };
-    const conditions: Array<'sunny' | 'partly-cloudy' | 'cloudy' | 'rainy' | 'stormy'> = ['cloudy', 'partly-cloudy', 'rainy', 'sunny', 'stormy'];
-    const conditionIndex = month >= 10 || month <= 2 ? 0 : month >= 5 && month <= 8 ? 1 : 2;
-    return {
-      temp: baseTemps[month] + Math.round((Math.sin(currentTime.getHours() / 3.8) * 3)),
-      feelsLike: baseTemps[month] + Math.round((Math.sin(currentTime.getHours() / 3.8) * 3)) - 2,
-      humidity: 72 + Math.round(Math.sin(currentTime.getDate()) * 10),
-      wind: 8 + Math.round(Math.cos(currentTime.getDate()) * 5),
-      condition: conditions[conditionIndex],
-      pressure: 1013 + Math.round(Math.sin(currentTime.getDate() / 3) * 8),
-      visibility: 'Good',
-      uvIndex: month >= 5 && month <= 8 ? 5 : 1,
-    };
-  }, [currentTime]);
+  const fetchWeather = useCallback(async () => {
+    try {
+      const response = await fetch(OPEN_METEO_URL);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data: OpenMeteoResponse = await response.json();
 
-  const forecast: WeatherDay[] = useMemo(() => {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const today = currentTime.getDay();
-    return [
-      { day: 'Today', temp: currentWeather.temp, low: currentWeather.temp - 4, condition: currentWeather.condition, humidity: currentWeather.humidity, wind: currentWeather.wind, icon: currentWeather.condition === 'sunny' ? '☀️' : currentWeather.condition === 'partly-cloudy' ? '⛅' : currentWeather.condition === 'rainy' ? '🌧️' : '☁️' },
-      { day: days[(today + 1) % 7], temp: currentWeather.temp + 1, low: currentWeather.temp - 3, condition: 'partly-cloudy', humidity: 68, wind: 12, icon: '⛅' },
-      { day: days[(today + 2) % 7], temp: currentWeather.temp - 1, low: currentWeather.temp - 5, condition: 'rainy', humidity: 82, wind: 15, icon: '🌧️' },
-    ];
-  }, [currentWeather, currentTime]);
+      const currentCode = data.current.weather_code;
+      const { condition } = mapWeatherCode(currentCode);
+
+      const current: CurrentWeather = {
+        temp: Math.round(data.current.temperature_2m),
+        feelsLike: Math.round(data.current.apparent_temperature),
+        humidity: Math.round(data.current.relative_humidity_2m),
+        wind: Math.round(data.current.wind_speed_10m),
+        condition,
+        pressure: 1013, // Not fetched from API, use standard value
+        visibility: 'Good',
+        uvIndex: Math.round(data.daily.uv_index_max[0]),
+      };
+
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const today = new Date().getDay();
+      const forecast: WeatherDay[] = data.daily.temperature_2m_max.map((maxTemp, i) => {
+        const dayCode = data.daily.weather_code[i];
+        const mapped = mapWeatherCode(dayCode);
+        return {
+          day: i === 0 ? 'Today' : days[(today + i) % 7],
+          temp: Math.round(maxTemp),
+          low: Math.round(data.daily.temperature_2m_min[i]),
+          condition: mapped.condition,
+          humidity: current.humidity, // Use current humidity as approximation
+          wind: current.wind,
+          icon: mapped.icon,
+        };
+      });
+
+      setLiveWeather(current);
+      setLiveForecast(forecast);
+      setIsLive(true);
+    } catch {
+      // On error, fall back to simulated data
+      setIsLive(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchWeather();
+    // Refresh weather every 10 minutes
+    const interval = setInterval(fetchWeather, 10 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [fetchWeather]);
+
+  // Use live data if available, otherwise fall back to simulated
+  const simulated = useMemo(() => getSimulatedWeather(currentTime), [currentTime]);
+  const currentWeather = liveWeather || simulated.current;
+  const forecast = liveForecast || simulated.forecast;
 
   const careAlerts: CareAlert[] = useMemo(() => {
     const alerts: CareAlert[] = [];
@@ -114,12 +217,19 @@ export default function WeatherWidget() {
       <div style={{ background: getGradient(), padding: '20px 24px', color: '#fff', position: 'relative' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <div style={{ fontSize: 11, fontWeight: 600, opacity: 0.85, letterSpacing: 0.5 }}>SALFORD, GREATER MANCHESTER</div>
+            <div style={{ fontSize: 11, fontWeight: 600, opacity: 0.85, letterSpacing: 0.5, display: 'flex', alignItems: 'center', gap: 8 }}>
+              SALFORD, UK
+              {isLive && (
+                <span style={{ background: 'rgba(34,197,94,0.9)', color: '#fff', fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, letterSpacing: 0.3 }}>
+                  Live
+                </span>
+              )}
+            </div>
             <div style={{ fontSize: 42, fontWeight: 900, lineHeight: 1.1, marginTop: 4 }}>
-              {currentWeather.temp}°C
+              {currentWeather.temp}&deg;C
             </div>
             <div style={{ fontSize: 13, opacity: 0.9, marginTop: 4 }}>
-              Feels like {currentWeather.feelsLike}°C
+              Feels like {currentWeather.feelsLike}&deg;C
             </div>
             <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2, textTransform: 'capitalize' }}>
               {currentWeather.condition.replace('-', ' ')}
@@ -138,7 +248,7 @@ export default function WeatherWidget() {
           </div>
           <div style={{ fontSize: 11, opacity: 0.9 }}>
             <span style={{ opacity: 0.7 }}>Wind</span>
-            <div style={{ fontWeight: 700 }}>{currentWeather.wind} mph</div>
+            <div style={{ fontWeight: 700 }}>{currentWeather.wind} km/h</div>
           </div>
           <div style={{ fontSize: 11, opacity: 0.9 }}>
             <span style={{ opacity: 0.7 }}>Pressure</span>
@@ -159,9 +269,9 @@ export default function WeatherWidget() {
             <div key={day.day} style={{ flex: 1, textAlign: 'center', padding: '8px 4px', borderRight: i < forecast.length - 1 ? '1px solid var(--border)' : 'none' }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>{day.day}</div>
               <div style={{ fontSize: 22, margin: '4px 0' }}>{day.icon}</div>
-              <div style={{ fontSize: 14, fontWeight: 800 }}>{day.temp}°</div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{day.low}°</div>
-              <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{day.wind}mph</div>
+              <div style={{ fontSize: 14, fontWeight: 800 }}>{day.temp}&deg;</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{day.low}&deg;</div>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{day.wind}km/h</div>
             </div>
           ))}
         </div>
