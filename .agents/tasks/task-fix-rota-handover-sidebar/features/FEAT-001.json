@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "fix",
   "description": "Fix SmartRota page errors and add Excel/CSV upload for rota data. The SmartRota page crashes when data is empty or API fails because the hooks (useRotaTemplates, useRotaTemplate, useRotaConstraints) may return undefined/error states that are not handled gracefully. Additionally, add an Excel upload option allowing managers to upload a CSV file with columns (staff_name, date, shift_type) that gets parsed on the backend and stored as shifts.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "In frontend/src/pages/SmartRota.tsx, add error handling: wrap all data access in null-safe patterns, add try/catch around handleGenerate, show user-friendly error states when API calls fail (using generateRota.isError, etc.), and handle empty template/shift arrays gracefully so the page never crashes.",
     "In backend/src/controllers/smartRota.controller.ts, add defensive error handling in generateRota: wrap the staff_profiles JOIN query in a try/catch and return a helpful error message if rota_templates or staff_profiles tables are empty. Ensure listRotaTemplates and getRotaTemplate return empty arrays/null gracefully instead of crashing.",
@@ -25,5 +25,5 @@
     "Run 'cd /projects/sandbox/jubilant-waddle/backend && npm run build' - should succeed"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Added CSV upload endpoint, error handling in SmartRota page, multer CSV config. Backend and frontend build successfully."
 }

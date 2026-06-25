@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "fix",
   "description": "Fix SBAR Handover 'unexpected error' by adding a fallback in the AI service and voiceSbar controller. The issue is that ai.service.ts creates an Anthropic client at module load with process.env.ANTHROPIC_API_KEY, and when the key is not set, calling runAiOperation throws. Add a fallback that generates a structured handover from database data without AI when the API key is unavailable or the AI call fails.",
-  "status": "pending",
+  "status": "completed",
   "steps": [
     "In backend/src/services/ai.service.ts, modify runAiOperation to: (a) check if process.env.ANTHROPIC_API_KEY is set before attempting the API call, (b) if not set, skip the Anthropic call entirely and return a message indicating the AI service is not configured, (c) also handle the case where the Anthropic client was initialized with an empty/undefined key (move client creation inside the function or guard it). The key change: only instantiate/call Anthropic when the API key exists.",
     "In backend/src/controllers/voiceSbar.controller.ts generateSbarHandover function, add a fallback: if runAiOperation returns the 'AI service not configured' fallback message (or throws), construct a structured SBAR handover directly from the database data that was already queried (notes, incidents, missed meds, tasks, wellbeing). Build situation/background/assessment/recommendation sections from the raw data without AI. This ensures the handover page works even without an Anthropic API key.",
@@ -20,5 +20,5 @@
     "Run 'cd /projects/sandbox/jubilant-waddle/frontend && npm run build' - should succeed"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Guarded Anthropic instantiation with API key check. Added AI_NOT_CONFIGURED sentinel. Added buildFallbackSbar function that constructs SBAR from DB data. Frontend shows error gracefully."
 }
