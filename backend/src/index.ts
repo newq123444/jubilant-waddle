@@ -22,16 +22,26 @@ const app = express();
 // Serve uploaded files — try multiple path strategies
 // uploads served via dedicated route handler (see below)
 
-// ── Security middleware ────────────────────────────────────────────────────
-app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+// Handle preflight OPTIONS for all routes
+app.options('*', cors());
+
+// ── CORS middleware (must come before helmet) ──────────────────────────────
 app.use(cors({
   origin: process.env.CORS_ORIGIN === '*' || !process.env.CORS_ORIGIN ? true : process.env.CORS_ORIGIN,
   credentials: true,
 }));
 
+// ── Security middleware ────────────────────────────────────────────────────
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  crossOriginOpenerPolicy: false,
+  crossOriginEmbedderPolicy: false,
+}));
+
 // ── Rate limiting ──────────────────────────────────────────────────────────
 app.use('/api/auth/login', rateLimit({
   windowMs: 15 * 60 * 1000, max: 10,
+  skip: (req) => req.method === 'OPTIONS',
   message: { error: 'Too many login attempts. Try again in 15 minutes.' },
 }));
 app.use('/api', rateLimit({
