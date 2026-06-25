@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useGenerateRota, useRotaTemplates, useRotaTemplate, useUpdateRotaShift, usePublishRota, useRotaConstraints } from '../hooks';
+import React, { useState, useRef } from 'react';
+import { useGenerateRota, useRotaTemplates, useRotaTemplate, useUpdateRotaShift, usePublishRota, useRotaConstraints, useUploadRotaCsv } from '../hooks';
 import type { RotaTemplate, RotaShift } from '../types';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -22,30 +22,39 @@ export default function SmartRota() {
   const [editStaffId, setEditStaffId] = useState('');
   const [editStartTime, setEditStartTime] = useState('');
   const [editEndTime, setEditEndTime] = useState('');
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const generateRota = useGenerateRota();
-  const { data: templates } = useRotaTemplates();
+  const { data: templates, isError: templatesError, isLoading: templatesLoading } = useRotaTemplates();
   const { data: templateDetail } = useRotaTemplate(selectedTemplateId);
   const updateShift = useUpdateRotaShift();
   const publishRota = usePublishRota();
-  const { data: constraints } = useRotaConstraints();
+  const { data: constraints, isError: constraintsError } = useRotaConstraints();
+  const uploadCsv = useUploadRotaCsv();
 
   const handleGenerate = () => {
-    const budgetPence = budgetLimit ? Math.round(parseFloat(budgetLimit) * 100) : undefined;
-    generateRota.mutate({
-      week_start: weekStart,
-      name: rotaName || `Rota ${weekStart}`,
-      budget_limit_pence: budgetPence,
-      constraints: {
-        respect_preferences: respectPreferences,
-        min_nurse_coverage: minNurseCoverage,
-        working_time_directive: workingTimeDirective,
-      },
-    }, {
-      onSuccess: (data: any) => {
-        if (data?.id) setSelectedTemplateId(data.id);
-      }
-    });
+    if (!weekStart) return;
+    try {
+      const budgetPence = budgetLimit ? Math.round(parseFloat(budgetLimit) * 100) : undefined;
+      generateRota.mutate({
+        week_start: weekStart,
+        name: rotaName || `Rota ${weekStart}`,
+        budget_limit_pence: budgetPence,
+        constraints: {
+          respect_preferences: respectPreferences,
+          min_nurse_coverage: minNurseCoverage,
+          working_time_directive: workingTimeDirective,
+        },
+      }, {
+        onSuccess: (data: any) => {
+          if (data?.id) setSelectedTemplateId(data.id);
+          else if (data?.template?.id) setSelectedTemplateId(data.template.id);
+        }
+      });
+    } catch {
+      // Error is handled by the mutation's onError callback
+    }
   };
 
   const handleEditShift = (shift: RotaShift) => {
@@ -65,8 +74,20 @@ export default function SmartRota() {
     if (selectedTemplateId) publishRota.mutate(selectedTemplateId);
   };
 
-  const currentTemplate: RotaTemplate | null = templateDetail || null;
-  const shifts: RotaShift[] = currentTemplate?.shifts || [];
+  const handleCsvUpload = () => {
+    if (!csvFile) return;
+    const formData = new FormData();
+    formData.append('file', csvFile);
+    uploadCsv.mutate(formData, {
+      onSuccess: () => {
+        setCsvFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }
+    });
+  };
+
+  const currentTemplate: RotaTemplate | null = templateDetail?.template || templateDetail || null;
+  const shifts: RotaShift[] = currentTemplate?.shifts || templateDetail?.shifts || [];
 
   // Group shifts by staff
   const staffMap: Record<string, { name: string; role: string; shifts: RotaShift[] }> = {};
@@ -104,6 +125,13 @@ export default function SmartRota() {
         <h1 style={{ fontSize: '1.8rem', fontWeight: 700, margin: 0, color: '#1e293b' }}>AI Smart Rota Builder</h1>
         <p style={{ color: '#64748b', marginTop: 4 }}>Generate optimised staff rotas using AI, respecting constraints and budget limits</p>
       </div>
+
+      {/* Generation Error */}
+      {generateRota.isError && (
+        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: 16, marginBottom: 16, color: '#991b1b' }}>
+          <strong>Rota Generation Failed:</strong> {(generateRota.error as any)?.response?.data?.error || 'An error occurred while generating the rota. Please try again.'}
+        </div>
+      )}
 
       {/* Generation Form */}
       <div style={{ background: '#fff', borderRadius: 12, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,.1)', marginBottom: 24, border: '1px solid #e2e8f0' }}>
@@ -147,10 +175,55 @@ export default function SmartRota() {
         </button>
       </div>
 
+      {/* Upload Excel/CSV Rota */}
+      <div style={{ background: '#fff', borderRadius: 12, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,.1)', marginBottom: 24, border: '1px solid #e2e8f0' }}>
+        <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 8, color: '#1e293b' }}>Upload Excel Rota</h2>
+        <p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: 16 }}>
+          Upload a CSV file with columns: <strong>staff_name</strong>, <strong>date</strong> (YYYY-MM-DD), <strong>shift_type</strong> (day/evening/night/off/annual_leave/sick)
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.xlsx"
+            onChange={e => setCsvFile(e.target.files?.[0] || null)}
+            style={{ fontSize: '0.85rem' }}
+          />
+          <button
+            onClick={handleCsvUpload}
+            disabled={!csvFile || uploadCsv.isPending}
+            style={{ padding: '8px 20px', borderRadius: 8, background: '#2563eb', color: '#fff', border: 'none', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', opacity: (!csvFile || uploadCsv.isPending) ? 0.6 : 1 }}
+          >
+            {uploadCsv.isPending ? 'Uploading...' : 'Upload Excel Rota'}
+          </button>
+        </div>
+        {uploadCsv.isError && (
+          <div style={{ marginTop: 12, color: '#dc2626', fontSize: '0.85rem' }}>
+            {(uploadCsv.error as any)?.response?.data?.error || 'Upload failed. Please check your file format.'}
+          </div>
+        )}
+        {uploadCsv.isSuccess && uploadCsv.data && (
+          <div style={{ marginTop: 12, padding: 12, background: '#f0fdf4', borderRadius: 8, border: '1px solid #bbf7d0' }}>
+            <div style={{ color: '#166534', fontWeight: 600, fontSize: '0.85rem' }}>{(uploadCsv.data as any)?.message}</div>
+            {(uploadCsv.data as any)?.details && (
+              <div style={{ marginTop: 8, fontSize: '0.8rem', color: '#475569', maxHeight: 150, overflowY: 'auto' }}>
+                {((uploadCsv.data as any).details as any[]).filter((d: any) => d.status !== 'imported').map((d: any, i: number) => (
+                  <div key={i}>Row {d.row}: {d.status}</div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* Templates List */}
       <div style={{ background: '#fff', borderRadius: 12, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,.1)', marginBottom: 24, border: '1px solid #e2e8f0' }}>
         <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 16, color: '#1e293b' }}>Rota Templates</h2>
-        {templateList.length === 0 ? (
+        {templatesLoading ? (
+          <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>Loading templates...</p>
+        ) : templatesError ? (
+          <p style={{ color: '#dc2626', fontStyle: 'italic' }}>Unable to load templates. Please try refreshing.</p>
+        ) : templateList.length === 0 ? (
           <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>No templates yet. Generate your first rota above.</p>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
@@ -235,7 +308,7 @@ export default function SmartRota() {
       )}
 
       {/* Constraints Panel */}
-      {constraints && (
+      {!constraintsError && constraints && (
         <div style={{ background: '#fff', borderRadius: 12, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,.1)', marginBottom: 24, border: '1px solid #e2e8f0' }}>
           <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 12, color: '#1e293b' }}>Staff Constraints</h2>
           {Array.isArray(constraints) && constraints.length > 0 ? (

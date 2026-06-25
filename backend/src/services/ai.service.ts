@@ -2,7 +2,13 @@ import Anthropic from '@anthropic-ai/sdk';
 import { query } from '../models/db';
 import { logger } from '../utils/logger';
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+// Only instantiate Anthropic client when API key is available
+let anthropic: Anthropic | null = null;
+if (process.env.ANTHROPIC_API_KEY) {
+  anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+}
+
+export const AI_NOT_CONFIGURED = 'AI_SERVICE_NOT_CONFIGURED';
 
 export interface AiRequest {
   careHomeId: string;
@@ -15,6 +21,26 @@ export interface AiRequest {
 
 export async function runAiOperation(req: AiRequest): Promise<string> {
   const { careHomeId, requestedBy, operation, context, prompt, systemPrompt } = req;
+
+  // If no API key is configured, return a sentinel value so callers can handle the fallback
+  if (!anthropic || !process.env.ANTHROPIC_API_KEY) {
+    logger.warn('AI operation skipped: ANTHROPIC_API_KEY not configured');
+    // Still audit the attempt
+    try {
+      await query(
+        `INSERT INTO ai_audit_log (
+          care_home_id, requested_by, operation, input_context,
+          input_tokens, output_tokens, output_summary, model_used, status
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [careHomeId, requestedBy, operation, JSON.stringify(context),
+         0, 0, 'AI service not configured - no API key',
+         'none', 'skipped']
+      );
+    } catch (auditErr: any) {
+      logger.error('Failed to audit skipped AI operation:', auditErr.message);
+    }
+    return AI_NOT_CONFIGURED;
+  }
 
   const system = systemPrompt || `You are an AI assistant embedded in CareVista, a UK care home management system.
 You help care home managers and staff with administrative tasks.
@@ -52,15 +78,19 @@ IMPORTANT GUIDELINES:
   }
 
   // Always audit AI operations
-  await query(
-    `INSERT INTO ai_audit_log (
-      care_home_id, requested_by, operation, input_context,
-      input_tokens, output_tokens, output_summary, model_used, status
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-    [careHomeId, requestedBy, operation, JSON.stringify(context),
-     inputTokens, outputTokens, outputText.slice(0, 500),
-     'claude-opus-4-6', 'success']
-  );
+  try {
+    await query(
+      `INSERT INTO ai_audit_log (
+        care_home_id, requested_by, operation, input_context,
+        input_tokens, output_tokens, output_summary, model_used, status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [careHomeId, requestedBy, operation, JSON.stringify(context),
+       inputTokens, outputTokens, outputText.slice(0, 500),
+       'claude-opus-4-6', 'success']
+    );
+  } catch (auditErr: any) {
+    logger.error('Failed to audit AI operation:', auditErr.message);
+  }
 
   return outputText;
 }

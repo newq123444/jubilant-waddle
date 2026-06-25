@@ -1,7 +1,7 @@
 // src/controllers/voiceSbar.controller.ts
 import { Request, Response, NextFunction } from 'express';
 import { query } from '../models/db';
-import { runAiOperation } from '../services/ai.service';
+import { runAiOperation, AI_NOT_CONFIGURED } from '../services/ai.service';
 
 // ── Voice Transcription ───────────────────────────────────────────────────
 
@@ -251,7 +251,23 @@ Structure your response with exactly 4 labeled sections: SITUATION, BACKGROUND, 
     });
 
     // Parse the AI output into 4 sections
-    const sections = parseSbarSections(result);
+    let sections: { situation: string; background: string; assessment: string; recommendation: string };
+
+    if (result === AI_NOT_CONFIGURED || result.startsWith('AI service temporarily unavailable')) {
+      // Generate structured handover from database data without AI
+      sections = buildFallbackSbar({
+        shiftDate,
+        shiftType,
+        notes: notes.rows,
+        incidents: incidents.rows,
+        missedMeds: missedMeds.rows,
+        missedTasks: missedTasks.rows,
+        wellbeing: wellbeing.rows,
+        flaggedNotes: flaggedNotes.rows,
+      });
+    } else {
+      sections = parseSbarSections(result);
+    }
 
     // Build key concerns from flagged notes and incidents
     const keyConcerns = [
@@ -369,4 +385,116 @@ function parseSbarSections(text: string): {
   sections.recommendation = recommendationMatch?.[1]?.trim() || '';
 
   return sections;
+}
+
+function buildFallbackSbar(data: {
+  shiftDate: string;
+  shiftType: string;
+  notes: any[];
+  incidents: any[];
+  missedMeds: any[];
+  missedTasks: any[];
+  wellbeing: any[];
+  flaggedNotes: any[];
+}): { situation: string; background: string; assessment: string; recommendation: string } {
+  const { shiftDate, shiftType, notes, incidents, missedMeds, missedTasks, wellbeing, flaggedNotes } = data;
+
+  // SITUATION: Summary of what happened this shift
+  const situationParts: string[] = [];
+  situationParts.push(`Handover report for ${shiftType} shift on ${shiftDate}.`);
+  situationParts.push(`${notes.length} care note(s) recorded during this shift.`);
+  if (incidents.length > 0) {
+    situationParts.push(`${incidents.length} incident(s) occurred:`);
+    incidents.forEach((i: any) => {
+      situationParts.push(`  - ${i.resident_name} (Room ${i.room_number}): ${i.incident_type} (${i.severity}) - ${(i.description || '').slice(0, 100)}`);
+    });
+  }
+  if (flaggedNotes.length > 0) {
+    situationParts.push(`${flaggedNotes.length} flagged note(s) requiring attention:`);
+    flaggedNotes.forEach((f: any) => {
+      situationParts.push(`  - ${f.resident_name} (Room ${f.room_number}): ${(f.content || '').slice(0, 100)}`);
+    });
+  }
+
+  // BACKGROUND: Context from care notes
+  const backgroundParts: string[] = [];
+  if (notes.length > 0) {
+    backgroundParts.push('Care notes summary:');
+    const significantNotes = notes.filter((n: any) => n.is_significant);
+    const regularNotes = notes.filter((n: any) => !n.is_significant);
+    if (significantNotes.length > 0) {
+      backgroundParts.push('Significant observations:');
+      significantNotes.slice(0, 5).forEach((n: any) => {
+        backgroundParts.push(`  - ${n.resident_name} (Room ${n.room_number}) [${n.note_type}]: ${(n.content || '').slice(0, 120)}`);
+      });
+    }
+    if (regularNotes.length > 0) {
+      backgroundParts.push(`${regularNotes.length} additional care note(s) recorded.`);
+    }
+  } else {
+    backgroundParts.push('No care notes recorded during this shift.');
+  }
+  if (wellbeing.length > 0) {
+    backgroundParts.push('Wellbeing observations:');
+    wellbeing.slice(0, 5).forEach((w: any) => {
+      const details = [];
+      if (w.mood_score) details.push(`mood: ${w.mood_score}`);
+      if (w.pain_level) details.push(`pain: ${w.pain_level}`);
+      if (w.sleep_quality) details.push(`sleep: ${w.sleep_quality}`);
+      backgroundParts.push(`  - ${w.resident_name} (Room ${w.room_number}): ${details.join(', ')}${w.notes ? ' - ' + (w.notes as string).slice(0, 80) : ''}`);
+    });
+  }
+
+  // ASSESSMENT: Issues that need attention
+  const assessmentParts: string[] = [];
+  if (missedMeds.length > 0) {
+    assessmentParts.push(`${missedMeds.length} missed/refused medication(s):`);
+    missedMeds.forEach((m: any) => {
+      assessmentParts.push(`  - ${m.resident_name} (Room ${m.room_number}): ${m.medication_name} ${m.dose} at ${m.scheduled_time} (${m.admin_status})`);
+    });
+  }
+  if (missedTasks.length > 0) {
+    assessmentParts.push(`${missedTasks.length} missed/overdue task(s):`);
+    missedTasks.forEach((t: any) => {
+      assessmentParts.push(`  - ${t.resident_name} (Room ${t.room_number}): ${t.task_name} (${t.status})`);
+    });
+  }
+  if (incidents.length > 0) {
+    const highSeverity = incidents.filter((i: any) => i.severity === 'high' || i.severity === 'critical');
+    if (highSeverity.length > 0) {
+      assessmentParts.push(`${highSeverity.length} high/critical severity incident(s) require follow-up.`);
+    }
+  }
+  if (assessmentParts.length === 0) {
+    assessmentParts.push('No significant concerns identified during this shift. All medications administered and tasks completed as scheduled.');
+  }
+
+  // RECOMMENDATION: Actions for incoming shift
+  const recommendationParts: string[] = [];
+  if (missedMeds.length > 0) {
+    recommendationParts.push('Follow up on missed/refused medications with nursing staff.');
+  }
+  if (missedTasks.length > 0) {
+    recommendationParts.push('Complete overdue care tasks as priority.');
+  }
+  if (incidents.length > 0) {
+    recommendationParts.push('Review and follow up on incident reports. Update families if required.');
+  }
+  if (flaggedNotes.length > 0) {
+    recommendationParts.push('Review flagged care notes and take appropriate action.');
+  }
+  const lowMood = wellbeing.filter((w: any) => w.mood_score && parseInt(w.mood_score) <= 3);
+  if (lowMood.length > 0) {
+    recommendationParts.push(`Monitor residents with low mood scores: ${lowMood.map((w: any) => `${w.resident_name} (Room ${w.room_number})`).join(', ')}.`);
+  }
+  if (recommendationParts.length === 0) {
+    recommendationParts.push('Continue routine care. No urgent actions identified.');
+  }
+
+  return {
+    situation: situationParts.join('\n'),
+    background: backgroundParts.join('\n'),
+    assessment: assessmentParts.join('\n'),
+    recommendation: recommendationParts.join('\n'),
+  };
 }

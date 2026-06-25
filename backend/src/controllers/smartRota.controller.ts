@@ -337,3 +337,137 @@ export async function getStaffConstraints(req: Request, res: Response, next: Nex
     res.json(staffWithConstraints);
   } catch (err) { next(err); }
 }
+
+// ── Upload CSV Rota ───────────────────────────────────────────────────────
+export async function uploadRotaCsv(req: Request, res: Response, next: NextFunction) {
+  try {
+    const careHomeId = req.user!.care_home_id;
+    const userId = req.user!.id;
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded. Please upload a CSV file.' });
+    }
+
+    // Parse CSV content from the uploaded buffer
+    const content = req.file.buffer.toString('utf-8');
+    const lines = content.split(/\r?\n/).filter(line => line.trim() !== '');
+
+    if (lines.length < 2) {
+      return res.status(400).json({ error: 'CSV file is empty or has no data rows. Expected header: staff_name,date,shift_type' });
+    }
+
+    // Parse header row
+    const header = lines[0].toLowerCase().split(',').map(h => h.trim());
+    const nameIdx = header.findIndex(h => h === 'staff_name' || h === 'name' || h === 'staff');
+    const dateIdx = header.findIndex(h => h === 'date' || h === 'shift_date');
+    const typeIdx = header.findIndex(h => h === 'shift_type' || h === 'type' || h === 'shift');
+
+    if (nameIdx === -1 || dateIdx === -1 || typeIdx === -1) {
+      return res.status(400).json({
+        error: 'CSV must have columns: staff_name, date, shift_type. Found: ' + header.join(', ')
+      });
+    }
+
+    const validShiftTypes = ['day', 'evening', 'night', 'sleep-in', 'off', 'annual_leave', 'sick'];
+    const results: { row: number; status: string; staff_name: string; date: string; shift_type: string }[] = [];
+    let imported = 0;
+    let skipped = 0;
+
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(',').map(c => c.trim());
+      const staffName = cols[nameIdx] || '';
+      const shiftDate = cols[dateIdx] || '';
+      const shiftType = cols[typeIdx]?.toLowerCase() || '';
+
+      if (!staffName || !shiftDate || !shiftType) {
+        results.push({ row: i + 1, status: 'skipped: missing fields', staff_name: staffName, date: shiftDate, shift_type: shiftType });
+        skipped++;
+        continue;
+      }
+
+      if (!validShiftTypes.includes(shiftType)) {
+        results.push({ row: i + 1, status: `skipped: invalid shift_type "${shiftType}". Valid: ${validShiftTypes.join(', ')}`, staff_name: staffName, date: shiftDate, shift_type: shiftType });
+        skipped++;
+        continue;
+      }
+
+      // Validate date format (YYYY-MM-DD)
+      const dateMatch = shiftDate.match(/^\d{4}-\d{2}-\d{2}$/);
+      if (!dateMatch) {
+        results.push({ row: i + 1, status: 'skipped: invalid date format (expected YYYY-MM-DD)', staff_name: staffName, date: shiftDate, shift_type: shiftType });
+        skipped++;
+        continue;
+      }
+
+      // Look up staff by name (first_name + last_name)
+      const nameParts = staffName.split(/\s+/);
+      const firstName = nameParts[0];
+      const lastName = nameParts.slice(1).join(' ');
+
+      const { rows: users } = await query(
+        `SELECT u.id AS user_id FROM users u
+         WHERE u.care_home_id = $1 AND u.active = TRUE AND u.deleted_at IS NULL
+           AND LOWER(u.first_name) = LOWER($2) AND LOWER(u.last_name) = LOWER($3)`,
+        [careHomeId, firstName, lastName]
+      );
+
+      if (users.length === 0) {
+        results.push({ row: i + 1, status: `skipped: staff "${staffName}" not found`, staff_name: staffName, date: shiftDate, shift_type: shiftType });
+        skipped++;
+        continue;
+      }
+
+      const staffUserId = users[0].user_id;
+
+      // Get staff_profiles.id for this user
+      const { rows: profiles } = await query(
+        `SELECT id FROM staff_profiles WHERE user_id = $1 AND care_home_id = $2`,
+        [staffUserId, careHomeId]
+      );
+
+      if (profiles.length === 0) {
+        results.push({ row: i + 1, status: `skipped: no staff profile for "${staffName}"`, staff_name: staffName, date: shiftDate, shift_type: shiftType });
+        skipped++;
+        continue;
+      }
+
+      const staffProfileId = profiles[0].id;
+
+      // Define shift times based on type
+      let startTime = '07:00';
+      let endTime = '15:00';
+      if (shiftType === 'evening') { startTime = '15:00'; endTime = '22:00'; }
+      else if (shiftType === 'night') { startTime = '22:00'; endTime = '07:00'; }
+      else if (shiftType === 'sleep-in') { startTime = '22:00'; endTime = '07:00'; }
+      else if (shiftType === 'off' || shiftType === 'annual_leave' || shiftType === 'sick') { startTime = '00:00'; endTime = '23:59'; }
+
+      // Insert or update the shift
+      try {
+        await query(
+          `INSERT INTO shifts (care_home_id, staff_id, shift_date, shift_type, start_time, end_time, role_on_shift, notes, created_by)
+           VALUES ($1, $2, $3, $4::shift_type, $5, $6, $7, $8, $9)
+           ON CONFLICT (staff_id, shift_date) DO UPDATE SET
+             shift_type = EXCLUDED.shift_type,
+             start_time = EXCLUDED.start_time,
+             end_time = EXCLUDED.end_time,
+             notes = EXCLUDED.notes,
+             updated_at = NOW()`,
+          [careHomeId, staffProfileId, shiftDate, shiftType, startTime, endTime, 'staff', 'Imported from CSV', userId]
+        );
+        imported++;
+        results.push({ row: i + 1, status: 'imported', staff_name: staffName, date: shiftDate, shift_type: shiftType });
+      } catch (insertErr: any) {
+        results.push({ row: i + 1, status: `error: ${insertErr.message}`, staff_name: staffName, date: shiftDate, shift_type: shiftType });
+        skipped++;
+      }
+    }
+
+    res.json({
+      message: `CSV processed: ${imported} shifts imported, ${skipped} rows skipped`,
+      imported,
+      skipped,
+      total_rows: lines.length - 1,
+      details: results,
+    });
+  } catch (err) { next(err); }
+}

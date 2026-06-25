@@ -68,7 +68,7 @@ import * as smartHandoverCtrl from '../controllers/smartHandover.controller';
 import * as consentManagerCtrl from '../controllers/consentManager.controller';
 import * as digitalTwinCtrl from '../controllers/digitalTwin.controller';
 import * as environmentalIntelCtrl from '../controllers/environmentalIntel.controller';
-import { upload } from '../middleware/upload'; // getBillingSummary added
+import { upload, csvUpload } from '../middleware/upload'; // getBillingSummary added
 import * as aiService from '../services/ai.service';
 import { query } from '../models/db';
 import { AppError } from '../utils/errors';
@@ -539,6 +539,7 @@ router.get('/smart-rota/templates/:id', isManager, smartRotaCtrl.getRotaTemplate
 router.patch('/smart-rota/shifts/:id', isManager, smartRotaCtrl.updateRotaShift);
 router.post('/smart-rota/templates/:id/publish', isManager, smartRotaCtrl.publishRota);
 router.get('/smart-rota/constraints', isManager, smartRotaCtrl.getStaffConstraints);
+router.post('/smart-rota/upload-csv', isManager, csvUpload.single('file'), smartRotaCtrl.uploadRotaCsv);
 
 // -- Natural Language Search
 router.post('/search/nl', isStaff, nlSearchCtrl.search);

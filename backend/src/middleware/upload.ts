@@ -45,3 +45,27 @@ export const upload = multer({
   fileFilter,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
 });
+
+// CSV/Spreadsheet upload config — accepts .csv and .xlsx files
+const csvStorage = multer.memoryStorage();
+
+const csvFileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  const allowed = [
+    'text/csv',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'text/plain',
+  ];
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (allowed.includes(file.mimetype) || ext === '.csv' || ext === '.xlsx') {
+    cb(null, true);
+  } else {
+    cb(new Error('Only CSV or Excel files are allowed (.csv, .xlsx)'));
+  }
+};
+
+export const csvUpload = multer({
+  storage: csvStorage,
+  fileFilter: csvFileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+});

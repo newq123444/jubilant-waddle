@@ -1,0 +1,7 @@
+{
+  "task_id": "task-fix-rota-handover-sidebar",
+  "task_description": "Fix 4 issues: (1) SmartRota page crashing for managers, (2) Add Excel/CSV upload for rota, (3) SBAR AI Handover showing unexpected error when no API key, (4) Add sidebar search/filter for navigation",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
+  "blocked_reason": null
+}

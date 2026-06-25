@@ -503,6 +503,10 @@ export function usePublishRota() {
 export function useRotaConstraints() {
   return useQuery({ queryKey: ['smart-rota', 'constraints'], queryFn: () => smartRotaApi.getConstraints().then(r => r.data) });
 }
+export function useUploadRotaCsv() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (formData: FormData) => smartRotaApi.uploadCsv(formData).then(r => r.data), onSuccess: (data: any) => { qc.invalidateQueries({ queryKey: ['schedule'] }); qc.invalidateQueries({ queryKey: ['smart-rota'] }); toast.success(data?.message || 'CSV uploaded successfully'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to upload CSV') });
+}
 
 // -- Natural Language Search --
 export function useNlSearch() {

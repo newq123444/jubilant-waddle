@@ -209,6 +209,7 @@ export default function App() {
   const { isPhone, isTablet, isDesktop } = useBreakpoint();
   const [sidebarOpen, setSidebarOpen]  = useState(false);
   const [collapsed, setCollapsed]      = useState(false);
+  const [searchQuery, setSearchQuery]  = useState('');
 
   // Close drawer on route change (mobile/tablet)
   useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
@@ -312,16 +313,66 @@ export default function App() {
         </div>
       )}
 
+      {/* Search input */}
+      {!(isDesktop && collapsed) && (
+        <div style={{ padding: '8px 12px', borderBottom: '1px solid rgba(255,255,255,.04)', flexShrink: 0 }}>
+          <div style={{ position: 'relative' }}>
+            <input
+              type="text"
+              placeholder="Search menu..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '7px 30px 7px 10px',
+                borderRadius: 6,
+                border: '1px solid rgba(255,255,255,.12)',
+                background: 'rgba(255,255,255,.05)',
+                color: '#e2e8f0',
+                fontSize: '0.8rem',
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                style={{
+                  position: 'absolute',
+                  right: 6,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  color: '#9aa5b4',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  padding: '2px 4px',
+                  lineHeight: 1,
+                }}
+                title="Clear search"
+              >
+                &#10005;
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Nav items */}
       <div ref={navScrollRef} style={{ flex: 1, padding: '8px 0', overflowY: 'auto' }}>
         {NAV_ALL.map((item, i) => {
           if ('section' in item && !('path' in item)) {
             if (item.roles && !item.roles.includes(role)) return null;
+            // Hide section headers when searching
+            if (searchQuery) return null;
             if (isDesktop && collapsed) return <div key={i} style={{ borderTop: '1px solid rgba(255,255,255,.05)', margin: '6px 0' }} />;
             return <div key={i} style={{ padding: '12px 16px 4px', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#3d4f66' }}>{item.section}</div>;
           }
           const navItem = item as { path: string; label: string; icon: string; roles: string[] | null; badge?: string };
           if (navItem.roles && !navItem.roles.includes(role)) return null;
+          // Filter by search query
+          if (searchQuery && !navItem.label.toLowerCase().includes(searchQuery.toLowerCase())) return null;
           const badgeCount = getBadge(navItem.badge);
           const isActive   = navItem.path === '/' ? location.pathname === '/' : location.pathname.startsWith(navItem.path);
           return (

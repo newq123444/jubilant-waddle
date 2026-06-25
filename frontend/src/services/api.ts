@@ -242,6 +242,7 @@ export const smartRotaApi = {
   updateShift: (id: string, data: object) => api.patch(`/smart-rota/shifts/${id}`, data),
   publish: (id: string) => api.post(`/smart-rota/templates/${id}/publish`),
   getConstraints: () => api.get('/smart-rota/constraints'),
+  uploadCsv: (formData: FormData) => api.post('/smart-rota/upload-csv', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
 };
 
 // -- Natural Language Search --

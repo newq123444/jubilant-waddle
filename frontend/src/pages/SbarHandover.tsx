@@ -22,7 +22,11 @@ export default function SbarHandover() {
   const selectedHandover = handovers.find(h => h.id === selectedId) || null;
 
   const handleGenerate = async () => {
-    await generateSbar.mutateAsync({ shiftDate, shiftType });
+    try {
+      await generateSbar.mutateAsync({ shiftDate, shiftType });
+    } catch {
+      // Error is handled by the mutation's onError callback in the hook
+    }
   };
 
   const handleApprove = async (id: string) => {
@@ -70,6 +74,11 @@ export default function SbarHandover() {
               {generateSbar.isPending ? 'Generating...' : '🤖 Generate SBAR'}
             </button>
           </div>
+          {generateSbar.isError && (
+            <div style={{ marginTop: 12, padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, color: '#991b1b', fontSize: '0.85rem' }}>
+              {(generateSbar.error as any)?.response?.data?.error || 'Failed to generate handover. Please try again.'}
+            </div>
+          )}
         </div>
       </div>
 
