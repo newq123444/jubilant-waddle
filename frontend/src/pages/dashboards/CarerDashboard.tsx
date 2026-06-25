@@ -892,6 +892,14 @@ export default function CarerDashboard() {
   const [activeNoteType, setNoteType]     = useState<typeof NOTE_TYPES[0]|null>(null);
   const [activeTask, setTask]             = useState<any>(null);
   const [isAdHoc, setIsAdHoc]             = useState(false);
+  const [isMobile, setIsMobile]           = useState(window.innerWidth < 768);
+
+  // Track viewport width for mobile overlay
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const startTask = useStartTask();
   useTaskSSE();
@@ -994,8 +1002,57 @@ export default function CarerDashboard() {
       {/* ── Wellbeing Quick Alert ───────────────────────────── */}
       <WellbeingAlertWidget residents={residents} />
 
+      {/* ── Mobile overlay for form/picker ─────────────────── */}
+      {isMobile && (showForm || showTypePicker) && (
+        <div style={{ position:'fixed', inset:0, zIndex:1000, background:'var(--bg-primary, #fff)', overflowY:'auto', padding:'16px' }}>
+          <button onClick={closeForm} style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', cursor:'pointer', fontSize:14, fontWeight:600, color:'var(--text-primary)', marginBottom:12, padding:'4px 0' }}>
+            ← Back
+          </button>
+
+          {showTypePicker && activeResident && (
+            <div className="card" style={{ border:'2px solid #2563eb' }}>
+              <div className="card-header" style={{ background:'#eff6ff' }}>
+                <div>
+                  <span className="card-title">📝 Select Note Type</span>
+                  <div style={{ fontSize:12, color:'var(--text-muted)', marginTop:2 }}>
+                    Ad-hoc note for {activeResident.first_name} {activeResident.last_name} · Rm {activeResident.room_number}
+                  </div>
+                </div>
+                <button onClick={closeForm} style={{ background:'none', border:'1px solid var(--border)', borderRadius:6, padding:'4px 10px', cursor:'pointer', fontSize:12 }}>✕ Cancel</button>
+              </div>
+              <div className="card-body">
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(120px, 1fr))', gap:8 }}>
+                  {NOTE_TYPES.map(nt=>(
+                    <button key={nt.value} onClick={()=>setNoteType(nt)}
+                      style={{ padding:'12px 8px', borderRadius:10, border:`2px solid ${nt.color}25`, background:nt.color+'0e', cursor:'pointer', textAlign:'center', transition:'all 150ms' }}
+                      onMouseEnter={e=>{(e.currentTarget as HTMLButtonElement).style.borderColor=nt.color;}}
+                      onMouseLeave={e=>{(e.currentTarget as HTMLButtonElement).style.borderColor=nt.color+'25';}}>
+                      <div style={{ fontSize:22, marginBottom:4 }}>{nt.icon}</div>
+                      <div style={{ fontSize:11, fontWeight:700, color:nt.color }}>{nt.label}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showForm && activeResident && activeNoteType && (
+            <div className="card" style={{ border:`2px solid ${activeNoteType.color}`, display:'flex', flexDirection:'column', overflow:'hidden', minHeight:0 }}>
+              <ClinicalForm
+                resident={activeResident}
+                noteType={activeNoteType}
+                task={activeTask}
+                onClose={closeForm}
+                onSaved={() => { refetch(); closeForm(); }}
+                isAdHoc={isAdHoc}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Main split layout ───────────────────────────────── */}
-      <div className="carer-main-grid" style={{ display:'grid', gridTemplateColumns: showForm || showTypePicker ? '1fr 1fr' : '1fr', gap:16, alignItems:'start' }}>
+      <div className="carer-main-grid no-mobile-collapse" style={{ display:'grid', gridTemplateColumns: !isMobile && (showForm || showTypePicker) ? '1fr 1fr' : '1fr', gap:16, alignItems:'start' }}>
 
         {/* ── LEFT: Task Board ─────────────────────────────── */}
         <div>
@@ -1117,7 +1174,7 @@ export default function CarerDashboard() {
         </div>
 
         {/* ── RIGHT: Clinical Form ──────────────────────────── */}
-        {(showForm || showTypePicker) && (
+        {!isMobile && (showForm || showTypePicker) && (
           <div style={{ position:'sticky', top:80, height:'calc(100vh - 100px)', display:'flex', flexDirection:'column' }}>
             {showTypePicker && activeResident && (
               <div className="card" style={{ border:`2px solid #2563eb` }}>
