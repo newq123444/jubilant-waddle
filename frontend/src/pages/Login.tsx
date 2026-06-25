@@ -64,7 +64,7 @@ export default function Login() {
       fontFamily: "'Segoe UI', system-ui, sans-serif",
     }}>
       {/* Left panel – branding */}
-      <div style={{
+      <div className="login-left" style={{
         flex: '1 1 45%', display: 'flex', flexDirection: 'column',
         justifyContent: 'center', padding: '60px 48px',
         borderRight: '1px solid rgba(255,255,255,.06)',
@@ -117,11 +117,24 @@ export default function Login() {
       </div>
 
       {/* Right panel – login form */}
-      <div style={{
+      <div className="login-right" style={{
         flex: '1 1 55%', display: 'flex', flexDirection: 'column',
         justifyContent: 'center', padding: '60px 48px', overflowY: 'auto',
       }}>
         <div style={{ maxWidth: 520, width: '100%', margin: '0 auto' }}>
+          {/* Mobile header - visible only when left panel is hidden */}
+          <div className="login-mobile-header">
+            <div style={{
+              width: 40, height: 40, borderRadius: 10,
+              background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 20, boxShadow: '0 0 20px rgba(99,102,241,.3)',
+            }}>⚕</div>
+            <div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: '#fff' }}>CareVista</div>
+              <div style={{ fontSize: 10, color: '#4a5a7a', letterSpacing: '.08em', textTransform: 'uppercase' }}>Care Home Management</div>
+            </div>
+          </div>
           <h2 style={{ fontSize: 26, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Sign in</h2>
           <p style={{ fontSize: 14, color: '#4a5a7a', marginBottom: 32 }}>Enter your credentials or pick a demo account below</p>
 
@@ -201,7 +214,7 @@ export default function Login() {
           </div>
 
           {/* Demo account cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+          <div className="login-demo-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
             {DEMO_ACCOUNTS.map(acc => (
               <button
                 key={acc.email}
