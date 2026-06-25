@@ -1,5 +1,5 @@
 // src/App.tsx — Fully responsive: desktop sidebar, tablet drawer, phone bottom nav
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Routes, Route, NavLink, Link, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from './store/auth.store';
 import { useDashboard } from './hooks';
@@ -218,6 +218,14 @@ export default function App() {
   // Clear search when sidebar collapses
   useEffect(() => { if (collapsed) setSearchQuery(''); }, [collapsed]);
 
+  // Keep search input focused while typing
+  useEffect(() => {
+    if (searchQuery) {
+      const el = document.getElementById('sidebar-search-input');
+      if (el && document.activeElement !== el) el.focus();
+    }
+  }, [searchQuery]);
+
   const role      = user?.role || '';
   const roleColor = ROLE_COLORS[role] || '#2563eb';
 
@@ -320,10 +328,12 @@ export default function App() {
         <div style={{ padding: '8px 12px', borderBottom: '1px solid rgba(255,255,255,.04)', flexShrink: 0 }}>
           <div style={{ position: 'relative' }}>
             <input
+              id="sidebar-search-input"
               type="text"
               placeholder="Search menu..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
+              autoComplete="off"
               style={{
                 width: '100%',
                 padding: '7px 30px 7px 10px',

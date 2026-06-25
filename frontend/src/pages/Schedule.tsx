@@ -57,7 +57,7 @@ export default function Schedule() {
                     <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{s.job_title || s.role}</div>
                   </td>
                   {days.map(d => {
-                    const shift = (rota as any[]).find((r: any) => r.staff_id === s.id && r.shift_date === d);
+                    const shift = Array.isArray(rota) ? rota.find((r: any) => r.staff_id === s.id && r.shift_date === d) : undefined;
                     const sc = shift ? SHIFT_COLORS[shift.shift_type] || '#6b7280' : undefined;
                     return <td key={d} style={{ padding: '8px 6px', textAlign: 'center', background: d === new Date().toISOString().slice(0, 10) ? '#f8fbff' : undefined }}>
                       {shift ? (
