@@ -1,0 +1,7 @@
+{
+  "task_id": "task-ui-polish-visual",
+  "task_description": "Polish the CareVista UI to make it more graphic, visual, and easy to use for carers and staff. Add hover animations, gradients, progress indicators, larger icons, colored badges, and touch-friendly improvements across global CSS, CarerDashboard, TaskBoard, Residents, CareNotes, and sidebar navigation.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002"],
+  "blocked_reason": null
+}
