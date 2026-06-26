@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "feat",
   "description": "Global CSS polish in frontend/src/index.css - add hover animations, gradients, transitions, badge improvements, and table striping plus sidebar active-state improvements",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "In frontend/src/index.css, add a card hover animation that uses transform: translateY(-2px) with an increased box-shadow (shadow-lg) on .card:hover, keeping the existing transition duration at 200ms",
     "Add a gentle gradient to .page-header using a subtle background: linear-gradient(135deg, var(--primary-light), transparent) with appropriate padding and border-radius",
@@ -30,5 +30,5 @@
     "Run: cd /projects/sandbox/jubilant-waddle/frontend && npm run build"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All changes are visual only. Build passes cleanly (tsc + vite). The existing dark mode table row rule was also updated to include border-left for consistency."
 }
