@@ -48,7 +48,7 @@ function TaskChip({ task, userRole, userId, onOpen }: {
       title={`${task.task_name} — ${task.due_time?.slice(0,5)} ${isSomeoneElse ? `(${task.in_progress_name} is filling this)` : ''}`}
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 4,
-        padding: '5px 9px', borderRadius: 20,
+        padding: '5px 9px', borderRadius: 24,
         border: `2px solid ${isSomeoneElse ? '#c4b5fd' : st.border}`,
         background: isSomeoneElse ? '#faf5ff' : st.bg,
         color: isSomeoneElse ? '#7c3aed' : st.text,
@@ -59,6 +59,7 @@ function TaskChip({ task, userRole, userId, onOpen }: {
                    task.status === 'due' ? '0 0 0 2px #93c5fd60' : 'none',
         position: 'relative',
         opacity: task.status === 'upcoming' ? 0.65 : 1,
+        minWidth: 80, minHeight: 32,
       }}
     >
       <span style={{ fontSize: 13 }}>{task.icon}</span>
@@ -345,13 +346,30 @@ export default function TaskBoard() {
           <p className="page-subtitle">
             {counts.done}/{counts.total} complete · {counts.due} due · {counts.overdue} overdue · {counts.missed > 0 ? `⚠️ ${counts.missed} missed` : '0 missed'}
           </p>
+          {/* Progress Ring */}
+          <div style={{ display:'flex', alignItems:'center', gap:10, marginTop:8 }}>
+            <svg width="48" height="48" viewBox="0 0 48 48">
+              <circle cx="24" cy="24" r="20" fill="none" stroke="var(--border)" strokeWidth="4" />
+              <circle cx="24" cy="24" r="20" fill="none" stroke="#16a34a" strokeWidth="4"
+                strokeDasharray={`${2 * Math.PI * 20}`}
+                strokeDashoffset={`${2 * Math.PI * 20 * (1 - (counts.total > 0 ? counts.done / counts.total : 0))}`}
+                strokeLinecap="round"
+                transform="rotate(-90 24 24)"
+                style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+              />
+              <text x="24" y="24" textAnchor="middle" dominantBaseline="central" style={{ fontSize: 11, fontWeight: 700, fill: 'var(--text-primary)' }}>
+                {counts.total > 0 ? Math.round(counts.done / counts.total * 100) : 0}%
+              </text>
+            </svg>
+            <span style={{ fontSize:12, color:'var(--text-muted)' }}>Complete</span>
+          </div>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <input type="date" className="form-input" value={date} onChange={e => setDate(e.target.value)} style={{ width: 148 }} />
-          <button className="btn btn-secondary btn-sm" onClick={() => genTasks.mutate(date, { onSuccess: () => refetch() })} disabled={genTasks.isPending}>
+          <button className="btn btn-secondary btn-sm" onClick={() => genTasks.mutate(date, { onSuccess: () => refetch() })} disabled={genTasks.isPending} style={{ minHeight: 44, padding: '10px 16px' }}>
             {genTasks.isPending ? '⏳ Generating…' : '⚡ Generate Tasks'}
           </button>
-          <button className="btn btn-ghost btn-sm" onClick={() => refetch()}>🔄 Refresh</button>
+          <button className="btn btn-ghost btn-sm" onClick={() => refetch()} style={{ minHeight: 44, padding: '10px 16px' }}>🔄 Refresh</button>
         </div>
       </div>
 

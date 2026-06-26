@@ -5,6 +5,7 @@ import { useCareNotes, useCreateNote, useResidents, useStaff } from '../hooks';
 import { formatDateTime, NOTE_TYPE_LABELS, truncate } from '../utils/formatters';
 import type { CareNote, Resident } from '../types';
 import VoiceNoteInput from '../components/VoiceNoteInput';
+import { formatDistanceToNow } from 'date-fns';
 
 // Ordered list for the dropdown — clinical priority order
 const NOTE_TYPES: [string,string][] = [
@@ -41,20 +42,21 @@ const DRINK_OPTIONS = ['Water','Tea','Coffee','Juice','Squash','Milk','Soup','Th
 function NoteCard({ note: n, staff }: { note: any; staff: any[] }) {
   const [expanded, setExpanded] = useState(false);
   const borderColor = n.flagged ? 'var(--danger)' : n.is_significant ? 'var(--warning)' : 'transparent';
+  const cardBg = n.flagged ? '#fef2f208' : 'transparent';
   const meal = n.meal_context ? (typeof n.meal_context === 'string' ? JSON.parse(n.meal_context) : n.meal_context) : null;
   const coAuthors: string[] = n.co_author_names ? (typeof n.co_author_names === 'string' ? JSON.parse(n.co_author_names) : n.co_author_names) : [];
 
   return (
     <div
       className="card"
-      style={{ borderLeft: `4px solid ${borderColor}`, cursor: 'pointer', transition: 'box-shadow 0.15s' }}
+      style={{ borderLeft: `${n.flagged ? '5px' : '4px'} solid ${borderColor}`, background: cardBg, cursor: 'pointer', transition: 'box-shadow 0.15s' }}
       onClick={() => setExpanded(x => !x)}
     >
       <div className="card-body">
         {/* Header row */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6, gap: 12 }}>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-            <span className="badge badge-primary" style={{ fontSize: '0.78rem' }}>
+            <span className="badge badge-primary" style={{ fontSize: '0.82rem' }}>
               {NOTE_TYPE_LABELS[n.note_type] || n.note_type}
             </span>
             {n.resident_name && (
@@ -80,13 +82,16 @@ function NoteCard({ note: n, staff }: { note: any; staff: any[] }) {
               {coAuthors.length > 0 && (
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>+ {coAuthors.join(', ')}</div>
               )}
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{formatDateTime(n.created_at)}</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }} title={formatDateTime(n.created_at)}>
+                {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
+              </div>
             </div>
             <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>{expanded ? '▲' : '▼'}</span>
           </div>
         </div>
 
         {/* Content — truncated or full */}
+        {n.flagged && <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6, color:'#dc2626', fontSize:12, fontWeight:700 }}>🚩 Flagged for Review</div>}
         <p style={{ fontSize: '0.88rem', lineHeight: 1.7, color: 'var(--text-primary)', whiteSpace: 'pre-wrap', margin: 0 }}>
           {expanded ? n.content : (n.content?.length > 180 ? n.content.slice(0, 180) + '…' : n.content)}
         </p>

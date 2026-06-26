@@ -1065,17 +1065,22 @@ export default function CarerDashboard() {
             </div>
           </div>
 
-          {/* Task summary counts */}
-          <div style={{ display:'flex', gap:6, marginBottom:10, flexWrap:'wrap' }}>
+          {/* Task summary progress bars */}
+          <div style={{ display:'flex', gap:8, marginBottom:12, flexWrap:'wrap', alignItems:'center' }}>
             {[
-              { label:'Due',     val:tasks.filter(t=>t.status==='due').length,     color:'#2563eb' },
+              { label:'Due', val:tasks.filter(t=>t.status==='due').length, color:'#2563eb' },
               { label:'Overdue', val:tasks.filter(t=>t.status==='overdue').length, color:'#d97706' },
-              { label:'Missed',  val:tasks.filter(t=>t.status==='missed').length,  color:'#dc2626' },
-              { label:'Done',    val:tasks.filter(t=>t.status==='done').length,    color:'#16a34a' },
+              { label:'Missed', val:tasks.filter(t=>t.status==='missed').length, color:'#dc2626' },
+              { label:'Done', val:tasks.filter(t=>t.status==='done').length, color:'#16a34a' },
             ].map(k=>(
-              <div key={k.label} style={{ padding:'3px 10px', borderRadius:4, background:'white', border:`1px solid ${k.color}30`, fontSize:11 }}>
-                <span style={{ fontWeight:700, color:k.color }}>{k.val}</span>
-                <span style={{ color:'var(--text-muted)', marginLeft:4, fontWeight:400 }}>{k.label}</span>
+              <div key={k.label} style={{ flex:'1 1 120px', minWidth:100 }}>
+                <div style={{ display:'flex', justifyContent:'space-between', marginBottom:3 }}>
+                  <span style={{ fontSize:11, fontWeight:600, color:k.color }}>{k.label}</span>
+                  <span style={{ fontSize:11, fontWeight:700, color:k.color }}>{k.val}</span>
+                </div>
+                <div style={{ height:6, borderRadius:3, background:'var(--surface-2)', overflow:'hidden' }}>
+                  <div style={{ height:'100%', borderRadius:3, background:k.color, width:`${tasks.length>0 ? (k.val/tasks.length*100) : 0}%`, transition:'width 0.3s ease' }} />
+                </div>
               </div>
             ))}
           </div>
@@ -1105,7 +1110,7 @@ export default function CarerDashboard() {
                 const r = residents.find(res=>res.id===rid);
 
                 return (
-                  <div key={rid} style={{ background:'white', border:`1px solid ${rowBorder}`, borderRadius:10, padding:'10px 12px' }}>
+                  <div key={rid} style={{ background:allDone?'linear-gradient(135deg, #f0fdf4 0%, white 40%)':hasMissed?'linear-gradient(135deg, #fef2f2 0%, white 40%)':hasOverdue?'linear-gradient(135deg, #fffbeb 0%, white 40%)':'white', border:`1px solid ${rowBorder}`, borderRadius:10, padding:'10px 12px' }}>
                     <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:6, paddingBottom:6, borderBottom:'1px solid var(--border)' }}>
                       <div style={{ display:'flex', alignItems:'center', gap:8 }}>
                         {/* Resident photo or initials */}
@@ -1125,8 +1130,8 @@ export default function CarerDashboard() {
                         <span style={{ fontSize:11, color:allDone?'#16a34a':hasMissed?'#dc2626':'var(--text-muted)', fontWeight:500 }}>{done}/{resTasks.length}</span>
                       </div>
                       {r && (
-                        <button onClick={()=>handleAdHoc(r)} style={{ fontSize:11, padding:'3px 10px', borderRadius:8, border:'1px solid var(--border)', background:'var(--surface-2)', color:'var(--text-muted)', cursor:'pointer', fontWeight:600 }}>
-                          + Ad-hoc Note
+                        <button onClick={()=>handleAdHoc(r)} style={{ fontSize:12, padding:'5px 14px', borderRadius:8, border:'1px solid #3b82f6', background:'#eff6ff', color:'#2563eb', cursor:'pointer', fontWeight:700, display:'flex', alignItems:'center', gap:4 }}>
+                          📝 Ad-hoc Note
                         </button>
                       )}
                     </div>
@@ -1152,7 +1157,7 @@ export default function CarerDashboard() {
                               transition:'all 120ms', position:'relative',
                               boxShadow:task.status==='missed'?'0 0 0 2px #fca5a540':task.status==='due'?'0 0 0 2px #93c5fd40':'none',
                             }}>
-                            <span style={{ fontSize:11, opacity:0.7 }}>{task.icon}</span>
+                            <span style={{ fontSize:16 }}>{task.icon}</span>
                             <span style={{ maxWidth:90, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                               {task.task_name.length > 12 ? task.task_name.slice(0,12)+'…' : task.task_name}
                             </span>

@@ -41,13 +41,13 @@ export default function Residents() {
             const rc = getRiskColor(r.risk_level);
             const rb = r.risk_level === 'high' ? '#fef2f2' : r.risk_level === 'medium' ? '#fffbeb' : '#f0fdf4';
             return (
-              <div key={r.id} className="card" style={{ borderLeft: `4px solid ${rc}` }}>
+              <div key={r.id} className="card" style={{ borderLeft: `5px solid ${rc}` }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', flexWrap: 'wrap' }}>
-                  <div style={{ width: 44, height: 44, borderRadius: '50%', background: rb, border: `2px solid ${rc}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 800, color: rc, flexShrink: 0 }}>{r.first_name?.[0] ?? '?'}{r.last_name?.[0] ?? ''}</div>
+                  <div style={{ width: 48, height: 48, borderRadius: '50%', background: rb, border: `2px solid ${rc}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 800, color: rc, flexShrink: 0 }}>{r.first_name?.[0] ?? '?'}{r.last_name?.[0] ?? ''}</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 700, fontSize: 15 }}>{r.first_name} {r.last_name}</div>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                      <span>Room {r.room_number}</span><span>·</span><span>{formatAge(r.date_of_birth)}</span><span>·</span><span>Admitted {formatDate(r.admission_date)}</span>
+                      <span style={{ background:'#eff6ff', color:'#1e40af', padding:'1px 8px', borderRadius:6, fontWeight:700, fontSize:12 }}>Rm {r.room_number}</span><span>·</span><span>{formatAge(r.date_of_birth)}</span><span>·</span><span>Admitted {formatDate(r.admission_date)}</span>
                       {r.nhs_number && <><span>·</span><span>NHS: {r.nhs_number}</span></>}
                       {r.dnacpr && <><span>·</span><span style={{ color: '#dc2626', fontWeight: 700 }}>🔴 DNACPR</span></>}
                     </div>
