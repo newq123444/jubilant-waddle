@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "feat",
   "description": "Visual polish for CarerDashboard, TaskBoard, Residents, CareNotes, and App.tsx sidebar - larger icons, progress indicators, color gradients on cards, and touch-friendly improvements",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "In frontend/src/pages/dashboards/CarerDashboard.tsx: (a) Replace the simple task summary count pills with colored progress bars - each status (Due, Overdue, Missed, Done) gets a horizontal bar showing percentage of total tasks. Use div elements with percentage widths and colored backgrounds. (b) Make category icons in the task chips larger (16px font-size) and add color based on category type using CATEGORY_COLOR-like mapping. (c) Add a subtle color gradient background to each resident task card based on completion status: green-tinted (background: linear-gradient(to right, #f0fdf408, white)) when all done, amber when overdue, red when missed. (d) Make the '+ Ad-hoc Note' button more prominent - larger padding, colored background (#2563eb10 with #2563eb border and text), add a pen/note icon (📝).",
     "In frontend/src/pages/TaskBoard.tsx: (a) Add a visual progress ring/circle at the top showing overall completion percentage - use an SVG circle with stroke-dasharray/offset to create a circular progress indicator displaying counts.done/counts.total as percentage. Place it next to the existing page subtitle. (b) Change the STATUS badge styling in TaskChip to pill-shaped (borderRadius: 20px) with the appropriate status colors already defined - green=done, blue=in_progress, amber=due/overdue, red=missed. Ensure they have a min-width of 80px for touch targets. (c) Make action buttons (Generate Tasks, Refresh) larger with min-height 44px and larger padding for touch-friendliness.",
@@ -31,5 +31,5 @@
     "Run: cd /projects/sandbox/jubilant-waddle/frontend && npm run build"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All changes built successfully with no TypeScript or Vite errors. The warning about chunk size (>500KB) is pre-existing and unrelated to our changes."
 }
