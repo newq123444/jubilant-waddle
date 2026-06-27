@@ -1179,7 +1179,7 @@ export default function CarerDashboard() {
 
       {/* ── GRID VIEW ──────────────────────────────────────── */}
       {viewMode === 'grid' && (
-        <div style={{ display:'grid', gridTemplateColumns: !isMobile && gridSelectedResident ? `1fr 380px` : '1fr', gap:16, alignItems:'start' }}>
+        <div className="no-mobile-collapse" style={{ display:'grid', gridTemplateColumns: !isMobile && gridSelectedResident ? `1fr 380px` : '1fr', gap:16, alignItems:'start' }}>
           {/* Photo Grid */}
           <div>
             {/* Task summary progress bars */}
@@ -1203,7 +1203,7 @@ export default function CarerDashboard() {
             </div>
 
             {/* Resident photo cards grid */}
-            <div style={{ display:'grid', gridTemplateColumns:`repeat(${gridCols}, 1fr)`, gap:isMobile ? 6 : 12 }}>
+            <div className="no-mobile-collapse" style={{ display:'grid', gridTemplateColumns:`repeat(${gridCols}, 1fr)`, gap:isMobile ? 6 : 12 }}>
               {residents.filter(r => {
                 if (!search) return true;
                 return `${r.first_name} ${r.last_name} ${r.room_number}`.toLowerCase().includes(search.toLowerCase());
