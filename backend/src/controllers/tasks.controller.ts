@@ -36,6 +36,17 @@ const DEFAULT_TEMPLATES = [
   { name: 'Skin Inspection (Bed-bound)',     icon: '🔍', category: 'observation',     shift: 'day',     due_time: '10:00', window_mins: 60,  sort_order: 23, applies_to: 'bed_bound' },
   { name: 'Outdoor Garden Visit',            icon: '🌿', category: 'social_wellbeing', shift: 'day',    due_time: '14:30', window_mins: 60,  sort_order: 24, applies_to: 'independent,walking_aid' },
   { name: 'In-Room Sensory Activity',        icon: '🎵', category: 'social_wellbeing', shift: 'day',    due_time: '14:30', window_mins: 60,  sort_order: 25, applies_to: 'bed_bound' },
+  // Personal care templates
+  { name: 'Eye Care (cleaning, drops if prescribed)', icon: '👁️', category: 'personal_care', shift: 'day',     due_time: '08:30', window_mins: 120, sort_order: 26, applies_to: 'all' },
+  { name: 'Denture Care (cleaning, soaking overnight)', icon: '🦷', category: 'personal_care', shift: 'evening', due_time: '21:00', window_mins: 90,  sort_order: 27, applies_to: 'all' },
+  { name: 'Hearing Aid Check',              icon: '👂', category: 'personal_care', shift: 'day',     due_time: '08:00', window_mins: 120, sort_order: 28, applies_to: 'all' },
+  { name: 'Nail Care Check (weekly)',       icon: '💅', category: 'personal_care', shift: 'day',     due_time: '10:00', window_mins: 180, sort_order: 29, applies_to: 'all' },
+  { name: 'Glasses Cleaning',              icon: '👓', category: 'personal_care', shift: 'day',     due_time: '08:00', window_mins: 120, sort_order: 30, applies_to: 'all' },
+  { name: 'Continence Pad Check',          icon: '🩹', category: 'personal_care', shift: 'all',     due_time: '10:00', window_mins: 120, sort_order: 31, applies_to: 'bed_bound,wheelchair' },
+  { name: 'Hair Care & Grooming',          icon: '💇', category: 'personal_care', shift: 'day',     due_time: '09:30', window_mins: 120, sort_order: 32, applies_to: 'all' },
+  { name: 'Skin Moisturising',             icon: '🧴', category: 'personal_care', shift: 'day',     due_time: '10:30', window_mins: 120, sort_order: 33, applies_to: 'bed_bound' },
+  { name: 'Shaving / Facial Grooming',     icon: '🪒', category: 'personal_care', shift: 'day',     due_time: '09:00', window_mins: 120, sort_order: 34, applies_to: 'all' },
+  { name: 'Clothing Change Check',         icon: '👕', category: 'personal_care', shift: 'evening', due_time: '17:30', window_mins: 90,  sort_order: 35, applies_to: 'all' },
 ];
 
 // ── Generate today's tasks for all active residents ────────────────────────
