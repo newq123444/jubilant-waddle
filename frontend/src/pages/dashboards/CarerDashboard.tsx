@@ -978,7 +978,7 @@ export default function CarerDashboard() {
   };
 
   // Grid view: compute columns and card border color
-  const gridCols = isMobile ? 2 : isTablet ? 3 : 4;
+  const gridCols = isMobile ? 3 : isTablet ? 4 : 4;
   const getCardBorderColor = (residentTasks: any[]) => {
     if (!residentTasks || residentTasks.length === 0) return '#e2e8f0';
     const done = residentTasks.filter((t: any) => t.status === 'done' || t.status === 'deferred').length;
@@ -1203,7 +1203,7 @@ export default function CarerDashboard() {
             </div>
 
             {/* Resident photo cards grid */}
-            <div style={{ display:'grid', gridTemplateColumns:`repeat(${gridCols}, 1fr)`, gap:isMobile ? 8 : 12 }}>
+            <div style={{ display:'grid', gridTemplateColumns:`repeat(${gridCols}, 1fr)`, gap:isMobile ? 6 : 12 }}>
               {residents.filter(r => {
                 if (!search) return true;
                 return `${r.first_name} ${r.last_name} ${r.room_number}`.toLowerCase().includes(search.toLowerCase());
@@ -1219,46 +1219,52 @@ export default function CarerDashboard() {
                 return (
                   <div key={r.id} onClick={() => handleGridCardTap(r)}
                     style={{
-                      borderRadius:12, overflow:'hidden', cursor:'pointer',
-                      border:`3px solid ${isSelected ? '#2563eb' : borderColor}`,
+                      borderRadius: isMobile ? 8 : 12, overflow:'hidden', cursor:'pointer',
+                      border:`${isMobile ? 2 : 3}px solid ${isSelected ? '#2563eb' : borderColor}`,
                       boxShadow: isSelected ? '0 4px 20px rgba(37,99,235,.3)' : '0 2px 8px rgba(0,0,0,.12)',
                       transition:'all 180ms ease', position:'relative',
                       transform: isSelected ? 'scale(1.02)' : 'scale(1)',
                     }}>
                     {/* Photo area */}
-                    <div style={{ position:'relative', width:'100%', paddingTop:'100%', background:'#1e293b' }}>
+                    <div style={{ position:'relative', width:'100%', paddingTop: isMobile ? '64px' : '100%', height: isMobile ? 0 : undefined, background:'#1e293b' }}>
                       {photoUrl ? (
                         <img src={photoUrl} alt={r.first_name}
                           style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }} />
                       ) : (
                         <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', background:'linear-gradient(135deg, #1e293b 0%, #334155 100%)' }}>
-                          <span style={{ fontSize: isMobile ? 32 : 40, fontWeight:700, color:'#94a3b8' }}>{initials}</span>
+                          <span style={{ fontSize: isMobile ? 22 : 40, fontWeight:700, color:'#94a3b8' }}>{initials}</span>
                         </div>
                       )}
                       {/* Mood emoji overlay - bottom right of photo */}
                       {moodEmoji && (
-                        <div style={{ position:'absolute', bottom:6, right:6, fontSize:isMobile ? 16 : 20, background:'rgba(0,0,0,.5)', borderRadius:'50%', width:isMobile ? 26 : 30, height:isMobile ? 26 : 30, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                        <div style={{ position:'absolute', bottom: isMobile ? 2 : 6, right: isMobile ? 2 : 6, fontSize:isMobile ? 14 : 20, background:'rgba(0,0,0,.5)', borderRadius:'50%', width:isMobile ? 20 : 30, height:isMobile ? 20 : 30, display:'flex', alignItems:'center', justifyContent:'center' }}>
                           {moodEmoji}
                         </div>
                       )}
                       {/* Risk level info badge - top right */}
                       {r.risk_level === 'high' && (
-                        <div style={{ position:'absolute', top:6, right:6, fontSize:12, background:'rgba(220,38,38,.9)', color:'white', borderRadius:6, padding:'2px 6px', fontWeight:700 }}>
+                        <div style={{ position:'absolute', top: isMobile ? 2 : 6, right: isMobile ? 2 : 6, fontSize: isMobile ? 9 : 12, background:'rgba(220,38,38,.9)', color:'white', borderRadius: isMobile ? 4 : 6, padding: isMobile ? '1px 3px' : '2px 6px', fontWeight:700 }}>
                           ℹ️
                         </div>
                       )}
                       {/* Task count badge - top left */}
                       {resTasks.length > 0 && (
-                        <div style={{ position:'absolute', top:6, left:6, fontSize:10, background:'rgba(0,0,0,.7)', color:'white', borderRadius:6, padding:'2px 7px', fontWeight:700 }}>
+                        <div style={{ position:'absolute', top: isMobile ? 2 : 6, left: isMobile ? 2 : 6, fontSize: isMobile ? 8 : 10, background:'rgba(0,0,0,.7)', color:'white', borderRadius: isMobile ? 4 : 6, padding: isMobile ? '1px 4px' : '2px 7px', fontWeight:700 }}>
                           {done}/{resTasks.length}
+                        </div>
+                      )}
+                      {/* Room number overlay - bottom left (mobile only) */}
+                      {isMobile && (
+                        <div style={{ position:'absolute', bottom:2, left:2, fontSize:8, background:'rgba(0,0,0,.6)', color:'#e2e8f0', borderRadius:4, padding:'1px 4px', fontWeight:600 }}>
+                          {r.room_number}
                         </div>
                       )}
                     </div>
                     {/* Name strip */}
-                    <div style={{ background:'#1e293b', padding:isMobile ? '6px 8px' : '8px 10px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                    <div style={{ background:'#1e293b', padding:isMobile ? '4px 4px' : '8px 10px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
                       <div>
-                        <div style={{ fontSize:isMobile ? 11 : 13, fontWeight:700, color:'#f1f5f9', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{r.first_name}</div>
-                        <div style={{ fontSize:isMobile ? 9 : 10, color:'#94a3b8', fontWeight:500 }}>Rm {r.room_number}</div>
+                        <div style={{ fontSize:isMobile ? 10 : 13, fontWeight:700, color:'#f1f5f9', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{r.first_name}</div>
+                        {!isMobile && <div style={{ fontSize:10, color:'#94a3b8', fontWeight:500 }}>Rm {r.room_number}</div>}
                       </div>
                     </div>
                   </div>
