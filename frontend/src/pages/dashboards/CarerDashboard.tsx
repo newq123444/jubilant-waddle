@@ -887,16 +887,25 @@ export default function CarerDashboard() {
   const [search, setSearch] = useState('');
   const [date]              = useState(todayISO());
 
+  // View mode: grid (photo cards) or list (original task list)
+  const [viewMode, setViewMode] = useState<'grid'|'list'>('grid');
+  // Selected resident for grid view detail panel
+  const [gridSelectedResident, setGridSelectedResident] = useState<Resident|null>(null);
+
   // Active form state
   const [activeResident, setResident]     = useState<Resident|null>(null);
   const [activeNoteType, setNoteType]     = useState<typeof NOTE_TYPES[0]|null>(null);
   const [activeTask, setTask]             = useState<any>(null);
   const [isAdHoc, setIsAdHoc]             = useState(false);
   const [isMobile, setIsMobile]           = useState(window.innerWidth < 768);
+  const [isTablet, setIsTablet]           = useState(window.innerWidth >= 768 && window.innerWidth < 1024);
 
   // Track viewport width for mobile overlay
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsTablet(window.innerWidth >= 768 && window.innerWidth < 1024);
+    };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -968,6 +977,47 @@ export default function CarerDashboard() {
     setIsAdHoc(false);
   };
 
+  // Grid view: compute columns and card border color
+  const gridCols = isMobile ? 2 : isTablet ? 3 : 4;
+  const getCardBorderColor = (residentTasks: any[]) => {
+    if (!residentTasks || residentTasks.length === 0) return '#e2e8f0';
+    const done = residentTasks.filter((t: any) => t.status === 'done' || t.status === 'deferred').length;
+    const hasMissed = residentTasks.some((t: any) => t.status === 'missed');
+    const hasOverdue = residentTasks.some((t: any) => t.status === 'overdue');
+    if (hasMissed) return '#ef4444';
+    if (hasOverdue) return '#f59e0b';
+    if (done === residentTasks.length) return '#22c55e';
+    if (done > 0) return '#3b82f6';
+    return '#e2e8f0';
+  };
+
+  // Grid view: handle card tap
+  const handleGridCardTap = (r: Resident) => {
+    if (isMobile) {
+      setGridSelectedResident(r);
+    } else {
+      setGridSelectedResident(r);
+    }
+  };
+
+  const closeGridPanel = () => {
+    setGridSelectedResident(null);
+  };
+
+  // Get mood emoji from wellbeing overview
+  const { data: wellbeingOverview } = useWellbeingOverview();
+  const getMoodEmoji = (residentId: string): string | null => {
+    const MOOD_EMOJI_MAP: Record<string, string> = { 
+      very_low: '😢', low: '😔', neutral: '😐', happy: '😊', very_happy: '😄',
+      Happy: '😊', Neutral: '😐', Low: '😔', Agitated: '😠', Drowsy: '😴', 
+      Confused: '😕', Distressed: '😢', Calm: '😌'
+    };
+    const needsAttention = wellbeingOverview?.needsAttention || [];
+    const found = needsAttention.find((r: any) => r.id === residentId);
+    if (found?.mood) return MOOD_EMOJI_MAP[found.mood] || null;
+    return null;
+  };
+
   // If note type not yet chosen for ad-hoc, show type picker
   const showTypePicker = activeResident && !activeNoteType;
   const showForm       = activeResident && activeNoteType;
@@ -1001,6 +1051,82 @@ export default function CarerDashboard() {
 
       {/* ── Wellbeing Quick Alert ───────────────────────────── */}
       <WellbeingAlertWidget residents={residents} />
+
+      {/* ── View Mode Toggle ────────────────────────────────── */}
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
+        <div style={{ display:'flex', gap:4, background:'var(--surface-2)', borderRadius:8, padding:3 }}>
+          <button onClick={()=>{ setViewMode('grid'); setGridSelectedResident(null); }} style={{ padding:'6px 14px', borderRadius:6, border:'none', background:viewMode==='grid'?'white':'transparent', color:viewMode==='grid'?'var(--text-primary)':'var(--text-muted)', fontSize:12, fontWeight:viewMode==='grid'?700:500, cursor:'pointer', boxShadow:viewMode==='grid'?'0 1px 3px rgba(0,0,0,.1)':'none', transition:'all 150ms' }}>
+            🖼 Grid View
+          </button>
+          <button onClick={()=>{ setViewMode('list'); setGridSelectedResident(null); }} style={{ padding:'6px 14px', borderRadius:6, border:'none', background:viewMode==='list'?'white':'transparent', color:viewMode==='list'?'var(--text-primary)':'var(--text-muted)', fontSize:12, fontWeight:viewMode==='list'?700:500, cursor:'pointer', boxShadow:viewMode==='list'?'0 1px 3px rgba(0,0,0,.1)':'none', transition:'all 150ms' }}>
+            📋 List View
+          </button>
+        </div>
+        <div style={{ display:'flex', gap:6 }}>
+          <input type="text" placeholder="🔍 Search resident..." value={search} onChange={e=>setSearch(e.target.value)}
+            style={{ padding:'6px 10px', borderRadius:8, border:'1px solid var(--border)', fontSize:12, width:140, background:'var(--surface-2)' }} />
+          <button className="btn btn-ghost btn-sm" onClick={()=>refetch()} style={{ fontSize:12 }}>Refresh</button>
+        </div>
+      </div>
+
+      {/* ── Grid View: Mobile overlay for resident detail ──── */}
+      {viewMode === 'grid' && isMobile && gridSelectedResident && !showForm && !showTypePicker && (
+        <div style={{ position:'fixed', inset:0, zIndex:10000, background:'var(--bg-primary, #1a1d27)', color:'var(--text-primary, #e2e8f0)', overflowY:'auto', padding:'16px', WebkitOverflowScrolling:'touch' }}>
+          <button onClick={closeGridPanel} style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', cursor:'pointer', fontSize:14, fontWeight:600, color:'var(--text-primary, #e2e8f0)', marginBottom:12, padding:'4px 0' }}>
+            ← Back
+          </button>
+          {/* Resident header */}
+          <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:16, padding:'12px', background:'var(--surface-2, #252830)', borderRadius:12 }}>
+            {(() => {
+              const photoUrl = residentPhoto(gridSelectedResident.photo_url);
+              const initials = (gridSelectedResident.first_name[0] + gridSelectedResident.last_name[0]).toUpperCase();
+              return photoUrl ? (
+                <img src={photoUrl} alt={gridSelectedResident.first_name} style={{ width:56, height:56, borderRadius:'50%', objectFit:'cover', border:'3px solid var(--border)' }} />
+              ) : (
+                <div style={{ width:56, height:56, borderRadius:'50%', background:'#374151', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, fontWeight:700, color:'#e2e8f0', border:'3px solid #4b5563' }}>{initials}</div>
+              );
+            })()}
+            <div>
+              <div style={{ fontWeight:700, fontSize:16 }}>{gridSelectedResident.first_name} {gridSelectedResident.last_name}</div>
+              <div style={{ fontSize:12, color:'var(--text-muted)' }}>Room {gridSelectedResident.room_number}</div>
+              {gridSelectedResident.risk_level === 'high' && (
+                <span style={{ fontSize:10, padding:'2px 6px', borderRadius:4, background:'#fef2f2', color:'#dc2626', fontWeight:700, marginTop:4, display:'inline-block' }}>HIGH RISK</span>
+              )}
+            </div>
+          </div>
+          {/* Tasks for this resident */}
+          <div style={{ marginBottom:16 }}>
+            <div style={{ fontWeight:600, fontSize:13, marginBottom:8, color:'var(--text-primary, #e2e8f0)' }}>Pending Tasks</div>
+            {(byResident[gridSelectedResident.id] || []).sort((a:any,b:any)=>(a.due_time||'').localeCompare(b.due_time||'')).map((task:any) => {
+              const st = TASK_STATUS[task.status] || TASK_STATUS.upcoming;
+              const isDone = task.status==='done'||task.status==='deferred';
+              return (
+                <button key={task.id} onClick={()=>handleTaskTap(task)} disabled={isDone}
+                  style={{ display:'flex', alignItems:'center', gap:10, width:'100%', padding:'10px 12px', marginBottom:6, borderRadius:8, border:`1px solid ${st.border}`, background:st.bg, cursor:isDone?'default':'pointer', textAlign:'left' }}>
+                  <span style={{ fontSize:20 }}>{task.icon}</span>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:13, fontWeight:600, color:st.text }}>{task.task_name}</div>
+                    <div style={{ fontSize:11, color:'var(--text-muted)' }}>Due {task.due_time?.slice(0,5)} {isDone && '- Done'}</div>
+                  </div>
+                  {isDone && <span style={{ fontSize:14 }}>✓</span>}
+                </button>
+              );
+            })}
+            {(!byResident[gridSelectedResident.id] || byResident[gridSelectedResident.id].length === 0) && (
+              <div style={{ fontSize:12, color:'var(--text-muted)', padding:12, textAlign:'center' }}>No tasks assigned today</div>
+            )}
+          </div>
+          {/* Quick actions */}
+          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+            <button onClick={()=>handleAdHoc(gridSelectedResident)} style={{ padding:'12px 16px', borderRadius:10, border:'1px solid #3b82f6', background:'#eff6ff', color:'#2563eb', fontSize:13, fontWeight:700, cursor:'pointer', textAlign:'center' }}>
+              📝 + Ad-hoc Note
+            </button>
+            <Link to={`/residents/${gridSelectedResident.id}`} style={{ padding:'12px 16px', borderRadius:10, border:'1px solid var(--border)', background:'var(--surface-2, #252830)', color:'var(--text-primary, #e2e8f0)', fontSize:13, fontWeight:600, cursor:'pointer', textAlign:'center', textDecoration:'none' }}>
+              👤 View Full Profile
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* ── Mobile overlay for form/picker ─────────────────── */}
       {isMobile && (showForm || showTypePicker) && (
@@ -1051,6 +1177,155 @@ export default function CarerDashboard() {
         </div>
       )}
 
+      {/* ── GRID VIEW ──────────────────────────────────────── */}
+      {viewMode === 'grid' && (
+        <div style={{ display:'grid', gridTemplateColumns: !isMobile && gridSelectedResident ? `1fr 380px` : '1fr', gap:16, alignItems:'start' }}>
+          {/* Photo Grid */}
+          <div>
+            {/* Task summary progress bars */}
+            <div style={{ display:'flex', gap:8, marginBottom:14, flexWrap:'wrap', alignItems:'center' }}>
+              {[
+                { label:'Due', val:tasks.filter(t=>t.status==='due').length, color:'#2563eb' },
+                { label:'Overdue', val:tasks.filter(t=>t.status==='overdue').length, color:'#d97706' },
+                { label:'Missed', val:tasks.filter(t=>t.status==='missed').length, color:'#dc2626' },
+                { label:'Done', val:tasks.filter(t=>t.status==='done').length, color:'#16a34a' },
+              ].map(k=>(
+                <div key={k.label} style={{ flex:'1 1 120px', minWidth:100 }}>
+                  <div style={{ display:'flex', justifyContent:'space-between', marginBottom:3 }}>
+                    <span style={{ fontSize:11, fontWeight:600, color:k.color }}>{k.label}</span>
+                    <span style={{ fontSize:11, fontWeight:700, color:k.color }}>{k.val}</span>
+                  </div>
+                  <div style={{ height:6, borderRadius:3, background:'var(--surface-2)', overflow:'hidden' }}>
+                    <div style={{ height:'100%', borderRadius:3, background:k.color, width:`${tasks.length>0 ? (k.val/tasks.length*100) : 0}%`, transition:'width 0.3s ease' }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Resident photo cards grid */}
+            <div style={{ display:'grid', gridTemplateColumns:`repeat(${gridCols}, 1fr)`, gap:isMobile ? 8 : 12 }}>
+              {residents.filter(r => {
+                if (!search) return true;
+                return `${r.first_name} ${r.last_name} ${r.room_number}`.toLowerCase().includes(search.toLowerCase());
+              }).map(r => {
+                const resTasks = byResident[r.id] || [];
+                const done = resTasks.filter((t:any) => t.status === 'done' || t.status === 'deferred').length;
+                const borderColor = getCardBorderColor(resTasks);
+                const photoUrl = residentPhoto(r.photo_url);
+                const initials = (r.first_name[0] + (r.last_name?.[0] || '')).toUpperCase();
+                const moodEmoji = getMoodEmoji(r.id);
+                const isSelected = gridSelectedResident?.id === r.id;
+
+                return (
+                  <div key={r.id} onClick={() => handleGridCardTap(r)}
+                    style={{
+                      borderRadius:12, overflow:'hidden', cursor:'pointer',
+                      border:`3px solid ${isSelected ? '#2563eb' : borderColor}`,
+                      boxShadow: isSelected ? '0 4px 20px rgba(37,99,235,.3)' : '0 2px 8px rgba(0,0,0,.12)',
+                      transition:'all 180ms ease', position:'relative',
+                      transform: isSelected ? 'scale(1.02)' : 'scale(1)',
+                    }}>
+                    {/* Photo area */}
+                    <div style={{ position:'relative', width:'100%', paddingTop:'100%', background:'#1e293b' }}>
+                      {photoUrl ? (
+                        <img src={photoUrl} alt={r.first_name}
+                          style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }} />
+                      ) : (
+                        <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', background:'linear-gradient(135deg, #1e293b 0%, #334155 100%)' }}>
+                          <span style={{ fontSize: isMobile ? 32 : 40, fontWeight:700, color:'#94a3b8' }}>{initials}</span>
+                        </div>
+                      )}
+                      {/* Mood emoji overlay - bottom right of photo */}
+                      {moodEmoji && (
+                        <div style={{ position:'absolute', bottom:6, right:6, fontSize:isMobile ? 16 : 20, background:'rgba(0,0,0,.5)', borderRadius:'50%', width:isMobile ? 26 : 30, height:isMobile ? 26 : 30, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                          {moodEmoji}
+                        </div>
+                      )}
+                      {/* Risk level info badge - top right */}
+                      {r.risk_level === 'high' && (
+                        <div style={{ position:'absolute', top:6, right:6, fontSize:12, background:'rgba(220,38,38,.9)', color:'white', borderRadius:6, padding:'2px 6px', fontWeight:700 }}>
+                          ℹ️
+                        </div>
+                      )}
+                      {/* Task count badge - top left */}
+                      {resTasks.length > 0 && (
+                        <div style={{ position:'absolute', top:6, left:6, fontSize:10, background:'rgba(0,0,0,.7)', color:'white', borderRadius:6, padding:'2px 7px', fontWeight:700 }}>
+                          {done}/{resTasks.length}
+                        </div>
+                      )}
+                    </div>
+                    {/* Name strip */}
+                    <div style={{ background:'#1e293b', padding:isMobile ? '6px 8px' : '8px 10px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                      <div>
+                        <div style={{ fontSize:isMobile ? 11 : 13, fontWeight:700, color:'#f1f5f9', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{r.first_name}</div>
+                        <div style={{ fontSize:isMobile ? 9 : 10, color:'#94a3b8', fontWeight:500 }}>Rm {r.room_number}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Desktop: Resident Detail Panel (right side) */}
+          {!isMobile && gridSelectedResident && (
+            <div style={{ position:'sticky', top:80, background:'white', borderRadius:12, border:'2px solid #e2e8f0', boxShadow:'0 4px 16px rgba(0,0,0,.08)', overflow:'hidden', maxHeight:'calc(100vh - 100px)', display:'flex', flexDirection:'column' }}>
+              {/* Panel header */}
+              <div style={{ padding:'14px 16px', borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', gap:12, background:'var(--surface-2)' }}>
+                {(() => {
+                  const photoUrl = residentPhoto(gridSelectedResident.photo_url);
+                  const initials = (gridSelectedResident.first_name[0] + gridSelectedResident.last_name[0]).toUpperCase();
+                  return photoUrl ? (
+                    <img src={photoUrl} alt={gridSelectedResident.first_name} style={{ width:44, height:44, borderRadius:'50%', objectFit:'cover', border:'2px solid var(--border)' }} />
+                  ) : (
+                    <div style={{ width:44, height:44, borderRadius:'50%', background:'#e0e7ff', display:'flex', alignItems:'center', justifyContent:'center', fontSize:14, fontWeight:700, color:'#4338ca', border:'2px solid #c7d2fe' }}>{initials}</div>
+                  );
+                })()}
+                <div style={{ flex:1 }}>
+                  <div style={{ fontWeight:700, fontSize:14 }}>{gridSelectedResident.first_name} {gridSelectedResident.last_name}</div>
+                  <div style={{ fontSize:11, color:'var(--text-muted)' }}>Room {gridSelectedResident.room_number} {gridSelectedResident.risk_level === 'high' && <span style={{ color:'#dc2626', fontWeight:700 }}>- HIGH RISK</span>}</div>
+                </div>
+                <button onClick={closeGridPanel} style={{ background:'none', border:'1px solid var(--border)', borderRadius:6, padding:'4px 10px', cursor:'pointer', fontSize:12 }}>✕</button>
+              </div>
+              {/* Scrollable tasks list */}
+              <div style={{ flex:1, overflowY:'auto', padding:'12px 16px' }}>
+                <div style={{ fontWeight:600, fontSize:12, marginBottom:8, color:'var(--text-secondary)', textTransform:'uppercase', letterSpacing:'.05em' }}>Tasks Today</div>
+                {(byResident[gridSelectedResident.id] || []).sort((a:any,b:any)=>(a.due_time||'').localeCompare(b.due_time||'')).map((task:any) => {
+                  const st = TASK_STATUS[task.status] || TASK_STATUS.upcoming;
+                  const isDone = task.status==='done'||task.status==='deferred';
+                  return (
+                    <button key={task.id} onClick={()=>handleTaskTap(task)} disabled={isDone}
+                      style={{ display:'flex', alignItems:'center', gap:10, width:'100%', padding:'10px 12px', marginBottom:6, borderRadius:8, border:`1px solid ${st.border}`, background:st.bg, cursor:isDone?'default':'pointer', textAlign:'left', transition:'all 120ms' }}>
+                      <span style={{ fontSize:18 }}>{task.icon}</span>
+                      <div style={{ flex:1 }}>
+                        <div style={{ fontSize:13, fontWeight:600, color:st.text }}>{task.task_name}</div>
+                        <div style={{ fontSize:11, color:'var(--text-muted)' }}>Due {task.due_time?.slice(0,5)} {isDone && '- Completed'}</div>
+                      </div>
+                      {isDone && <span style={{ fontSize:14, color:'#16a34a' }}>✓</span>}
+                    </button>
+                  );
+                })}
+                {(!byResident[gridSelectedResident.id] || byResident[gridSelectedResident.id].length === 0) && (
+                  <div style={{ fontSize:12, color:'var(--text-muted)', padding:16, textAlign:'center', background:'var(--surface-2)', borderRadius:8 }}>No tasks assigned today</div>
+                )}
+              </div>
+              {/* Quick actions */}
+              <div style={{ padding:'12px 16px', borderTop:'1px solid var(--border)', display:'flex', flexDirection:'column', gap:8 }}>
+                <button onClick={()=>handleAdHoc(gridSelectedResident)} style={{ padding:'10px 16px', borderRadius:8, border:'1px solid #3b82f6', background:'#eff6ff', color:'#2563eb', fontSize:13, fontWeight:700, cursor:'pointer', textAlign:'center' }}>
+                  📝 + Ad-hoc Note
+                </button>
+                <Link to={`/residents/${gridSelectedResident.id}`} style={{ padding:'10px 16px', borderRadius:8, border:'1px solid var(--border)', background:'var(--surface-2)', color:'var(--text-primary)', fontSize:13, fontWeight:600, cursor:'pointer', textAlign:'center', textDecoration:'none' }}>
+                  👤 View Full Profile
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── LIST VIEW (original task board) ─────────────────── */}
+      {viewMode === 'list' && (
+      <>
       {/* ── Main split layout ───────────────────────────────── */}
       <div className="carer-main-grid no-mobile-collapse" style={{ display:'grid', gridTemplateColumns: !isMobile && (showForm || showTypePicker) ? '1fr 1fr' : '1fr', gap:16, alignItems:'start' }}>
 
@@ -1237,6 +1512,8 @@ export default function CarerDashboard() {
           Someone filling
         </span>
       </div>
+      </>
+      )}
     </div>
   );
 }
