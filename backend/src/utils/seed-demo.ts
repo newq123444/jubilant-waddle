@@ -2032,6 +2032,245 @@ async function seedDemo() {
     }
 
     // =========================================================================
+    // CQC COMPLIANCE DATA
+    // =========================================================================
+    console.log('  >  CQC Domain Scores...');
+    const cqcDomains = ['safe', 'effective', 'caring', 'responsive', 'well_led'];
+    const domainBaseScores: Record<string, number> = { safe: 72, effective: 68, caring: 82, responsive: 75, well_led: 64 };
+    const domainStrengths: Record<string, string[]> = {
+      safe: ['Low incident rate', 'Strong medication management', 'Comprehensive risk assessments', 'Good infection control compliance'],
+      effective: ['High training completion rate', 'Regular care plan reviews', 'Good nutrition monitoring', 'Active MDT working'],
+      caring: ['Excellent resident feedback', 'Strong family engagement', 'Person-centred approach', 'Dignity well maintained'],
+      responsive: ['Varied activity programme', 'Quick complaint resolution', 'Flexible daily routines', 'Good communication support'],
+      well_led: ['Regular audits completed', 'Staff meetings documented', 'Clear governance structure', 'Active improvement plans'],
+    };
+    const domainWeaknesses: Record<string, string[]> = {
+      safe: ['2 overdue risk assessments', 'Fire drill attendance gaps', 'Agency staff induction records incomplete'],
+      effective: ['3 staff with expired training', 'Some care plans overdue review', 'Supervision records gaps'],
+      caring: ['Limited life story documentation', 'End of life plans need updating', 'Spiritual needs assessments incomplete'],
+      responsive: ['Weekend activity provision limited', 'Discharge planning documentation gaps', 'Environment personalisation inconsistent'],
+      well_led: ['Policy reviews overdue', 'Staff survey participation low', 'Partnership working evidence limited', 'Duty of candour records incomplete'],
+    };
+    const domainRecommendations: Record<string, string[]> = {
+      safe: ['Complete overdue risk assessments within 7 days', 'Schedule fire drill make-up session', 'Review agency induction process'],
+      effective: ['Prioritise expired training renewals', 'Implement care plan review tracker', 'Schedule outstanding supervisions'],
+      caring: ['Allocate time for life story work', 'Review all end of life care plans', 'Conduct spiritual needs assessments'],
+      responsive: ['Develop weekend activity schedule', 'Update discharge planning templates', 'Support residents with room personalisation'],
+      well_led: ['Complete overdue policy reviews', 'Launch anonymous staff survey', 'Document partner meetings and outcomes'],
+    };
+
+    for (const domain of cqcDomains) {
+      const baseScore = domainBaseScores[domain];
+      // Insert scores for last 30 days (one per week for realism)
+      for (let week = 0; week < 5; week++) {
+        const score = Math.min(100, Math.max(30, baseScore + randInt(-5, 8) - week * 2));
+        const evidenceCount = randInt(8, 20);
+        const gapsCount = score < 70 ? randInt(3, 7) : randInt(0, 3);
+        await client.query(
+          `INSERT INTO cqc_domain_scores (care_home_id, domain, score, evidence_count, gaps_count, strengths, weaknesses, recommendations, calculated_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+          [homeId, domain, score, evidenceCount, gapsCount,
+           JSON.stringify(domainStrengths[domain]),
+           JSON.stringify(domainWeaknesses[domain]),
+           JSON.stringify(domainRecommendations[domain]),
+           timeStr(daysAgo(week * 7))]
+        );
+        track('cqc_domain_scores');
+      }
+    }
+
+    console.log('  >  CQC Evidence Packs...');
+    const evidencePackConfigs = [
+      { domains: ['safe', 'effective'], daysBack: 5, status: 'complete' },
+      { domains: ['caring', 'responsive', 'well_led'], daysBack: 12, status: 'complete' },
+      { domains: ['safe', 'caring', 'well_led'], daysBack: 20, status: 'complete' },
+      { domains: ['safe', 'effective', 'caring', 'responsive', 'well_led'], daysBack: 28, status: 'complete' },
+    ];
+    for (const cfg of evidencePackConfigs) {
+      const createdAt = daysAgo(cfg.daysBack);
+      const rangeStart = daysAgo(cfg.daysBack + 30);
+      const rangeEnd = daysAgo(cfg.daysBack);
+      const content: Record<string, any> = {};
+      for (const d of cfg.domains) {
+        content[d] = {
+          incidents_count: randInt(1, 8),
+          training_compliance: `${randInt(85, 98)}%`,
+          care_notes_count: randInt(50, 200),
+          audits_completed: randInt(2, 6),
+        };
+      }
+      await client.query(
+        `INSERT INTO cqc_evidence_packs (care_home_id, generated_by, domains_included, date_range_start, date_range_end, content, status, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [homeId, managerId, cfg.domains, dateStr(rangeStart), dateStr(rangeEnd), JSON.stringify(content), cfg.status, timeStr(createdAt)]
+      );
+      track('cqc_evidence_packs');
+    }
+
+    console.log('  >  Policy Reviews...');
+    const { rows: policyRows } = await client.query(
+      `SELECT id FROM policies WHERE care_home_id = $1 LIMIT 12`, [homeId]
+    );
+    const reviewers = [managerId, deputyId, nurseId, seniorId];
+    for (let i = 0; i < policyRows.length; i++) {
+      const policyId = policyRows[i].id;
+      const reviewDate = daysAgo(randInt(10, 90));
+      // Make some policies overdue (next_review_date in the past)
+      const isOverdue = i < 4;
+      const nextReview = isOverdue ? daysAgo(randInt(1, 20)) : daysFromNow(randInt(30, 180));
+      await client.query(
+        `INSERT INTO policy_reviews (care_home_id, policy_id, reviewer_id, review_date, next_review_date, status, changes_made, notes, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [homeId, policyId, rand(reviewers), dateStr(reviewDate), dateStr(nextReview),
+         isOverdue ? 'overdue' : 'reviewed',
+         i % 3 === 0 ? 'Updated section 3.2 with new guidance' : i % 3 === 1 ? 'Minor formatting changes' : 'No changes required',
+         i % 2 === 0 ? 'Reviewed with team during staff meeting' : 'Annual review completed',
+         timeStr(reviewDate)]
+      );
+      track('policy_reviews');
+    }
+
+    console.log('  >  Inspection Prep Checklists...');
+    const checklistItemsByDomain: Record<string, { title: string; description: string; completed: boolean }[]> = {
+      safe: [
+        { title: 'Risk assessments up to date', description: 'Verify all resident risk assessments have been reviewed within the last month', completed: true },
+        { title: 'Incident reporting procedures', description: 'Confirm incident reporting system is accessible and staff are trained', completed: true },
+        { title: 'Medication management audit', description: 'Check medication storage, administration records, and controlled drugs register', completed: true },
+        { title: 'Safeguarding policies current', description: 'Ensure safeguarding policies are reviewed and staff have completed training', completed: false },
+        { title: 'Fire safety checks', description: 'Verify fire drills conducted, equipment tested, and evacuation plans displayed', completed: true },
+        { title: 'Infection control measures', description: 'Check hand hygiene compliance, PPE availability, and cleaning schedules', completed: true },
+        { title: 'Staffing levels adequate', description: 'Confirm staffing ratios meet requirements for current resident needs', completed: false },
+        { title: 'Equipment maintenance records', description: 'Verify all equipment has current safety certificates and maintenance logs', completed: true },
+      ],
+      effective: [
+        { title: 'Staff training compliance >90%', description: 'Verify all mandatory training is up to date for all staff members', completed: true },
+        { title: 'Care plan reviews current', description: 'Confirm care plans have been reviewed within required timeframes', completed: false },
+        { title: 'Nutrition and hydration monitoring', description: 'Check MUST assessments, food and fluid charts, and weight monitoring', completed: true },
+        { title: 'Health outcome tracking', description: 'Review clinical outcome data and improvement metrics', completed: true },
+        { title: 'Multi-disciplinary working', description: 'Evidence of GP visits, specialist referrals, and MDT meetings', completed: false },
+        { title: 'Consent documentation', description: 'Verify mental capacity assessments and consent forms are in place', completed: true },
+        { title: 'Evidence-based practice', description: 'Confirm care approaches align with current best practice guidance', completed: false },
+        { title: 'Supervision records', description: 'Check staff supervision and appraisal records are current', completed: true },
+      ],
+      caring: [
+        { title: 'Dignity and respect observations', description: 'Evidence of privacy, choice, and dignified care delivery', completed: true },
+        { title: 'Family engagement records', description: 'Verify regular communication with families and involvement in care', completed: true },
+        { title: 'Life story work', description: 'Confirm person-centred life stories are in place and used in care planning', completed: false },
+        { title: 'Resident feedback collected', description: 'Check resident surveys, meetings, and feedback mechanisms', completed: true },
+        { title: 'End of life care planning', description: 'Verify advance care plans and preferred priorities for care', completed: true },
+        { title: 'Emotional support evidence', description: 'Records of emotional support, wellbeing activities, and mental health care', completed: true },
+        { title: 'Cultural and spiritual needs', description: 'Evidence that cultural, religious, and spiritual needs are met', completed: false },
+        { title: 'Independence promotion', description: 'Examples of supporting residents to maintain independence', completed: true },
+      ],
+      responsive: [
+        { title: 'Activity programme variety', description: 'Verify diverse activity programme meeting different interests and abilities', completed: true },
+        { title: 'Complaints handling', description: 'Review complaints log, response times, and resolution outcomes', completed: true },
+        { title: 'Person-centred care plans', description: 'Confirm care plans reflect individual preferences and needs', completed: true },
+        { title: 'Admission process', description: 'Check pre-admission assessments and transition support', completed: false },
+        { title: 'Daily routine flexibility', description: 'Evidence that residents can choose their own routines', completed: true },
+        { title: 'Communication needs met', description: 'Verify aids and approaches for residents with communication needs', completed: false },
+        { title: 'Discharge planning', description: 'Check processes for planned and unplanned discharges', completed: false },
+        { title: 'Environment personalisation', description: 'Evidence of personalised rooms and communal spaces', completed: true },
+      ],
+      well_led: [
+        { title: 'Governance framework', description: 'Review management structure, accountability, and decision-making processes', completed: true },
+        { title: 'Quality assurance audits', description: 'Verify regular internal audits are conducted and actioned', completed: true },
+        { title: 'Policy review schedule', description: 'Confirm all policies are reviewed within their review dates', completed: false },
+        { title: 'Staff engagement', description: 'Evidence of staff meetings, feedback mechanisms, and morale initiatives', completed: false },
+        { title: 'Regulatory compliance', description: 'Check CQC notifications submitted and conditions met', completed: true },
+        { title: 'Continuous improvement plan', description: 'Review improvement plans and evidence of progress', completed: true },
+        { title: 'Partnership working', description: 'Evidence of working with external partners and stakeholders', completed: false },
+        { title: 'Transparency and openness', description: 'Check duty of candour compliance and open culture evidence', completed: true },
+      ],
+    };
+
+    for (const domain of cqcDomains) {
+      const items = checklistItemsByDomain[domain];
+      const completedCount = items.filter(i => i.completed).length;
+      await client.query(
+        `INSERT INTO inspection_prep_checklists (care_home_id, title, domain, items, completed_items, total_items, status, created_by, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $9)`,
+        [homeId,
+         `CQC ${domain.replace('_', ' ').toUpperCase()} Domain - Inspection Preparation`,
+         domain,
+         JSON.stringify(items),
+         completedCount,
+         items.length,
+         completedCount === items.length ? 'complete' : 'in_progress',
+         managerId,
+         timeStr(daysAgo(7))]
+      );
+      track('inspection_prep_checklists');
+    }
+
+    // =========================================================================
+    // PREDICTIVE RISK DATA
+    // =========================================================================
+    console.log('  >  Predictive Risk Scores...');
+    for (const room of highRiskRooms) {
+      const resId = residentIds[room];
+      if (!resId) continue;
+
+      // Generate falls and deterioration scores over last 30 days (every 3-5 days)
+      for (let dBack = 0; dBack < 30; dBack += randInt(3, 5)) {
+        const fallsScore = randInt(45, 92);
+        const fallsFactors: Record<string, any> = {
+          age_risk: randInt(5, 15),
+          mobility_score: randInt(10, 30),
+          medication_risk: randInt(5, 20),
+          cognitive_impairment: randInt(5, 25),
+          previous_falls: randInt(0, 15),
+          environmental_risk: randInt(3, 10),
+        };
+        await client.query(
+          `INSERT INTO predictive_risk_scores (care_home_id, resident_id, risk_type, score, factors, generated_at)
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+          [homeId, resId, 'falls', fallsScore, JSON.stringify(fallsFactors), timeStr(daysAgo(dBack))]
+        );
+        track('predictive_risk_scores');
+
+        const deterScore = randInt(40, 85);
+        const deterFactors: Record<string, any> = {
+          vital_signs_trend: randInt(5, 20),
+          weight_change: randInt(3, 15),
+          nutrition_risk: randInt(5, 18),
+          infection_indicators: randInt(2, 12),
+          functional_decline: randInt(5, 20),
+          comorbidity_burden: randInt(8, 25),
+        };
+        await client.query(
+          `INSERT INTO predictive_risk_scores (care_home_id, resident_id, risk_type, score, factors, generated_at)
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+          [homeId, resId, 'deterioration', deterScore, JSON.stringify(deterFactors), timeStr(daysAgo(dBack))]
+        );
+        track('predictive_risk_scores');
+      }
+    }
+
+    console.log('  >  Predictive Alerts...');
+    const alertConfigs = [
+      { room: '2', alertType: 'falls_risk', riskScore: 88, factors: { mobility_decline: true, recent_near_miss: true, medication_change: true } },
+      { room: '4', alertType: 'falls_risk', riskScore: 82, factors: { cognitive_impairment: true, unsteady_gait: true, history_of_falls: true } },
+      { room: '8', alertType: 'deterioration_risk', riskScore: 79, factors: { weight_loss: true, reduced_appetite: true, increased_confusion: true } },
+      { room: '10', alertType: 'falls_risk', riskScore: 91, factors: { post_hospital: true, new_medication: true, mobility_aid_required: true } },
+      { room: '14', alertType: 'weight_loss_risk', riskScore: 74, factors: { bmi_declining: true, poor_intake: true, recent_illness: true } },
+      { room: '20', alertType: 'deterioration_risk', riskScore: 85, factors: { palliative_care: true, pain_increase: true, functional_decline: true } },
+      { room: '24', alertType: 'medication_interaction', riskScore: 72, factors: { polypharmacy: true, new_prescription: true, renal_function_change: true } },
+      { room: '4', alertType: 'deterioration_risk', riskScore: 76, factors: { infection_signs: true, temp_elevated: true, reduced_mobility: true } },
+    ];
+
+    for (const cfg of alertConfigs) {
+      const resId = residentIds[cfg.room];
+      if (!resId) continue;
+      await client.query(
+        `INSERT INTO predictive_alerts (care_home_id, resident_id, alert_type, risk_score, threshold, factors, status, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [homeId, resId, cfg.alertType, cfg.riskScore, 70, JSON.stringify(cfg.factors), 'active', timeStr(daysAgo(randInt(0, 3)))]
+      );
+      track('predictive_alerts');
+    }
+
+    // =========================================================================
     // COMMIT & SUMMARY
     // =========================================================================
     await client.query('COMMIT');

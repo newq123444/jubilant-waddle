@@ -566,7 +566,7 @@ export interface InspectionChecklist {
   id: string;
   title: string;
   domain: string;
-  items: Array<{ label: string; completed: boolean; evidence?: string }>;
+  items: Array<{ title: string; description: string; completed: boolean; evidence?: string }>;
   completed_items: number;
   total_items: number;
   status: string;

@@ -412,14 +412,16 @@ function InspectionPrepTab() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {items.map((item: any, idx: number) => (
-              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 18px', borderBottom: '1px solid var(--border)', cursor: 'pointer' }} onClick={() => handleToggle(idx, item.completed)}>
-                <div style={{ width: 22, height: 22, borderRadius: 4, border: `2px solid ${item.completed ? '#16a34a' : '#d1d5db'}`, background: item.completed ? '#16a34a' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px 18px', borderBottom: '1px solid var(--border)', cursor: 'pointer' }} onClick={() => handleToggle(idx, item.completed)}>
+                <div style={{ width: 22, height: 22, borderRadius: 4, border: `2px solid ${item.completed ? '#16a34a' : '#d1d5db'}`, background: item.completed ? '#16a34a' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
                   {item.completed && <span style={{ color: 'white', fontSize: 14, fontWeight: 700 }}>&#10003;</span>}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 500, textDecoration: item.completed ? 'line-through' : 'none', color: item.completed ? 'var(--text-muted)' : 'var(--text-primary)' }}>{item.label}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, textDecoration: item.completed ? 'line-through' : 'none', color: item.completed ? 'var(--text-muted)' : 'var(--text-primary)' }}>{item.title}</div>
+                  {item.description && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>{item.description}</div>}
                   {item.evidence && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>Evidence: {item.evidence}</div>}
                 </div>
+                <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 8, background: '#eff6ff', color: '#2563eb', fontWeight: 600, whiteSpace: 'nowrap', marginTop: 2 }}>{DOMAIN_LABELS[selectedDomain] || selectedDomain}</span>
               </div>
             ))}
           </div>

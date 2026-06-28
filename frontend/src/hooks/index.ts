@@ -344,7 +344,7 @@ export function useUploadFamilyPhoto() {
 
 // ── CQC Compliance ────────────────────────────────────────────────────────
 export function useCqcDomainScores() {
-  return useQuery({ queryKey: ['cqc-scores'], queryFn: () => complianceApi.getCqcScores().then(r => r.data) });
+  return useQuery({ queryKey: ['cqc-scores'], queryFn: () => complianceApi.getCqcScores().then(r => r.data?.scores || r.data || []) });
 }
 export function useCalculateCqcScores() {
   const qc = useQueryClient();
@@ -355,10 +355,10 @@ export function useGenerateEvidencePack() {
   return useMutation({ mutationFn: (data: object) => complianceApi.generateEvidencePack(data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['evidence-packs'] }); toast.success('Evidence pack generated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to generate evidence pack') });
 }
 export function useCqcEvidencePacks() {
-  return useQuery({ queryKey: ['evidence-packs'], queryFn: () => complianceApi.getEvidencePacks().then(r => r.data) });
+  return useQuery({ queryKey: ['evidence-packs'], queryFn: () => complianceApi.getEvidencePacks().then(r => r.data?.packs || r.data || []) });
 }
 export function usePolicyReviews() {
-  return useQuery({ queryKey: ['policy-reviews'], queryFn: () => complianceApi.getPolicyReviews().then(r => r.data) });
+  return useQuery({ queryKey: ['policy-reviews'], queryFn: () => complianceApi.getPolicyReviews().then(r => r.data?.policies || r.data || []) });
 }
 export function useCreatePolicyReview() {
   const qc = useQueryClient();
@@ -372,7 +372,16 @@ export function useUpdateChecklistItem() {
   return useMutation({ mutationFn: ({ id, data }: { id: string; data: object }) => complianceApi.updateChecklistItem(id, data).then(r => r.data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['inspection-checklist'] }); toast.success('Checklist updated'); }, onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to update checklist') });
 }
 export function useComplianceOverview() {
-  return useQuery({ queryKey: ['compliance-overview'], queryFn: () => complianceApi.getOverview().then(r => r.data) });
+  return useQuery({ queryKey: ['compliance-overview'], queryFn: () => complianceApi.getOverview().then(r => {
+    const d = r.data;
+    return {
+      domain_scores: d.domainScores || d.domain_scores || [],
+      overdue_policies_count: d.overduePolicies ?? d.overdue_policies_count ?? 0,
+      expiring_training_count: d.expiringTraining ?? d.expiring_training_count ?? 0,
+      open_actions_count: d.openComplianceActions ?? d.open_actions_count ?? 0,
+      overall_readiness_score: d.overallReadiness ?? d.overall_readiness_score ?? 0,
+    };
+  }) });
 }
 
 // ── Voice Notes ───────────────────────────────────────────────────────────
