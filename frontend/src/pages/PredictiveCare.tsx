@@ -3,6 +3,29 @@ import React, { useState } from 'react';
 import { usePredictiveRiskDashboard, usePredictiveAlerts, useResidentRiskHistory, useRunPredictiveAnalysis, useAcknowledgePredictiveAlert, useResidents } from '../hooks';
 import type { PredictiveRiskDashboardItem, PredictiveAlert } from '../types';
 
+// ── Error Boundary ────────────────────────────────────────────────────────
+class PredictiveCareErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {
+  constructor(props: { children: React.ReactNode }) { super(props); this.state = { hasError: false, error: null }; }
+  static getDerivedStateFromError(error: Error) { return { hasError: true, error }; }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="card" style={{ padding: 60, textAlign: 'center' }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>⚠️</div>
+          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Something went wrong</div>
+          <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>
+            The Falls & Risk AI page encountered an error. Please try refreshing.
+          </div>
+          <button onClick={() => window.location.reload()} style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>
+            Refresh Page
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function scoreColor(score: number | null): string {
   if (score === null) return '#6b7280';
   if (score > 70) return '#dc2626';
@@ -24,6 +47,14 @@ function formatTime(dateStr: string | null): string {
 }
 
 export default function PredictiveCare() {
+  return (
+    <PredictiveCareErrorBoundary>
+      <PredictiveCareInner />
+    </PredictiveCareErrorBoundary>
+  );
+}
+
+function PredictiveCareInner() {
   const [tab, setTab] = useState<'dashboard' | 'alerts' | 'detail'>('dashboard');
 
   return (
@@ -60,7 +91,7 @@ function RiskDashboardTab() {
   if (isLoading) return <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>Loading risk dashboard...</div>;
   if (error) return <div style={{ padding: 40, textAlign: 'center', color: '#dc2626' }}>Failed to load dashboard</div>;
 
-  const residents: PredictiveRiskDashboardItem[] = Array.isArray(data) ? data : (data?.residents ?? []);
+  const residents: PredictiveRiskDashboardItem[] = Array.isArray(data) ? data : (data?.dashboard ?? []);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -75,6 +106,27 @@ function RiskDashboardTab() {
         </button>
       </div>
 
+      {residents.length === 0 ? (
+        <div className="card" style={{ padding: 60, textAlign: 'center' }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>🎯</div>
+          <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>No Risk Scores Available</div>
+          <div style={{ fontSize: 13, color: 'var(--text-muted)', maxWidth: 400, margin: '0 auto 20px' }}>
+            Risk analysis has not been run yet. Click the button below to calculate falls and deterioration risk scores for all active residents.
+          </div>
+          <button
+            onClick={() => runAnalysis.mutate()}
+            disabled={runAnalysis.isPending}
+            style={{ padding: '12px 24px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer', opacity: runAnalysis.isPending ? 0.6 : 1 }}
+          >
+            {runAnalysis.isPending ? '⏳ Running Analysis...' : '🔄 Run Risk Analysis'}
+          </button>
+          {runAnalysis.isPending && (
+            <div style={{ marginTop: 12, fontSize: 12, color: 'var(--text-muted)' }}>
+              This may take a moment as each resident is analyzed individually...
+            </div>
+          )}
+        </div>
+      ) : (
       <div className="card">
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
@@ -89,9 +141,7 @@ function RiskDashboardTab() {
               </tr>
             </thead>
             <tbody>
-              {residents.length === 0 ? (
-                <tr><td colSpan={6} style={{ padding: 30, textAlign: 'center', color: 'var(--text-muted)' }}>No risk data yet. Click "Run Analysis" to generate scores.</td></tr>
-              ) : residents.map((r) => (
+              {residents.map((r) => (
                 <tr key={r.resident_id} style={{ borderBottom: '1px solid var(--border)' }}>
                   <td style={{ padding: '10px 12px', fontWeight: 600 }}>{r.first_name} {r.last_name}</td>
                   <td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>{r.room_number}</td>
@@ -119,6 +169,7 @@ function RiskDashboardTab() {
           </table>
         </div>
       </div>
+      )}
     </div>
   );
 }

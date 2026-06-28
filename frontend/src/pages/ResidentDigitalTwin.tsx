@@ -5,7 +5,38 @@ import { api } from '../services/api';
 
 const riskColors: Record<string, string> = { high: '#dc2626', warning: '#d97706', info: '#2563eb' };
 
+// ── Error Boundary ────────────────────────────────────────────────────────
+class DigitalTwinErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: React.ReactNode }) { super(props); this.state = { hasError: false }; }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="card" style={{ padding: 60, textAlign: 'center' }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>⚠️</div>
+          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Something went wrong</div>
+          <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>
+            The Digital Twin page encountered an error. Please try refreshing.
+          </div>
+          <button onClick={() => window.location.reload()} style={{ padding: '8px 16px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>
+            Refresh Page
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function ResidentDigitalTwin() {
+  return (
+    <DigitalTwinErrorBoundary>
+      <ResidentDigitalTwinInner />
+    </DigitalTwinErrorBoundary>
+  );
+}
+
+function ResidentDigitalTwinInner() {
   const [selectedResident, setSelectedResident] = useState('');
 
   const { data: residents } = useQuery({ queryKey: ['residents'], queryFn: () => api.get('/residents').then(r => r.data) });
@@ -101,7 +132,7 @@ export default function ResidentDigitalTwin() {
                 <div><strong>Allergies:</strong> {twin.medical?.allergies || 'None known'}</div>
                 <div><strong>Diet:</strong> {twin.medical?.dietary_requirements || 'Standard'}</div>
                 {twin.medical?.dnacpr && <div style={{ color: '#dc2626', fontWeight: 600 }}>DNACPR in place</div>}
-                {twin.medical?.medications?.length > 0 && (
+                {twin.medical?.medications?.length > 0 ? (
                   <div>
                     <strong>Active Medications ({twin.medical?.medications?.length || 0}):</strong>
                     <ul style={{ margin: '4px 0 0', paddingLeft: 16 }}>
@@ -110,6 +141,8 @@ export default function ResidentDigitalTwin() {
                       ))}
                     </ul>
                   </div>
+                ) : (
+                  <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>No active medications recorded</div>
                 )}
                 {twin.medical?.gp?.name && <div><strong>GP:</strong> {twin.medical.gp.name}</div>}
               </div>
@@ -153,7 +186,7 @@ export default function ResidentDigitalTwin() {
           </div>
 
           {/* Timeline */}
-          {timeline?.length > 0 && (
+          {timeline && timeline.length > 0 ? (
             <div className="card" style={{ padding: 20 }}>
               <h3 style={{ margin: '0 0 16px', fontSize: 15 }}>📅 Recent Events Timeline</h3>
               <div style={{ display: 'grid', gap: 8 }}>
@@ -168,6 +201,11 @@ export default function ResidentDigitalTwin() {
                   </div>
                 ))}
               </div>
+            </div>
+          ) : twin && (
+            <div className="card" style={{ padding: 30, textAlign: 'center' }}>
+              <h3 style={{ margin: '0 0 8px', fontSize: 15 }}>📅 Recent Events Timeline</h3>
+              <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>No recent events recorded for this resident.</div>
             </div>
           )}
         </div>

@@ -3,7 +3,38 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../services/api';
 
+// ── Error Boundary ────────────────────────────────────────────────────────
+class AiCarePlanErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: React.ReactNode }) { super(props); this.state = { hasError: false }; }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="card" style={{ padding: 60, textAlign: 'center' }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>⚠️</div>
+          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Something went wrong</div>
+          <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>
+            The AI Care Plan Writer encountered an error. Please try refreshing.
+          </div>
+          <button onClick={() => window.location.reload()} style={{ padding: '8px 16px', background: '#7c3aed', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>
+            Refresh Page
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function AiCarePlanWriter() {
+  return (
+    <AiCarePlanErrorBoundary>
+      <AiCarePlanWriterInner />
+    </AiCarePlanErrorBoundary>
+  );
+}
+
+function AiCarePlanWriterInner() {
   const [tab, setTab] = useState<'generate' | 'plans'>('generate');
   const [selectedResident, setSelectedResident] = useState('');
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
@@ -70,7 +101,10 @@ export default function AiCarePlanWriter() {
           </button>
 
           {generateMutation.isError && (
-            <div style={{ marginTop: 16, padding: 12, background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, color: '#dc2626', fontSize: 13 }}>Failed to generate care plan. Please try again.</div>
+            <div style={{ marginTop: 16, padding: 16, background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, color: '#dc2626', fontSize: 13 }}>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>Failed to generate care plan</div>
+              <div>{(generateMutation.error as any)?.response?.data?.error || 'The AI care plan service encountered an error. This may happen if the system is still being set up. Please try again or contact support.'}</div>
+            </div>
           )}
         </div>
       )}
@@ -131,7 +165,18 @@ export default function AiCarePlanWriter() {
                   </div>
                 </div>
               ))}
-              {plans?.length === 0 && <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>No care plans generated yet. Use the Generate tab to create one.</div>}
+              {plans?.length === 0 && (
+                <div style={{ padding: 60, textAlign: 'center' }}>
+                  <div style={{ fontSize: 48, marginBottom: 12 }}>📋</div>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>No Care Plans Generated Yet</div>
+                  <div style={{ fontSize: 13, color: 'var(--text-muted)', maxWidth: 400, margin: '0 auto 20px' }}>
+                    AI care plans help create CQC-compliant documentation based on resident assessments and observations. Generate your first care plan to get started.
+                  </div>
+                  <button onClick={() => setTab('generate')} style={{ padding: '10px 20px', background: 'linear-gradient(135deg, #7c3aed, #a855f7)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                    ✨ Generate Your First Care Plan
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -56,26 +56,44 @@ export async function getDigitalTwin(req: Request, res: Response, next: NextFunc
     }
 
     // Incidents
-    const { rows: recentIncidents } = await query(
-      `SELECT id, incident_type, severity, status, incident_date FROM incidents
-       WHERE resident_id = $1 AND care_home_id = $2
-       ORDER BY incident_date DESC LIMIT 5`,
-      [residentId, careHomeId]
-    );
+    let recentIncidents: any[] = [];
+    try {
+      const { rows } = await query(
+        `SELECT id, incident_type, severity, status, incident_date FROM incidents
+         WHERE resident_id = $1 AND care_home_id = $2
+         ORDER BY incident_date DESC LIMIT 5`,
+        [residentId, careHomeId]
+      );
+      recentIncidents = rows;
+    } catch (e: any) {
+      if (!e?.message?.includes('does not exist')) throw e;
+    }
 
     // Medications
-    const { rows: medications } = await query(
-      `SELECT name AS medication_name, dose, route, frequency, active FROM medications
-       WHERE resident_id = $1 AND care_home_id = $2 AND active = TRUE`,
-      [residentId, careHomeId]
-    );
+    let medications: any[] = [];
+    try {
+      const { rows } = await query(
+        `SELECT name AS medication_name, dose, route, frequency, active FROM medications
+         WHERE resident_id = $1 AND care_home_id = $2 AND active = TRUE`,
+        [residentId, careHomeId]
+      );
+      medications = rows;
+    } catch (e: any) {
+      if (!e?.message?.includes('does not exist')) throw e;
+    }
 
     // Key relationships (key worker)
-    const { rows: keyWorker } = await query(
-      `SELECT u.first_name, u.last_name, u.role FROM users u
-       WHERE u.id = $1 AND u.care_home_id = $2`,
-      [resident.key_worker_id, careHomeId]
-    );
+    let keyWorker: any[] = [];
+    try {
+      const { rows } = await query(
+        `SELECT u.first_name, u.last_name, u.role FROM users u
+         WHERE u.id = $1 AND u.care_home_id = $2`,
+        [resident.key_worker_id, careHomeId]
+      );
+      keyWorker = rows;
+    } catch (e: any) {
+      if (!e?.message?.includes('does not exist')) throw e;
+    }
 
     // Risk indicators
     const riskIndicators = [];

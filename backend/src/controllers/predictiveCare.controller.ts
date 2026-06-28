@@ -80,14 +80,20 @@ export async function calculateFallsRisk(req: Request, res: Response, next: Next
     else if (age >= 70) ageScore = 20;
 
     // 5. Mood/sleep from wellbeing logs (weight: 15%)
-    const { rows: wellbeingData } = await query(
-      `SELECT mood_score, sleep_quality
-       FROM wellbeing_logs
-       WHERE resident_id = $1 AND care_home_id = $2
-         AND created_at > NOW() - INTERVAL '14 days'
-       ORDER BY created_at DESC LIMIT 14`,
-      [residentId, careHomeId]
-    );
+    let wellbeingData: any[] = [];
+    try {
+      const { rows } = await query(
+        `SELECT mood_score, sleep_quality
+         FROM wellbeing_logs
+         WHERE resident_id = $1 AND care_home_id = $2
+           AND created_at > NOW() - INTERVAL '14 days'
+         ORDER BY created_at DESC LIMIT 14`,
+        [residentId, careHomeId]
+      );
+      wellbeingData = rows;
+    } catch (e: any) {
+      if (!e?.message?.includes('does not exist')) throw e;
+    }
     let moodSleepScore = 0;
     if (wellbeingData.length > 0) {
       const avgMood = wellbeingData.reduce((sum: number, w: any) => sum + (w.mood_score || 3), 0) / wellbeingData.length;
@@ -117,12 +123,16 @@ export async function calculateFallsRisk(req: Request, res: Response, next: Next
       moodSleep: { score: moodSleepScore, weight: 0.15, dataPoints: wellbeingData.length },
     };
 
-    // Store in predictive_risk_scores
-    await query(
-      `INSERT INTO predictive_risk_scores (care_home_id, resident_id, risk_type, score, factors)
-       VALUES ($1, $2, 'falls', $3, $4)`,
-      [careHomeId, residentId, totalScore, JSON.stringify(factors)]
-    );
+    // Store in predictive_risk_scores (resilient - skip if table missing)
+    try {
+      await query(
+        `INSERT INTO predictive_risk_scores (care_home_id, resident_id, risk_type, score, factors)
+         VALUES ($1, $2, 'falls', $3, $4)`,
+        [careHomeId, residentId, totalScore, JSON.stringify(factors)]
+      );
+    } catch (e: any) {
+      if (!e?.message?.includes('does not exist')) throw e;
+    }
 
     res.json({
       residentId,
@@ -151,12 +161,18 @@ export async function calculateDeteriorationRisk(req: Request, res: Response, ne
     if (!resident) return res.status(404).json({ error: 'Resident not found' });
 
     // 1. Weight trend - loss > 5% in 30 days (weight: 25%)
-    const { rows: weights } = await query(
-      `SELECT weight_kg, created_at FROM resident_weights
-       WHERE resident_id = $1
-       ORDER BY created_at DESC LIMIT 4`,
-      [residentId]
-    );
+    let weights: any[] = [];
+    try {
+      const { rows } = await query(
+        `SELECT weight_kg, created_at FROM resident_weights
+         WHERE resident_id = $1
+         ORDER BY created_at DESC LIMIT 4`,
+        [residentId]
+      );
+      weights = rows;
+    } catch (e: any) {
+      if (!e?.message?.includes('does not exist')) throw e;
+    }
     let weightScore = 0;
     if (weights.length >= 2) {
       const latest = parseFloat(weights[0].weight_kg);
@@ -294,12 +310,16 @@ export async function calculateDeteriorationRisk(req: Request, res: Response, ne
       missedMedications: { missed, total, score: missedMedScore, weight: 0.10 },
     };
 
-    // Store in predictive_risk_scores
-    await query(
-      `INSERT INTO predictive_risk_scores (care_home_id, resident_id, risk_type, score, factors)
-       VALUES ($1, $2, 'deterioration', $3, $4)`,
-      [careHomeId, residentId, totalScore, JSON.stringify(factors)]
-    );
+    // Store in predictive_risk_scores (resilient - skip if table missing)
+    try {
+      await query(
+        `INSERT INTO predictive_risk_scores (care_home_id, resident_id, risk_type, score, factors)
+         VALUES ($1, $2, 'deterioration', $3, $4)`,
+        [careHomeId, residentId, totalScore, JSON.stringify(factors)]
+      );
+    } catch (e: any) {
+      if (!e?.message?.includes('does not exist')) throw e;
+    }
 
     res.json({
       residentId,
@@ -320,53 +340,52 @@ export async function getRiskDashboard(req: Request, res: Response, next: NextFu
     const careHomeId = req.user!.care_home_id;
 
     // Get latest risk scores per resident per type using DISTINCT ON
-    const { rows } = await query(
-      `SELECT
-         r.id AS resident_id,
-         r.first_name || ' ' || r.last_name AS resident_name,
-         r.room_number,
-         r.risk_level,
-         falls.score AS falls_score,
-         falls.factors AS falls_factors,
-         falls.generated_at AS falls_generated_at,
-         det.score AS deterioration_score,
-         det.factors AS deterioration_factors,
-         det.generated_at AS deterioration_generated_at
-       FROM residents r
-       LEFT JOIN LATERAL (
-         SELECT score, factors, generated_at FROM predictive_risk_scores
-         WHERE resident_id = r.id AND care_home_id = $1 AND risk_type = 'falls'
-         ORDER BY generated_at DESC LIMIT 1
-       ) falls ON TRUE
-       LEFT JOIN LATERAL (
-         SELECT score, factors, generated_at FROM predictive_risk_scores
-         WHERE resident_id = r.id AND care_home_id = $1 AND risk_type = 'deterioration'
-         ORDER BY generated_at DESC LIMIT 1
-       ) det ON TRUE
-       WHERE r.care_home_id = $1 AND r.active = TRUE
-         AND (falls.score IS NOT NULL OR det.score IS NOT NULL)
-       ORDER BY COALESCE(falls.score, 0) + COALESCE(det.score, 0) DESC`,
-      [careHomeId]
-    );
+    let rows: any[] = [];
+    try {
+      const result = await query(
+        `SELECT
+           r.id AS resident_id,
+           r.first_name || ' ' || r.last_name AS resident_name,
+           r.room_number,
+           r.risk_level,
+           falls.score AS falls_score,
+           falls.factors AS falls_factors,
+           falls.generated_at AS falls_generated_at,
+           det.score AS deterioration_score,
+           det.factors AS deterioration_factors,
+           det.generated_at AS deterioration_generated_at
+         FROM residents r
+         LEFT JOIN LATERAL (
+           SELECT score, factors, generated_at FROM predictive_risk_scores
+           WHERE resident_id = r.id AND care_home_id = $1 AND risk_type = 'falls'
+           ORDER BY generated_at DESC LIMIT 1
+         ) falls ON TRUE
+         LEFT JOIN LATERAL (
+           SELECT score, factors, generated_at FROM predictive_risk_scores
+           WHERE resident_id = r.id AND care_home_id = $1 AND risk_type = 'deterioration'
+           ORDER BY generated_at DESC LIMIT 1
+         ) det ON TRUE
+         WHERE r.care_home_id = $1 AND r.active = TRUE
+           AND (falls.score IS NOT NULL OR det.score IS NOT NULL)
+         ORDER BY COALESCE(falls.score, 0) + COALESCE(det.score, 0) DESC`,
+        [careHomeId]
+      );
+      rows = result.rows;
+    } catch (e: any) {
+      if (!e?.message?.includes('does not exist')) throw e;
+      // predictive_risk_scores table doesn't exist - return empty dashboard
+    }
 
     const dashboard = rows.map((row: any) => ({
-      residentId: row.resident_id,
-      residentName: row.resident_name,
-      room: row.room_number,
-      riskLevel: row.risk_level,
-      falls: row.falls_score !== null ? {
-        score: row.falls_score,
-        factors: row.falls_factors,
-        generatedAt: row.falls_generated_at,
-        level: row.falls_score >= 80 ? 'critical' : row.falls_score >= 60 ? 'high' : row.falls_score >= 40 ? 'moderate' : 'low',
-      } : null,
-      deterioration: row.deterioration_score !== null ? {
-        score: row.deterioration_score,
-        factors: row.deterioration_factors,
-        generatedAt: row.deterioration_generated_at,
-        level: row.deterioration_score >= 80 ? 'critical' : row.deterioration_score >= 60 ? 'high' : row.deterioration_score >= 40 ? 'moderate' : 'low',
-      } : null,
-      combinedScore: (row.falls_score || 0) + (row.deterioration_score || 0),
+      resident_id: row.resident_id,
+      first_name: row.resident_name?.split(' ')[0] || '',
+      last_name: row.resident_name?.split(' ').slice(1).join(' ') || '',
+      room_number: row.room_number,
+      risk_level: row.risk_level,
+      falls_score: row.falls_score ?? null,
+      falls_generated_at: row.falls_generated_at ?? null,
+      deterioration_score: row.deterioration_score ?? null,
+      deterioration_generated_at: row.deterioration_generated_at ?? null,
     }));
 
     res.json({ dashboard, generatedAt: new Date().toISOString() });
@@ -379,14 +398,20 @@ export async function getRiskHistory(req: Request, res: Response, next: NextFunc
     const careHomeId = req.user!.care_home_id;
     const { residentId } = req.params;
 
-    const { rows } = await query(
-      `SELECT id, risk_type, score, factors, generated_at
-       FROM predictive_risk_scores
-       WHERE resident_id = $1 AND care_home_id = $2
-         AND generated_at > NOW() - INTERVAL '30 days'
-       ORDER BY generated_at DESC`,
-      [residentId, careHomeId]
-    );
+    let rows: any[] = [];
+    try {
+      const result = await query(
+        `SELECT id, risk_type, score, factors, generated_at
+         FROM predictive_risk_scores
+         WHERE resident_id = $1 AND care_home_id = $2
+           AND generated_at > NOW() - INTERVAL '30 days'
+         ORDER BY generated_at DESC`,
+        [residentId, careHomeId]
+      );
+      rows = result.rows;
+    } catch (e: any) {
+      if (!e?.message?.includes('does not exist')) throw e;
+    }
 
     res.json({ residentId, history: rows });
   } catch (err) { next(err); }
@@ -397,16 +422,22 @@ export async function getAlerts(req: Request, res: Response, next: NextFunction)
   try {
     const careHomeId = req.user!.care_home_id;
 
-    const { rows } = await query(
-      `SELECT pa.*,
-         r.first_name || ' ' || r.last_name AS resident_name,
-         r.room_number
-       FROM predictive_alerts pa
-       JOIN residents r ON r.id = pa.resident_id
-       WHERE pa.care_home_id = $1 AND pa.status = 'active'
-       ORDER BY pa.risk_score DESC, pa.created_at DESC`,
-      [careHomeId]
-    );
+    let rows: any[] = [];
+    try {
+      const result = await query(
+        `SELECT pa.*,
+           r.first_name || ' ' || r.last_name AS resident_name,
+           r.room_number
+         FROM predictive_alerts pa
+         JOIN residents r ON r.id = pa.resident_id
+         WHERE pa.care_home_id = $1 AND pa.status = 'active'
+         ORDER BY pa.risk_score DESC, pa.created_at DESC`,
+        [careHomeId]
+      );
+      rows = result.rows;
+    } catch (e: any) {
+      if (!e?.message?.includes('does not exist')) throw e;
+    }
 
     res.json({ alerts: rows });
   } catch (err) { next(err); }
@@ -419,13 +450,20 @@ export async function acknowledgeAlert(req: Request, res: Response, next: NextFu
     const { id } = req.params;
     const userId = req.user!.id;
 
-    const { rows: [alert] } = await query(
-      `UPDATE predictive_alerts
-       SET status = 'acknowledged', acknowledged_by = $1
-       WHERE id = $2 AND care_home_id = $3
-       RETURNING *`,
-      [userId, id, careHomeId]
-    );
+    let alert: any = null;
+    try {
+      const { rows: [row] } = await query(
+        `UPDATE predictive_alerts
+         SET status = 'acknowledged', acknowledged_by = $1
+         WHERE id = $2 AND care_home_id = $3
+         RETURNING *`,
+        [userId, id, careHomeId]
+      );
+      alert = row;
+    } catch (e: any) {
+      if (!e?.message?.includes('does not exist')) throw e;
+      return res.status(404).json({ error: 'Alert not found (table not available)' });
+    }
 
     if (!alert) return res.status(404).json({ error: 'Alert not found' });
     res.json({ alert });
@@ -465,32 +503,40 @@ export async function runPredictiveAnalysis(req: Request, res: Response, next: N
 
         // Create alerts for scores > 70 (only if no active alert already exists)
         if (fallsResult.score > 70) {
-          const { rows: existingFallsAlerts } = await query(
-            `SELECT id FROM predictive_alerts WHERE resident_id = $1 AND alert_type = 'falls_risk' AND status = 'active'`,
-            [resident.id]
-          );
-          if (existingFallsAlerts.length === 0) {
-            const { rows: [alert] } = await query(
-              `INSERT INTO predictive_alerts (care_home_id, resident_id, alert_type, risk_score, threshold, factors, status)
-               VALUES ($1, $2, 'falls_risk', $3, 70, $4, 'active') RETURNING *`,
-              [careHomeId, resident.id, fallsResult.score, JSON.stringify(fallsResult.factors)]
+          try {
+            const { rows: existingFallsAlerts } = await query(
+              `SELECT id FROM predictive_alerts WHERE resident_id = $1 AND alert_type = 'falls_risk' AND status = 'active'`,
+              [resident.id]
             );
-            alerts.push(alert);
+            if (existingFallsAlerts.length === 0) {
+              const { rows: [alert] } = await query(
+                `INSERT INTO predictive_alerts (care_home_id, resident_id, alert_type, risk_score, threshold, factors, status)
+                 VALUES ($1, $2, 'falls_risk', $3, 70, $4, 'active') RETURNING *`,
+                [careHomeId, resident.id, fallsResult.score, JSON.stringify(fallsResult.factors)]
+              );
+              alerts.push(alert);
+            }
+          } catch (e: any) {
+            if (!e?.message?.includes('does not exist')) throw e;
           }
         }
 
         if (detResult.score > 70) {
-          const { rows: existingDetAlerts } = await query(
-            `SELECT id FROM predictive_alerts WHERE resident_id = $1 AND alert_type = 'deterioration_risk' AND status = 'active'`,
-            [resident.id]
-          );
-          if (existingDetAlerts.length === 0) {
-            const { rows: [alert] } = await query(
-              `INSERT INTO predictive_alerts (care_home_id, resident_id, alert_type, risk_score, threshold, factors, status)
-               VALUES ($1, $2, 'deterioration_risk', $3, 70, $4, 'active') RETURNING *`,
-              [careHomeId, resident.id, detResult.score, JSON.stringify(detResult.factors)]
+          try {
+            const { rows: existingDetAlerts } = await query(
+              `SELECT id FROM predictive_alerts WHERE resident_id = $1 AND alert_type = 'deterioration_risk' AND status = 'active'`,
+              [resident.id]
             );
-            alerts.push(alert);
+            if (existingDetAlerts.length === 0) {
+              const { rows: [alert] } = await query(
+                `INSERT INTO predictive_alerts (care_home_id, resident_id, alert_type, risk_score, threshold, factors, status)
+                 VALUES ($1, $2, 'deterioration_risk', $3, 70, $4, 'active') RETURNING *`,
+                [careHomeId, resident.id, detResult.score, JSON.stringify(detResult.factors)]
+              );
+              alerts.push(alert);
+            }
+          } catch (e: any) {
+            if (!e?.message?.includes('does not exist')) throw e;
           }
         }
 
@@ -603,20 +649,30 @@ async function calculateRiskInternal(
       age: { value: age, score: ageScore },
     };
 
-    // Store score
-    await query(
-      `INSERT INTO predictive_risk_scores (care_home_id, resident_id, risk_type, score, factors)
-       VALUES ($1, $2, 'falls', $3, $4)`,
-      [careHomeId, residentId, totalScore, JSON.stringify(factors)]
-    );
+    // Store score (resilient - skip if table missing)
+    try {
+      await query(
+        `INSERT INTO predictive_risk_scores (care_home_id, resident_id, risk_type, score, factors)
+         VALUES ($1, $2, 'falls', $3, $4)`,
+        [careHomeId, residentId, totalScore, JSON.stringify(factors)]
+      );
+    } catch (e: any) {
+      if (!e?.message?.includes('does not exist')) throw e;
+    }
 
     return { score: totalScore, factors };
   } else {
     // Deterioration risk calculation (simplified for batch)
-    const { rows: weights } = await query(
-      `SELECT weight_kg FROM resident_weights WHERE resident_id = $1 ORDER BY created_at DESC LIMIT 4`,
-      [residentId]
-    );
+    let weights: any[] = [];
+    try {
+      const { rows } = await query(
+        `SELECT weight_kg FROM resident_weights WHERE resident_id = $1 ORDER BY created_at DESC LIMIT 4`,
+        [residentId]
+      );
+      weights = rows;
+    } catch (e: any) {
+      if (!e?.message?.includes('does not exist')) throw e;
+    }
     let weightScore = 0;
     if (weights.length >= 2) {
       const latest = parseFloat(weights[0].weight_kg);
@@ -676,12 +732,16 @@ async function calculateRiskInternal(
       food: { avgPercent: avgFood, score: foodScore },
     };
 
-    // Store score
-    await query(
-      `INSERT INTO predictive_risk_scores (care_home_id, resident_id, risk_type, score, factors)
-       VALUES ($1, $2, 'deterioration', $3, $4)`,
-      [careHomeId, residentId, totalScore, JSON.stringify(factors)]
-    );
+    // Store score (resilient - skip if table missing)
+    try {
+      await query(
+        `INSERT INTO predictive_risk_scores (care_home_id, resident_id, risk_type, score, factors)
+         VALUES ($1, $2, 'deterioration', $3, $4)`,
+        [careHomeId, residentId, totalScore, JSON.stringify(factors)]
+      );
+    } catch (e: any) {
+      if (!e?.message?.includes('does not exist')) throw e;
+    }
 
     return { score: totalScore, factors };
   }
