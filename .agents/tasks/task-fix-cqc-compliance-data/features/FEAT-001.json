@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "fix",
   "description": "Fix CQC Compliance page data mapping issues: (1) Inspection Prep tab shows empty checkboxes because frontend renders item.label but backend stores item.title/description; (2) CQC Readiness tab data mapping issues with backend response wrapping; (3) Add comprehensive CQC compliance demo data and predictive risk data to seed-demo.ts",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Fix frontend/src/pages/Compliance.tsx InspectionPrepTab: The backend controller (cqcCompliance.controller.ts) stores checklist items as {title, description, completed} but the frontend renders {item.label}. Change the rendering in InspectionPrepTab to use item.title instead of item.label, and display item.description below the title. Also add a domain badge showing which CQC domain each checklist belongs to.",
     "Fix frontend/src/types/index.ts: Update the InspectionChecklist interface items array type from { label: string; completed: boolean; evidence?: string } to { title: string; description: string; completed: boolean; evidence?: string } to match backend data.",
@@ -26,5 +26,5 @@
     "cd /projects/sandbox/jubilant-waddle/backend && npm run build"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All changes build successfully. Frontend renders item.title and item.description with domain badges. Hooks properly unwrap nested API responses ({scores:[...]}, {packs:[...]}, {policies:[...]}). Overview hook transforms camelCase backend keys (overallReadiness, overduePolicies, etc.) to match frontend ComplianceOverview type (overall_readiness_score, overdue_policies_count, etc.). Seed data adds 25 domain scores, 4 evidence packs, 12 policy reviews, 5 inspection checklists with 8 items each, ~70 predictive risk scores, and 8 predictive alerts."
 }
