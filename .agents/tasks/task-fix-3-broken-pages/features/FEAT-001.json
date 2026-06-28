@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "fix",
   "description": "Make all 3 backend controllers resilient to missing tables/columns by wrapping queries in try/catch blocks that return empty data on table-not-found errors, and fix the frontend pages to show friendly empty states with action buttons instead of crashing.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "1. BACKEND - digitalTwin.controller.ts: The getDigitalTwin function already has resilience for wellbeing_logs. Extend this pattern to ALL queries that might fail due to missing tables. Wrap medications query, incidents query, key_worker query each in their own try/catch that returns [] on 'does not exist' errors. For getTimeline, the wellbeing fallback is already in place. No further changes needed there.",
     "2. BACKEND - predictiveCare.controller.ts: Wrap the getRiskDashboard query in try/catch - if predictive_risk_scores table does not exist, return { dashboard: [], generatedAt: new Date().toISOString() }. Do the same for getRiskHistory, getAlerts, acknowledgeAlert. For calculateFallsRisk: wrap the INSERT INTO predictive_risk_scores in try/catch so it doesn't crash if the table is missing (just skip the insert). Same for calculateDeteriorationRisk. For calculateRiskInternal helper: wrap INSERT INTO predictive_risk_scores in try/catch. For runPredictiveAnalysis: wrap the INSERT INTO predictive_alerts in try/catch. The individual queries against existing tables (incidents, medications, care_notes, residents, med_administrations) are fine since those tables exist from migration 001. The main risk is predictive_risk_scores and predictive_alerts tables being missing (migration 006) and resident_weights (migration 014).",
@@ -23,5 +23,5 @@
     "cd /projects/sandbox/jubilant-waddle/backend && npm run build"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All changes build cleanly. The getRiskDashboard endpoint now returns fields matching the frontend PredictiveRiskDashboardItem type (resident_id, first_name, last_name, room_number, risk_level, falls_score, falls_generated_at, deterioration_score, deterioration_generated_at) instead of the camelCase format. The data.residents bug was fixed to data.dashboard. Error boundaries were added as class components since they require componentDidCatch lifecycle methods."
 }
