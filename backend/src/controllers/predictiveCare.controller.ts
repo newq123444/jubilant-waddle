@@ -345,7 +345,8 @@ export async function getRiskDashboard(req: Request, res: Response, next: NextFu
       const result = await query(
         `SELECT
            r.id AS resident_id,
-           r.first_name || ' ' || r.last_name AS resident_name,
+           r.first_name,
+           r.last_name,
            r.room_number,
            r.risk_level,
            falls.score AS falls_score,
@@ -378,8 +379,8 @@ export async function getRiskDashboard(req: Request, res: Response, next: NextFu
 
     const dashboard = rows.map((row: any) => ({
       resident_id: row.resident_id,
-      first_name: row.resident_name?.split(' ')[0] || '',
-      last_name: row.resident_name?.split(' ').slice(1).join(' ') || '',
+      first_name: row.first_name || '',
+      last_name: row.last_name || '',
       room_number: row.room_number,
       risk_level: row.risk_level,
       falls_score: row.falls_score ?? null,

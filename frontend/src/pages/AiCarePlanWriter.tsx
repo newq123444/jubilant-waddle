@@ -116,7 +116,7 @@ function AiCarePlanWriterInner() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <h3 style={{ margin: 0, fontSize: 18 }}>📄 {selectedPlan.resident_name || 'Care Plan'}</h3>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  {selectedPlan.status === 'draft' && (
+                  {selectedPlan.status === 'draft' && !String(selectedPlan.id).startsWith('temp-') && (
                     <>
                       <button onClick={() => approveMutation.mutate({ id: selectedPlan.id, status: 'approved' })} style={{ padding: '8px 16px', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>✓ Approve</button>
                       <button onClick={() => approveMutation.mutate({ id: selectedPlan.id, status: 'rejected' })} style={{ padding: '8px 16px', background: '#dc2626', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>✗ Reject</button>
@@ -125,6 +125,12 @@ function AiCarePlanWriterInner() {
                   <button onClick={() => setSelectedPlan(null)} style={{ padding: '8px 16px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', fontSize: 13 }}>Close</button>
                 </div>
               </div>
+
+              {String(selectedPlan.id).startsWith('temp-') && (
+                <div style={{ padding: 12, background: '#fefce8', border: '1px solid #fde68a', borderRadius: 8, marginBottom: 16, fontSize: 13, color: '#92400e' }}>
+                  <strong>Note:</strong> Plan generated but not persisted - database setup required. Approve/reject actions are unavailable until the care plans table is configured.
+                </div>
+              )}
 
               {selectedPlanContent?.cqc_domains && (
                 <div style={{ display: 'grid', gap: 16 }}>
