@@ -373,7 +373,7 @@ function InspectionPrepTab() {
 
   const handleToggle = (index: number, completed: boolean) => {
     if (checklistData) {
-      updateItem.mutate({ id: checklistData.id, data: { item_index: index, completed: !completed } });
+      updateItem.mutate({ id: checklistData.id, data: { itemIndex: index, completed: !completed } });
     }
   };
 
