@@ -254,12 +254,33 @@ export default function App() {
     }
   }, []);
 
-  // Restore scroll position after render
+  // Restore scroll position after render (desktop - immediate)
   useEffect(() => {
-    const saved = sessionStorage.getItem(scrollKey);
-    if (saved && navScrollRef.current) {
-      navScrollRef.current.scrollTop = parseInt(saved, 10);
+    if (isDesktop) {
+      const saved = sessionStorage.getItem(scrollKey);
+      if (saved && navScrollRef.current) {
+        navScrollRef.current.scrollTop = parseInt(saved, 10);
+      }
     }
+  }, [location.pathname, isDesktop]);
+
+  // Restore scroll position when mobile drawer opens
+  useEffect(() => {
+    if (sidebarOpen && !isDesktop) {
+      const saved = sessionStorage.getItem(scrollKey);
+      if (saved) {
+        setTimeout(() => {
+          if (navScrollRef.current) {
+            navScrollRef.current.scrollTop = parseInt(saved, 10);
+          }
+        }, 16);
+      }
+    }
+  }, [sidebarOpen, isDesktop]);
+
+  // Scroll main content to top on route change (mobile)
+  useEffect(() => {
+    window.scrollTo(0, 0);
   }, [location.pathname]);
 
   // ── Sidebar content (shared between desktop + mobile drawer) ────────────
